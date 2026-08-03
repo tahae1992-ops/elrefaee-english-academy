@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="800" height="800" role="img" aria-labelledby="erea-watermark-title">
+  <title id="erea-watermark-title">EREA watermark</title>
+  <!-- Low-opacity overlay use (certificates, marketing imagery) — brand
+       color at 10% opacity rather than generic gray, so it still reads
+       as EREA even at a glance, never competing with foreground content. -->
+  <g opacity="0.1">
+    <rect x="22" y="21" width="34" height="14" rx="7" fill="#22537F" />
+    <rect x="22" y="43" width="55" height="14" rx="7" fill="#22537F" />
+    <rect x="22" y="65" width="76" height="14" rx="7" fill="#22537F" />
+  </g>
+</svg>

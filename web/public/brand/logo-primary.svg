@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100" role="img" aria-labelledby="erea-primary-logo-title">
+  <title id="erea-primary-logo-title">EREA</title>
+  <!-- Horizontal lockup: mark + wordmark, vertically centered together.
+       Primary usage per docs/12-brand-book.md §2 — app navigation,
+       marketing header, anywhere there's room for the full lockup. -->
+  <rect x="0" y="21" width="34" height="14" rx="7" fill="#22537F" />
+  <rect x="0" y="43" width="55" height="14" rx="7" fill="#22537F" />
+  <rect x="0" y="65" width="76" height="14" rx="7" fill="#22537F" />
+  <text
+    x="100"
+    y="52"
+    dominant-baseline="central"
+    font-family="Charter, 'Iowan Old Style', 'Sitka Text', Cambria, Georgia, serif"
+    font-weight="700"
+    font-size="56"
+    letter-spacing="-0.5"
+    fill="#0F2942"
+  >EREA</text>
+</svg>

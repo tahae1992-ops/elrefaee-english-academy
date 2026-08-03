@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512" role="img" aria-labelledby="erea-social-avatar-title">
+  <title id="erea-social-avatar-title">EREA</title>
+  <!--
+    Mark scaled to 65% and re-centered (vs. the standard monogram/app-icon
+    proportions) specifically so a circular crop — which most social
+    platforms apply to profile images — never clips a bar. Verified: the
+    farthest mark point sits ~31 units from center on a 50-unit-radius
+    canvas, well inside any circular safe area.
+  -->
+  <rect width="100" height="100" fill="#22537F" />
+  <rect x="25.3" y="31.15" width="22.1" height="9.1" rx="4.55" fill="#FFFFFF" />
+  <rect x="25.3" y="45.45" width="35.75" height="9.1" rx="4.55" fill="#FFFFFF" />
+  <rect x="25.3" y="59.75" width="49.4" height="9.1" rx="4.55" fill="#FFFFFF" />
+</svg>

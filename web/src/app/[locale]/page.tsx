@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { Logo } from "@/components/logo";
 
 export default function Home() {
   const t = useTranslations("HomePage");
@@ -10,9 +11,9 @@ export default function Home() {
       <p className="font-mono text-xs uppercase tracking-[0.08em] text-primary">
         {t("eyebrow")}
       </p>
-      <div>
-        <h1 className="font-display text-4xl font-bold tracking-[-0.01em]">
-          {t("title")}
+      <div className="flex flex-col items-center gap-2">
+        <h1>
+          <Logo className="text-4xl" />
         </h1>
         {/* Brand Book §1's first-mention pairing rule: the full legal name
             appears once, subordinate to the EREA wordmark, then never

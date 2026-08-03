@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-labelledby="erea-monogram-title">
+  <title id="erea-monogram-title">EREA monogram</title>
+  <!--
+    Three ascending geometric bars, left-aligned. The shared left edge
+    implies a vertical spine without drawing one, reading as an
+    abstract "E" (EREA) while the increasing bar length reads as
+    progression through a level system — the product's core concept —
+    without using any literal education iconography. Construction is
+    exact/repeatable: bar height 14, gap 8, widths 34/55/76 (a clean
+    +21 step each bar), symmetric 21pt margin top and bottom.
+    See docs/12-brand-book.md §2 for the full rationale.
+  -->
+  <rect x="22" y="21" width="34" height="14" rx="7" fill="#22537F" />
+  <rect x="22" y="43" width="55" height="14" rx="7" fill="#22537F" />
+  <rect x="22" y="65" width="76" height="14" rx="7" fill="#22537F" />
+</svg>

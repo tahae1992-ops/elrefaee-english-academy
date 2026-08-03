@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 160" width="200" height="160" role="img" aria-labelledby="erea-secondary-logo-title">
+  <title id="erea-secondary-logo-title">EREA</title>
+  <!-- Stacked lockup: mark above, wordmark centered below. Secondary
+       usage per docs/12-brand-book.md §2 — square/constrained contexts
+       where the horizontal Primary Logo doesn't fit well (app splash
+       screens, square social posts, narrow print formats). -->
+  <rect x="62" y="8" width="34" height="14" rx="7" fill="#22537F" />
+  <rect x="62" y="30" width="55" height="14" rx="7" fill="#22537F" />
+  <rect x="62" y="52" width="76" height="14" rx="7" fill="#22537F" />
+  <text
+    x="100"
+    y="130"
+    text-anchor="middle"
+    font-family="Charter, 'Iowan Old Style', 'Sitka Text', Cambria, Georgia, serif"
+    font-weight="700"
+    font-size="40"
+    letter-spacing="0"
+    fill="#0F2942"
+  >EREA</text>
+</svg>
