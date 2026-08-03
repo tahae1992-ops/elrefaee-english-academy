@@ -39,12 +39,15 @@ describe("identity.user_roles — partial unique indexes (DDD §3.1)", () => {
       VALUES (${userId}::uuid, ${roleId}::uuid, NULL)
     `);
 
+    // drizzle-orm wraps the driver error: the Postgres error text
+    // ("duplicate key value violates unique constraint...", code
+    // 23505) lands on `.cause`, not the top-level `.message`.
     await expect(
       db.execute(sql`
         INSERT INTO probe_user_roles (user_id, role_id, academy_id)
         VALUES (${userId}::uuid, ${roleId}::uuid, NULL)
       `),
-    ).rejects.toThrow(/unique/i);
+    ).rejects.toMatchObject({ cause: { code: "23505" } });
 
     // A naive UNIQUE(user_id, role_id, academy_id) would incorrectly
     // allow this pair too (Postgres treats NULLs as distinct), which is
@@ -63,7 +66,7 @@ describe("identity.user_roles — partial unique indexes (DDD §3.1)", () => {
         INSERT INTO probe_user_roles (user_id, role_id, academy_id)
         VALUES (${userId}::uuid, ${roleId}::uuid, ${academyA}::uuid)
       `),
-    ).rejects.toThrow(/unique/i);
+    ).rejects.toMatchObject({ cause: { code: "23505" } });
 
     const rows = await db.execute(
       sql`SELECT count(*)::int AS count FROM probe_user_roles`,
@@ -102,8 +105,9 @@ describe("identity + academy tables — RLS is enabled (Sprint 2 DoD)", () => {
       SELECT c.relname, c.relrowsecurity
       FROM pg_class c
       JOIN pg_namespace n ON n.oid = c.relnamespace
-      WHERE (n.nspname = 'identity')
-         OR (n.nspname = 'academy' AND c.relname = 'academies')
+      WHERE c.relkind = 'r'
+        AND ((n.nspname = 'identity')
+         OR (n.nspname = 'academy' AND c.relname = 'academies'))
     `);
     for (const row of rlsRows) {
       expect(row.relrowsecurity, `${row.relname} should have RLS enabled`).toBe(true);

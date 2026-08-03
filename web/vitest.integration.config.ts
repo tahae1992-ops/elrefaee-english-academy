@@ -17,6 +17,7 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    setupFiles: ["./vitest.integration.setup.ts"],
     include: ["**/*.integration.test.ts"],
     exclude: ["**/node_modules/**"],
     // DB round-trips are slower than jsdom unit tests; the default
