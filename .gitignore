@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+
+# Env files (never commit secrets)
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel
+
+# Editor/OS
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# Sentry
+.sentryclirc
+
+# Not part of the app repo — local-only files
+Git-2.55.0.3-64-bit.exe
+audit_extract/
+scratchpad/
+.claude/

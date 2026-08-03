@@ -1,0 +1,30 @@
+{
+  "id": "89b0da4d-7c0f-4e99-9553-7e6db992b864",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {},
+  "enums": {},
+  "schemas": {
+    "academy": "academy",
+    "ai": "ai",
+    "assessment": "assessment",
+    "billing": "billing",
+    "curriculum": "curriculum",
+    "engagement": "engagement",
+    "identity": "identity",
+    "instruction": "instruction",
+    "learning": "learning",
+    "notifications": "notifications",
+    "shared": "shared"
+  },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
