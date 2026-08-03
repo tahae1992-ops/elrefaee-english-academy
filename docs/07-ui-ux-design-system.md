@@ -68,6 +68,8 @@ Not a component library skin — the **visual argument for the product's core di
 
 **Responsive breakpoints** (Section 4.3): mobile (0–767px), tablet (768–1279px), desktop (1280–1535px), wide (1536px+) — Student-facing screens are authored mobile-first and expand; Instructor/Admin screens are authored desktop-first and degrade gracefully to tablet, with a stated minimum-viable (not optimized) mobile experience.
 
+**RTL & localization readiness — *Added 2026-08-03 (i18n architecture revision)*:** every component in Sections 5–6 is built with **logical CSS properties** (`margin-inline-start`/`padding-inline-end`/`inset-inline-start`, never physical `margin-left`/`padding-right`/`left`), so a component's layout flips correctly under `dir="rtl"` without a separate RTL stylesheet or component fork. Icons that encode directionality (a "back" chevron, a progress-direction arrow) are the one category requiring an explicit RTL-mirrored variant, not automatic flipping — flagged per-component where it applies (e.g., the Lesson block-flow's outline navigation, doc 09 §5.5). **No specific RTL locale is targeted yet** (DDD §3.12's `supported_locales` registry has none marked `rtl` at launch), so this is verified capability, not verified polish — a real visual QA pass under an actual RTL locale is a follow-up the moment one is added, not assumed clean today.
+
 ---
 
 ## 4. Design Tokens

@@ -9,7 +9,14 @@ if (!process.env.DATABASE_URL) {
 
 export default defineConfig({
   dialect: "postgresql",
-  schema: "./src/shared/infrastructure/db/schemas.ts",
+  // A glob, not a single file — as each module lands its own tables
+  // (modules/<context>/infrastructure/db/tables/*.ts), drizzle-kit picks
+  // them up without this config needing to change every sprint.
+  schema: [
+    "./src/shared/infrastructure/db/schemas.ts",
+    "./src/shared/infrastructure/db/tables/*.ts",
+    "./src/modules/**/infrastructure/db/tables/*.ts",
+  ],
   out: "./drizzle/migrations",
   dbCredentials: {
     url: process.env.DATABASE_URL,

@@ -132,6 +132,7 @@ erDiagram
 | id | uuid | PK, FK → `auth.users.id` | Shared identity with Supabase Auth |
 | display_name | varchar(60) | NOT NULL | |
 | native_language | varchar(10) | NULL | ISO 639-1, reserved for future L1 glossing (Blueprint §12) |
+| preferred_locale | varchar(35) | NULL | **Added 2026-08-03 (i18n revision).** BCP-47 tag (e.g. `en`, `es`, `ar-SA`), NOT an enum — an open, growing set by design (Blueprint §12). NULL means "use auto-detected locale, no explicit override" — an explicit choice always wins over detection once set (Section 3.12) |
 | current_level | cefr_level | NULL | Self-reported/placed level |
 | accessibility_prefs | jsonb | NOT NULL, default `{}` | Font scale, contrast, dyslexia-font toggle |
 | anonymized_at | timestamptz | NULL | GDPR anonymization marker (Section 6.2) |
@@ -399,10 +400,11 @@ erDiagram
 | result_id | uuid | FK, UNIQUE, NOT NULL | |
 | issuer | varchar(120) | NOT NULL, default `'Elrefaee English Academy'` | Not hardcoded — future accredited-partner issuers (Blueprint §8) |
 | verification_code | varchar(20) | UNIQUE, NOT NULL | Non-guessable random string, not sequential |
-| disclaimer_text | text | NOT NULL | |
+| disclaimer_text | text | NOT NULL | **Resolved and frozen at issuance time** (added detail, i18n revision) — rendered from `shared.certificate_templates` (Section 3.12) in the learner's locale *at the moment of issuance*, then stored verbatim here. A certificate's disclaimer never changes retroactively if the template's translation is later edited — matches the existing immutability principle for this table, just clarifies where the text originates |
+| locale | varchar(35) | NOT NULL, default `'en'` | **Added 2026-08-03.** Which locale the frozen template text above was rendered in — not the learner's *current* preferred_locale (which can change after issuance), an immutable record of what the certificate actually says |
 | status | varchar(10) | NOT NULL, CHECK IN (`active`,`revoked`) | |
 | issued_at | timestamptz | NOT NULL | |
-**Relationships:** `result_id` → `assessment.results` (traceability for disputes, Blueprint §8).
+**Relationships:** `result_id` → `assessment.results` (traceability for disputes, Blueprint §8); `locale`+template resolution → `shared.certificate_templates` (Section 3.12) at issuance time only, not a live FK (the text is frozen, not looked up dynamically on every read).
 **Expected growth:** grows with certifications earned — much smaller than `attempts`/`responses` (most attempts don't culminate in a passing certification exam).
 **Performance considerations:** `verification_code` is looked up by an **unauthenticated public endpoint** (SRS FR-11) — indexed, and the endpoint itself is rate-limited (SRS §6.4) since it has no auth gate to lean on.
 
@@ -562,10 +564,11 @@ erDiagram
 | Table | Key columns | Constraints |
 |---|---|---|
 | `preferences` | user_id (PK, FK), category_settings (jsonb, default `{}`) | |
-| `notifications` | id (bigint PK, IDENTITY), user_id (FK), type (varchar(40)), payload (jsonb), channel (`in_app`/`email`/`push`), sent_at (NULL), read_at (NULL), created_at | |
-**Purpose:** SRS FR-17/FR-20.
-**Expected growth:** large but bounded by retention policy (Section 10 — read notifications purged after 90 days).
-**Performance considerations:** `notifications` indexed on `(user_id, read_at)` for unread-count queries (a common dashboard-load query).
+| `notifications` | id (bigint PK, IDENTITY), user_id (FK), type (varchar(40)), payload (jsonb), channel (`in_app`/`email`/`push`), locale (varchar(35), NOT NULL), sent_at (NULL), read_at (NULL), created_at | |
+| `templates` | id (uuid PK), key (varchar(60)), locale (varchar(35)), channel (`in_app`/`email`/`push`), subject (text, NULL — email only), body (text) | **Added 2026-08-03 (i18n revision).** UNIQUE(key, locale, channel) |
+**Purpose:** SRS FR-17/FR-20; `templates` is the i18n revision's dynamic-content translation table (Blueprint §12) for this schema — Academy Admins can edit notification/email copy per locale without a deploy.
+**Expected growth:** `notifications` large but bounded by retention policy (Section 10 — read notifications purged after 90 days); `templates` near-static, configuration-scale.
+**Performance considerations:** `notifications` indexed on `(user_id, read_at)` for unread-count queries (a common dashboard-load query). `notifications.payload` stores the **already-rendered, already-localized** content at dispatch time — same freeze-at-generation-time principle as `assessment.certificates.disclaimer_text` (Section 3.4) — a dashboard read never re-resolves a template live; `templates.locale` is only consulted once, at send time, resolved against the recipient's `user_profiles.preferred_locale` (falling back to the notification's originating academy's default locale if the user has no explicit preference — Section 3.12).
 
 ---
 
@@ -611,6 +614,38 @@ erDiagram
 | dispatched_at | timestamptz | NULL |
 | retry_count | int | NOT NULL, default 0 |
 **Performance considerations:** a partial index `WHERE dispatched_at IS NULL` keeps the relay's polling query cheap regardless of the table's total historical size; dispatched rows purged after a short retention window (Section 10) — this table is a delivery mechanism, not a permanent log (that's `audit_log`'s job).
+
+### 3.12 Localization / Translation Tables — *Added 2026-08-03 (i18n architecture revision, mid-implementation)*
+
+Realizes Blueprint §12's revised decision: static UI strings live in code (`next-intl` message catalogs, not the database — see SAD addendum); this section covers only the **dynamic, admin-editable content** that needs database-backed translation, plus the locale-registry mechanism that reconciles "unlimited languages" with "the UI switcher needs to list which ones are actually on."
+
+#### `shared.supported_locales`
+**Purpose:** the enabled-locale registry — what the locale switcher offers, distinct from what BCP-47 *permits* (effectively infinite). Adding a language is a data insert here, never a migration — the concrete mechanism that makes "unlimited languages" true rather than aspirational.
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| locale | varchar(35) | PK | BCP-47 tag (e.g. `en`, `es`, `ar-SA`) |
+| display_name | varchar(60) | NOT NULL | Shown in the switcher, in that language's own script (e.g. `Español`, not `Spanish`) |
+| direction | varchar(3) | NOT NULL, CHECK IN (`ltr`,`rtl`) | Drives the design system's logical-property layout direction (doc 07 addendum) |
+| is_active | boolean | NOT NULL, default `true` | A locale can be registered but temporarily hidden (e.g. translations in progress) without deleting the row |
+| is_default | boolean | NOT NULL, default `false` | Exactly one row has this `true` (English at launch) — enforced by a partial unique index `WHERE is_default` |
+**Expected growth:** near-static, configuration-scale — a handful of rows even at full internationalization maturity.
+
+#### `shared.certificate_templates`
+**Purpose:** the source templates `assessment.certificates.disclaimer_text` (Section 3.4) is rendered from at issuance time, per locale.
+| Column | Type | Constraints | Description |
+|---|---|---|---|
+| id | uuid | PK | |
+| template_key | varchar(60) | NOT NULL | e.g. `disclaimer`, `level_label_b1` |
+| locale | varchar(35) | FK → `supported_locales.locale`, NOT NULL | |
+| body | text | NOT NULL | |
+**Constraints:** UNIQUE(template_key, locale).
+**Relationships:** consulted by the Certificate issuance use case (SAD §17) at generation time only — `assessment.certificates` does not hold a live FK to this table, by design (Section 3.4's freeze-at-issuance principle: editing a template must never retroactively change an already-issued certificate's text).
+
+#### Locale resolution order (the concrete algorithm every locale-aware read follows)
+1. `user_profiles.preferred_locale`, if set (an explicit choice always wins — Blueprint §12).
+2. Otherwise, the `Accept-Language` request header, matched against `shared.supported_locales WHERE is_active`, per `next-intl`'s standard negotiation (SAD addendum).
+3. Otherwise, the `is_default` locale (English).
+This order is the same for every consumer — the UI shell, notification dispatch, and certificate issuance all resolve locale identically, so "which language does this user see" never has more than one answer depending on which subsystem is asked.
 
 ---
 

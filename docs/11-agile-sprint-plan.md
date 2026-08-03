@@ -9,6 +9,7 @@
 ### Table of contents
 1. Product Backlog — Epics & Features (V1/V2/V3, complete)
 2. Sprint 1 — Project Setup (full detail)
+   - Sprint 1.5 — i18n Architecture Retrofit *(inserted 2026-08-03, between Sprints 1 and 2)*
 3. Sprint 2 — Authentication (full detail)
 4. Sprint 3 — User & Academy Management (full detail)
 5. Sprint 4 — Curriculum Engine, Part 1 (full detail)
@@ -85,6 +86,36 @@
 
 ---
 
+## Sprint 1.5 — i18n Architecture Retrofit — *Inserted 2026-08-03, between Sprint 1 and Sprint 2*
+
+**Why this exists as an inserted, unnumbered sprint rather than folded into Sprint 2:** the request to bring i18n infrastructure forward (Blueprint §12's revision) arrived after Sprint 1 was already complete and reviewed. Some of this work is a genuine **retrofit of already-shipped Sprint 1 code** (the app shell's route structure), not new Sprint 2 scope — conflating the two would misrepresent what Sprint 2's own velocity/capacity actually covers. This sprint is deliberately small and infrastructure-only; no new user-facing feature ships here.
+
+**Sprint Goal:** the app shell is locale-routed and RTL-capable, with a working locale switcher, before any further feature work lands on top of it.
+**Epic/Feature:** E1 (Platform Foundation) gets a new Feature: Localization Infrastructure. **Capacity:** ~10 pts (small, focused).
+
+**Technical Tasks**
+| Task | Priority | Deps | Pts | Duration | Acceptance Criteria | Risk | DoD |
+|---|---|---|---|---|---|---|---|
+| Install/configure `next-intl`; retrofit `app/` → `app/[locale]/` | Must | Sprint 1 | 5 | 2d | Existing homepage and health-check route both still work; API routes remain outside the locale segment (SAD §5 addendum) | Medium — touches already-shipped, already-reviewed Sprint 1 files | Existing Sprint 1 tests (all 12) still pass unmodified in behavior, updated only where the route path itself changed |
+| `proxy.ts` for locale detection (Accept-Language) + explicit override | Must | next-intl installed | 3 | 1d | DDD §3.12's resolution order (explicit pref → header → default) implemented exactly | Low | Unit-tested with faked Accept-Language headers |
+| Locale switcher component | Must | tokens (Sprint 1) | 2 | 0.5d | Persists an explicit choice to `user_profiles.preferred_locale` once authenticated, to a cookie pre-auth | Low | Keyboard-accessible, matches doc 07 §5.7 Navigation patterns |
+
+**Database Tasks**
+| Task | Priority | Deps | Pts | Duration | AC | Risk | DoD |
+|---|---|---|---|---|---|---|---|
+| `shared.supported_locales`, `shared.certificate_templates`, `notifications.templates`; `preferred_locale` on `user_profiles` (DDD §3.12) | Must | Sprint 1 schemas | 3 | 1d | Seeded with exactly one row in `supported_locales` (English, `is_default=true`) | Low | RLS policies present (CI-enforced) |
+
+**QA Tasks**
+| Task | Priority | Deps | Pts | AC | DoD |
+|---|---|---|---|---|---|
+| RTL smoke test | Should | switcher | 1 | Force `dir="rtl"` in a test build and confirm no layout breaks under logical-property CSS, even with zero real RTL locale registered | Documented as a repeatable manual check until a real RTL locale exists to test against properly |
+
+**Sprint 1.5 total: ~14 pts.**
+
+**Sprint 2's tasks below are updated in place** (not restated separately) to reflect this: the Login/Register/Forgot Password screens are now built against `next-intl` message keys from the start, never hardcoded English strings — a Should-Have-turned-Must-Have change to Sprint 2's own Frontend Tasks, absorbed into the existing point estimates below rather than inflating them, since translating three short auth screens' strings is genuinely small work once the infrastructure above exists.
+
+---
+
 ## 3. Sprint 2 — Authentication
 
 **Sprint Goal:** a user can register, log in (incl. MFA for elevated roles), refresh a session, and RLS provably blocks cross-user access at the database level.
@@ -112,7 +143,7 @@
 **Frontend Tasks**
 | Task | Priority | Deps | Pts | Duration | AC | Risk | DoD |
 |---|---|---|---|---|---|---|---|
-| Login/Register/Forgot Password screens | Must | design tokens | 5 | 2d | Matches hi-fi spec §5.2 exactly incl. error/loading/disabled states | Low | Passes the axe-core accessibility scan (SRS §14.4) |
+| Login/Register/Forgot Password screens | Must | design tokens, Sprint 1.5 | 5 | 2d | Matches hi-fi spec §5.2 exactly incl. error/loading/disabled states; every string sourced from a `next-intl` message key, zero hardcoded English text | Low | Passes the axe-core accessibility scan (SRS §14.4) |
 | MFA challenge screen | Must | AuthService | 3 | 1d | A wrong code shows an inline error, not a redirect-and-lose-context | Low | Keyboard-only flow tested |
 
 **API Tasks**

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 
 type ThemePreference = "light" | "dark";
@@ -45,6 +46,7 @@ function getServerSnapshot(): ThemePreference {
  * stays in sync across tabs and OS-preference changes.
  */
 export function ThemeToggle() {
+  const t = useTranslations("ThemeToggle");
   const theme = useSyncExternalStore(
     subscribe,
     resolvePreference,
@@ -81,7 +83,7 @@ export function ThemeToggle() {
 
   return (
     <Button variant="outline" size="sm" onClick={toggle} aria-pressed={theme === "dark"}>
-      {theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      {theme === "dark" ? t("switchToLight") : t("switchToDark")}
     </Button>
   );
 }

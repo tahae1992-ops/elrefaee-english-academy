@@ -1,6 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithIntl } from "@/test/render-with-intl";
 import { ThemeToggle } from "./theme-toggle";
 
 function mockMatchMedia(prefersDark: boolean) {
@@ -20,7 +21,7 @@ describe("ThemeToggle", () => {
 
   it("applies the OS preference on first render when no stored choice exists", async () => {
     mockMatchMedia(true);
-    render(<ThemeToggle />);
+    renderWithIntl(<ThemeToggle />);
 
     await waitFor(() =>
       expect(document.documentElement.getAttribute("data-theme")).toBe("dark"),
@@ -30,7 +31,7 @@ describe("ThemeToggle", () => {
   it("toggles data-theme and persists the explicit choice", async () => {
     mockMatchMedia(false);
     const user = userEvent.setup();
-    render(<ThemeToggle />);
+    renderWithIntl(<ThemeToggle />);
 
     const button = await screen.findByRole("button", {
       name: /switch to dark mode/i,
@@ -60,7 +61,7 @@ describe("ThemeToggle", () => {
     mockMatchMedia(true); // OS says dark...
     window.localStorage.setItem("elrefaee-theme-preference", "light"); // ...user chose light
 
-    render(<ThemeToggle />);
+    renderWithIntl(<ThemeToggle />);
 
     await waitFor(() =>
       expect(document.documentElement.getAttribute("data-theme")).toBe(
@@ -83,7 +84,7 @@ describe("ThemeToggle", () => {
       });
     const user = userEvent.setup();
 
-    render(<ThemeToggle />);
+    renderWithIntl(<ThemeToggle />);
 
     const button = await screen.findByRole("button", {
       name: /switch to dark mode/i,
