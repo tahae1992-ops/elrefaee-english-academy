@@ -68,4 +68,35 @@ describe("ThemeToggle", () => {
       ),
     );
   });
+
+  it("still toggles the DOM attribute even when localStorage throws (e.g. private browsing)", async () => {
+    mockMatchMedia(false);
+    const getItemSpy = vi
+      .spyOn(window.localStorage.__proto__, "getItem")
+      .mockImplementation(() => {
+        throw new DOMException("blocked", "SecurityError");
+      });
+    const setItemSpy = vi
+      .spyOn(window.localStorage.__proto__, "setItem")
+      .mockImplementation(() => {
+        throw new DOMException("blocked", "SecurityError");
+      });
+    const user = userEvent.setup();
+
+    render(<ThemeToggle />);
+
+    const button = await screen.findByRole("button", {
+      name: /switch to dark mode/i,
+    });
+    await user.click(button);
+
+    await waitFor(() =>
+      expect(document.documentElement.getAttribute("data-theme")).toBe(
+        "dark",
+      ),
+    );
+
+    getItemSpy.mockRestore();
+    setItemSpy.mockRestore();
+  });
 });

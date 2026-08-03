@@ -8,8 +8,15 @@ type ThemePreference = "light" | "dark";
 const STORAGE_KEY = "elrefaee-theme-preference";
 
 function resolvePreference(): ThemePreference {
-  const stored = window.localStorage.getItem(STORAGE_KEY);
-  if (stored === "light" || stored === "dark") return stored;
+  // localStorage throws in some privacy modes (e.g. Safari private
+  // browsing with storage fully blocked) — falling back to the OS
+  // preference is a strictly better outcome than crashing the toggle.
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+  } catch {
+    // fall through to the OS preference below
+  }
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
     : "light";
@@ -54,10 +61,21 @@ export function ThemeToggle() {
 
   function toggle() {
     const next: ThemePreference = theme === "dark" ? "light" : "dark";
-    window.localStorage.setItem(STORAGE_KEY, next);
+    try {
+      window.localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // Storage blocked (e.g. private browsing) — the toggle still works
+      // for this page load via the DOM attribute below; it just won't
+      // persist across a reload, which is an acceptable degradation.
+    }
+    // Update the DOM directly in case localStorage is unavailable and the
+    // 'storage' event below has nothing to notify (dispatchEvent alone
+    // doesn't guarantee useSyncExternalStore re-reads synchronously here).
+    document.documentElement.setAttribute("data-theme", next);
     // localStorage.setItem doesn't fire a 'storage' event in the same tab
     // that wrote it (only in other tabs) — dispatch one so this tab's
-    // useSyncExternalStore subscription re-reads immediately.
+    // useSyncExternalStore subscription re-reads and the button label
+    // stays in sync with the DOM attribute set above.
     window.dispatchEvent(new StorageEvent("storage"));
   }
 
