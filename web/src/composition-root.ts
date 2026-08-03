@@ -3,6 +3,10 @@ import { DrizzleDatabaseHealthAdapter } from "@/modules/identity/infrastructure/
 import { ListRolesWithPermissionsUseCase } from "@/modules/identity/application/use-cases/list-roles-with-permissions.use-case";
 import { RoleResolver } from "@/modules/identity/application/use-cases/resolve-user-permissions.use-case";
 import { DrizzleRoleAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-role.adapter";
+import { AuthService } from "@/modules/identity/application/use-cases/auth.service";
+import { SupabaseAuthAdapter } from "@/modules/identity/infrastructure/adapters/supabase-auth.adapter";
+import { DrizzleUserProfileAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-user-profile.adapter";
+import { GetDashboardDataUseCase } from "@/modules/identity/application/use-cases/get-dashboard-data.use-case";
 
 /**
  * The single composition point that wires Infrastructure implementations
@@ -26,4 +30,15 @@ export function createListRolesUseCase(): ListRolesWithPermissionsUseCase {
 export function createRoleResolver(): RoleResolver {
   const roleRepository = new DrizzleRoleAdapter();
   return new RoleResolver(roleRepository);
+}
+
+export function createAuthService(): AuthService {
+  const authProvider = new SupabaseAuthAdapter();
+  const userProfileRepository = new DrizzleUserProfileAdapter();
+  return new AuthService(authProvider, userProfileRepository);
+}
+
+export function createGetDashboardDataUseCase(): GetDashboardDataUseCase {
+  const userProfileRepository = new DrizzleUserProfileAdapter();
+  return new GetDashboardDataUseCase(userProfileRepository, createRoleResolver());
 }

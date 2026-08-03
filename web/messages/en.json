@@ -11,5 +11,17 @@
   },
   "LocaleSwitcher": {
     "label": "Language"
+  },
+  "RegisterPage": {
+    "title": "Create your account",
+    "displayNameLabel": "Name",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "passwordHint": "At least 8 characters",
+    "submit": "Create account",
+    "submitting": "Creating account…",
+    "genericError": "Registration failed. Please try again.",
+    "successConfirmEmail": "Account created — check {email} to confirm before signing in.",
+    "successReady": "Account created. You're signed in as {email}."
   }
 }
