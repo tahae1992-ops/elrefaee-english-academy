@@ -39,6 +39,9 @@ jobs:
       - name: Architecture boundary check
         run: npm run arch:check
 
+      - name: RLS coverage check (SRS §12.2)
+        run: npm run check:rls
+
       - name: Unit tests
         run: npm run test
 

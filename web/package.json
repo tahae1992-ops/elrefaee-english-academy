@@ -18,6 +18,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "arch:check": "dependency-cruiser src --config .dependency-cruiser.cjs",
+    "check:rls": "node scripts/check-rls-coverage.mjs",
     "audit:check": "audit-ci --config audit-ci.jsonc"
   },
   "dependencies": {
