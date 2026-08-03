@@ -1,0 +1,36 @@
+{
+  // Fails CI on any high/critical advisory EXCEPT the ones explicitly
+  // allowlisted below — a genuinely new vulnerability still blocks the
+  // build; these three don't, because they're nested inside frameworks
+  // we don't control and have no safe fix available upstream yet
+  // (investigated during Sprint 1, see the note on each below). This is
+  // a tracked, reviewed exception list, not a blanket "ignore audit."
+  "high": true,
+  "moderate": false,
+  "allowlist": [
+    // esbuild <=0.24.2, dev-server-only CORS issue, pulled in transitively
+    // by drizzle-kit's (deprecated) @esbuild-kit/esm-loader. Not
+    // exploitable in production — esbuild's dev server is never run
+    // outside a developer's own machine. `npm audit fix --force` would
+    // downgrade drizzle-kit to 0.18.1 (a genuine regression); no drizzle-kit
+    // release currently avoids this dependency. Revisit when drizzle-kit
+    // drops @esbuild-kit/esm-loader.
+    "GHSA-67mh-4wv8-2f99",
+    // postcss <=8.5.17 XSS/path-traversal advisories, bundled INSIDE
+    // Next.js 16.2.12's own node_modules (next/node_modules/postcss),
+    // not a dependency we resolve ourselves. postcss here runs only at
+    // build time over our own trusted CSS, never over attacker-controlled
+    // input. `npm audit fix --force` would downgrade Next.js to 9.3.3 (a
+    // 7-major-version regression) — not a real fix. Revisit when a Next.js
+    // patch release updates its bundled postcss.
+    "GHSA-qx2v-qp2m-jg93",
+    "GHSA-6g55-p6wh-862q",
+    "GHSA-r28c-9q8g-f849",
+    // sharp <0.35.0 (libvips CVEs), also bundled inside Next.js's own
+    // node_modules, used only for Next's build-time image optimization
+    // over our own known image assets. Same "no real fix without
+    // downgrading Next.js 7 major versions" situation. Revisit when a
+    // Next.js patch release updates its bundled sharp.
+    "GHSA-f88m-g3jw-g9cj"
+  ]
+}
