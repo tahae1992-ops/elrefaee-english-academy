@@ -11,10 +11,17 @@ import "../globals.css";
 // is no network dependency or flash-of-unstyled-text risk for the type
 // system at all.
 
+// Brand Book §7: "EREA" is the public/product brand used everywhere in
+// the app, including page titles; the full legal name ("Elrefaee
+// English Academy") stays in the description, where a search result or
+// share-preview genuinely benefits from the fuller institutional name.
 export const metadata: Metadata = {
-  title: "Elrefaee English Academy",
+  title: {
+    default: "EREA",
+    template: "%s · EREA",
+  },
   description:
-    "Learn American English with real certification, teacher support, and AI-augmented practice.",
+    "EREA (Elrefaee English Academy) — learn American English with real certification, teacher support, and AI-augmented practice.",
 };
 
 // Applies the resolved theme before first paint, so there is no flash of
