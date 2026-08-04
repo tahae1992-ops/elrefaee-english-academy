@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { CourseListItem } from "@/modules/curriculum/interface/types";
 
@@ -19,8 +20,8 @@ export function CourseCard({ course }: { course: CourseListItem }) {
   const t = useTranslations("Courses");
   const isLocked = course.access.state === "locked" || course.access.state === "requires_placement";
 
-  return (
-    <Card className={cn("gap-3", isLocked && "opacity-60")}>
+  const card = (
+    <Card className={cn("gap-3", isLocked && "opacity-60", !isLocked && "transition-opacity hover:opacity-90")}>
       <CardHeader className="flex-row items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
           <Badge variant="outline" className="w-fit">
@@ -44,4 +45,7 @@ export function CourseCard({ course }: { course: CourseListItem }) {
       </CardContent>
     </Card>
   );
+
+  if (isLocked) return card;
+  return <Link href={`/courses/${course.id}`}>{card}</Link>;
 }

@@ -130,6 +130,66 @@
       "retry": "Try again"
     }
   },
+  "CourseDetails": {
+    "progressLabel": "{percent}% complete",
+    "continueCta": "Continue",
+    "startCta": "Start course",
+    "courseComplete": "Course complete",
+    "unitLabel": "Unit {number}",
+    "unitInProgress": "In progress",
+    "lessonCount": "{completed}/{total} lessons",
+    "locked": {
+      "title": "This course isn't unlocked yet",
+      "description": "Reach the required level to unlock this course."
+    },
+    "error": {
+      "title": "We couldn't load this course",
+      "description": "This is a temporary issue on our side — your account is fine.",
+      "retry": "Try again"
+    }
+  },
+  "Unit": {
+    "backToCourse": "Back to course",
+    "checkpoint": {
+      "title": "Unit checkpoint",
+      "comingSoon": "Complete every lesson above to finish this unit.",
+      "unitComplete": "Unit complete — the next unit is now unlocked."
+    }
+  },
+  "Lesson": {
+    "progress": "Block {current} of {total}",
+    "saveAndExit": "Save and exit",
+    "continue": "Continue",
+    "finishLesson": "Finish lesson",
+    "saving": "Saving…",
+    "outlineLabel": "Lesson outline",
+    "blocks": {
+      "warmUp": "Warm-up",
+      "presentation": "Presentation",
+      "controlledPractice": "Practice",
+      "communicativeTask": "Task",
+      "wrapUp": "Wrap-up",
+      "checkAnswer": "Check answer",
+      "checking": "Checking…",
+      "correct": "Correct!",
+      "incorrect": "Not quite — the correct answer is highlighted above.",
+      "taskPlaceholder": "Type your answer here.",
+      "submitTask": "Submit",
+      "taskSubmitted": "Submitted"
+    },
+    "error": {
+      "checkFailed": "Couldn't check your answer. Please try again.",
+      "saveFailed": "Couldn't save your progress. Please try again.",
+      "completeFailed": "Couldn't complete the lesson. Please try again."
+    },
+    "complete": {
+      "title": "Lesson complete!",
+      "description": "Nice work — your progress has been saved.",
+      "unitCompleteDescription": "You've completed this unit — the next one is now unlocked.",
+      "backToUnit": "Back to unit",
+      "backToCourse": "Back to course"
+    }
+  },
   "PlacementTest": {
     "selfAssessment": {
       "title": "How would you describe your English?",

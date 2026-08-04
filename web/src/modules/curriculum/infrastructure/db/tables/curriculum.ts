@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { jsonb, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { integer, jsonb, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { curriculumSchema } from "@/shared/infrastructure/db/schemas";
 import { academies } from "@/shared/infrastructure/db/tables/academy";
 import { cefrLevel, contentStatus, contentType } from "@/shared/infrastructure/db/tables/enums";
@@ -27,9 +27,13 @@ import { userProfiles } from "@/modules/identity/infrastructure/db/tables/identi
  *    concept exists yet. Seed content (authored by Claude per the
  *    project's content workflow, pending review) leaves this null.
  *
- * `units`/`lessons` are intentionally not built in this slice — the
- * Course Catalog screen (doc 08 §4.7) only lists courses; unit/lesson
- * browsing is the separate, later "Course Details" screen.
+ * Lesson Viewer slice adds `units`/`lessons`. Both `content_item_id`
+ * columns are NOT NULL (unlike `courses.content_item_id`, nullable per
+ * DDD) — every unit/lesson built here is authored with real content,
+ * there's no "structure before authoring" case to support yet. Their
+ * `content_type` is `lesson` — the enum has no dedicated
+ * unit/course-overview type, so the closest fit is reused, same
+ * documented choice already made for `courses` above.
  */
 
 export const contentItems = curriculumSchema.table("content_items", {
@@ -59,4 +63,36 @@ export const courses = curriculumSchema.table(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [uniqueIndex("courses_academy_cefr_level_unique").on(table.academyId, table.cefrLevel)],
+);
+
+export const units = curriculumSchema.table(
+  "units",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    courseId: uuid("course_id")
+      .notNull()
+      .references(() => courses.id),
+    contentItemId: uuid("content_item_id")
+      .notNull()
+      .references(() => contentItems.id),
+    orderIndex: integer("order_index").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("units_course_order_unique").on(table.courseId, table.orderIndex)],
+);
+
+export const lessons = curriculumSchema.table(
+  "lessons",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    unitId: uuid("unit_id")
+      .notNull()
+      .references(() => units.id),
+    contentItemId: uuid("content_item_id")
+      .notNull()
+      .references(() => contentItems.id),
+    orderIndex: integer("order_index").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [uniqueIndex("lessons_unit_order_unique").on(table.unitId, table.orderIndex)],
 );

@@ -3,7 +3,7 @@ import { ListCoursesUseCase } from "./list-courses.use-case";
 import type { CourseRepositoryPort, PublishedCourse } from "@/modules/curriculum/application/ports/course-repository-port";
 
 function fakeCourse(overrides: Partial<PublishedCourse> = {}): PublishedCourse {
-  return { id: "course-1", cefrLevel: "a1", title: "Starter", description: "desc", ...overrides };
+  return { id: "course-1", academyId: "academy-1", cefrLevel: "a1", title: "Starter", description: "desc", ...overrides };
 }
 
 describe("ListCoursesUseCase", () => {
@@ -14,6 +14,7 @@ describe("ListCoursesUseCase", () => {
         fakeCourse({ id: "c2", cefrLevel: "pre_a1" }),
         fakeCourse({ id: "c3", cefrLevel: "a1" }),
       ]),
+      getById: vi.fn(),
     };
 
     const result = await new ListCoursesUseCase(courses).execute("b1");
@@ -28,6 +29,7 @@ describe("ListCoursesUseCase", () => {
         fakeCourse({ id: "same", cefrLevel: "a2" }),
         fakeCourse({ id: "above", cefrLevel: "b1" }),
       ]),
+      getById: vi.fn(),
     };
 
     const result = await new ListCoursesUseCase(courses).execute("a2");
@@ -40,6 +42,7 @@ describe("ListCoursesUseCase", () => {
   it("marks every course as requiring placement when the learner has no level yet", async () => {
     const courses: CourseRepositoryPort = {
       listPublished: vi.fn().mockResolvedValue([fakeCourse()]),
+      getById: vi.fn(),
     };
 
     const result = await new ListCoursesUseCase(courses).execute(null);
