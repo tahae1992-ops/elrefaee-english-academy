@@ -36,6 +36,13 @@
       "when": 1785813629644,
       "tag": "0008_assessment_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1785821443976,
+      "tag": "0011_curriculum_tables",
+      "breakpoints": true
     }
   ]
 }

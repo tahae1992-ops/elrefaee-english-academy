@@ -17,6 +17,8 @@ import { GetAttemptStatusUseCase } from "@/modules/assessment/application/use-ca
 import { DrizzleItemBankAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-item-bank.adapter";
 import { DrizzleAttemptAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-attempt.adapter";
 import { DrizzleResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-result.adapter";
+import { ListCoursesUseCase } from "@/modules/curriculum/application/use-cases/list-courses.use-case";
+import { DrizzleCourseAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-course.adapter";
 
 /**
  * The single composition point that wires Infrastructure implementations
@@ -78,4 +80,8 @@ export function createFinalizeAttemptUseCase(): FinalizeAttemptUseCase {
 
 export function createGetAttemptStatusUseCase(): GetAttemptStatusUseCase {
   return new GetAttemptStatusUseCase(new DrizzleAttemptAdapter(), new DrizzleResultAdapter());
+}
+
+export function createListCoursesUseCase(): ListCoursesUseCase {
+  return new ListCoursesUseCase(new DrizzleCourseAdapter());
 }

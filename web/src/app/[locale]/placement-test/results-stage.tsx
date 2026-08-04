@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import type { PlacementScore } from "@/modules/assessment/interface/types";
 
 const LEVEL_LABEL: Record<string, string> = {
@@ -54,9 +54,14 @@ export function ResultsStage({ result }: { result: PlacementScore }) {
           </p>
         </div>
 
-        <Button onClick={() => router.push("/dashboard")} className="w-full">
-          {t("goToDashboard")}
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button asChild className="w-full">
+            <Link href="/courses">{t("viewCourse")}</Link>
+          </Button>
+          <Button variant="outline" onClick={() => router.push("/dashboard")} className="w-full">
+            {t("goToDashboard")}
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

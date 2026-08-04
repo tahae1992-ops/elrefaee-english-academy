@@ -24,8 +24,15 @@ describe("SidebarNav", () => {
   it("renders not-yet-built items as disabled, not as dead links", () => {
     renderWithIntl(<SidebarNav />);
 
-    expect(screen.queryByRole("link", { name: /courses/i })).not.toBeInTheDocument();
-    const courses = screen.getByText("Courses").closest("span");
-    expect(courses).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByRole("link", { name: /review/i })).not.toBeInTheDocument();
+    const review = screen.getByText("Review").closest("span");
+    expect(review).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("renders Courses (Course Catalog slice) as a real link", () => {
+    renderWithIntl(<SidebarNav />);
+
+    const courses = screen.getByRole("link", { name: /courses/i });
+    expect(courses).toHaveAttribute("href", "/courses");
   });
 });

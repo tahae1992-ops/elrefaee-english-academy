@@ -26,3 +26,30 @@ export const skillType = sharedSchema.enum("skill_type", [
   "grammar",
   "vocabulary",
 ]);
+
+/** DDD §3.3's shared `content_type` enum — every authorable content kind across the platform. */
+export const contentType = sharedSchema.enum("content_type", [
+  "lesson",
+  "exercise",
+  "quiz_item",
+  "vocabulary_entry",
+  "grammar_explanation",
+  "reading_passage",
+  "listening_script",
+  "pronunciation_activity",
+  "teacher_note",
+  "dialogue",
+  "assessment_item",
+]);
+
+/** DDD §3.3's shared `content_status` enum — the Content Governance lifecycle (Blueprint §4.1). */
+export const contentStatus = sharedSchema.enum("content_status", [
+  "draft",
+  "in_review",
+  "changes_requested",
+  "approved",
+  "scheduled",
+  "published",
+  "deprecated",
+  "archived",
+]);

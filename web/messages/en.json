@@ -43,7 +43,7 @@
       "comingSoon": "Soon",
       "home": { "label": "Home" },
       "review": { "label": "Review", "comingSoonHint": "Spaced-repetition review — coming soon." },
-      "courses": { "label": "Courses", "comingSoonHint": "Course Catalog — coming soon." },
+      "courses": { "label": "Courses" },
       "certificates": { "label": "Certificates", "comingSoonHint": "Your earned certificates — coming soon." },
       "profile": { "label": "Profile", "comingSoonHint": "Profile & settings — coming soon." }
     },
@@ -66,10 +66,10 @@
       "title": "Find your starting point",
       "description": "Take a short placement test so your lessons match your level from day one.",
       "cta": "Take the placement test",
-      "assessedTitle": "Lessons are coming soon",
-      "assessedDescription": "You're placed — lessons matched to your level will appear here once the Course Catalog launches.",
+      "assessedTitle": "Browse your courses",
+      "assessedDescription": "You're placed — head to the Course Catalog to find your course. Lessons themselves will appear once they launch.",
       "comingSoon": "Coming soon",
-      "comingSoonHint": "Course Catalog is being built next — this will be your entry point into lessons."
+      "comingSoonHint": "Lesson content is being built next — the Course Catalog is your entry point in the meantime."
     },
     "cefrLevel": {
       "title": "Current level",
@@ -86,7 +86,8 @@
       "title": "Recommended for you",
       "emptyTitle": "No recommendation yet",
       "emptyDescription": "Complete your placement test to get a lesson matched to your level.",
-      "emptyDescriptionPlaced": "Lesson recommendations will appear here once the Course Catalog is available."
+      "emptyDescriptionPlaced": "Lesson recommendations are coming soon — browse the Course Catalog to find your course in the meantime.",
+      "browseCourses": "Browse courses"
     },
     "recentActivity": {
       "title": "Recent activity",
@@ -96,10 +97,35 @@
     "courseProgress": {
       "title": "Your courses",
       "emptyTitle": "No courses yet",
-      "emptyDescription": "Enrolled courses will appear here once the Course Catalog is available."
+      "emptyDescription": "Enrolled courses will appear here once you start one from the Course Catalog.",
+      "browseCourses": "Browse courses"
     },
     "error": {
       "title": "We couldn't load your dashboard data",
+      "description": "This is a temporary issue on our side — your account is fine.",
+      "retry": "Try again"
+    }
+  },
+  "Courses": {
+    "title": "Course Catalog",
+    "description": "Browse every level, from your first words to fluent, professional English.",
+    "filters": {
+      "label": "Filter courses",
+      "myLevel": "My level",
+      "all": "All"
+    },
+    "card": {
+      "currentLevel": "Your level",
+      "lockedReason": "Complete {level} to unlock",
+      "requiresPlacementReason": "Take the placement test to see your level"
+    },
+    "placementBanner": {
+      "title": "Find out where to start",
+      "description": "Take the placement test to unlock the courses matched to your level.",
+      "cta": "Take the placement test"
+    },
+    "error": {
+      "title": "We couldn't load the course catalog",
       "description": "This is a temporary issue on our side — your account is fine.",
       "retry": "Try again"
     }
@@ -135,7 +161,8 @@
       "overallLevel": "Your level: {level}",
       "skillBreakdown": "Skill breakdown",
       "learningPathTitle": "Your learning path",
-      "learningPathPlaceholder": "Courses matching your {level} level will appear here once the Course Catalog is available.",
+      "learningPathPlaceholder": "Your {level} course is ready in the Course Catalog — lesson content inside it is still on the way.",
+      "viewCourse": "View my course",
       "goToDashboard": "Go to dashboard"
     },
     "error": {

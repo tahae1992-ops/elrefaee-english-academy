@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
  * itself fails — the nav chrome (already resolved by the layout) stays
  * up, only the data-dependent content degrades.
  */
-export function WidgetsErrorState() {
-  const t = useTranslations("Dashboard.error");
+export function WidgetsErrorState({ namespace = "Dashboard.error" }: { namespace?: string }) {
+  const t = useTranslations(namespace);
 
   return (
     <Card className="border-destructive/40 bg-destructive/5">
