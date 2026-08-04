@@ -16,6 +16,7 @@ function buildService(overrides: {
   const authProvider: AuthProviderPort = {
     signUp: vi.fn(),
     signIn: vi.fn(),
+    signOut: vi.fn().mockResolvedValue(undefined),
     ...overrides.authProvider,
   };
   const userProfiles: UserProfileRepositoryPort = {
@@ -160,5 +161,18 @@ describe("AuthService.login", () => {
     const [entry] = vi.mocked(auditLog.record).mock.calls[0];
     expect(entry.after?.emailHash).toEqual(expect.any(String));
     expect(entry.after?.emailHash).not.toContain("yuki");
+  });
+});
+
+describe("AuthService.logout", () => {
+  it("signs out via the auth provider and records an audit entry", async () => {
+    const { service, authProvider, auditLog } = buildService();
+
+    await service.logout("user-1");
+
+    expect(authProvider.signOut).toHaveBeenCalled();
+    expect(auditLog.record).toHaveBeenCalledWith(
+      expect.objectContaining({ actorId: "user-1", action: "auth.logout", entityId: "user-1" }),
+    );
   });
 });

@@ -7,7 +7,9 @@ describe("GetDashboardDataUseCase", () => {
   it("combines the profile and resolved permissions for an existing user", async () => {
     const userProfiles: UserProfileRepositoryPort = {
       createProfileWithDefaultRole: vi.fn(),
-      findById: vi.fn().mockResolvedValue({ userId: "user-1", displayName: "Yuki" }),
+      findById: vi
+        .fn()
+        .mockResolvedValue({ userId: "user-1", displayName: "Yuki", currentLevel: "b1" }),
     };
     const roleResolver = {
       resolveForUser: vi.fn().mockResolvedValue(new Set(["progress.view_own", "learning.attempt"])),
@@ -17,6 +19,7 @@ describe("GetDashboardDataUseCase", () => {
 
     expect(result).toEqual({
       displayName: "Yuki",
+      currentLevel: "b1",
       permissionKeys: ["learning.attempt", "progress.view_own"],
     });
   });

@@ -3,6 +3,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { getLocaleDirection } from "@/i18n/locale-direction";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import "../globals.css";
 
 // Body/display type is the OS-native system font stack + Charter (doc 07
@@ -82,7 +83,9 @@ export default async function LocaleLayout({
         <script dangerouslySetInnerHTML={{ __html: noFlashOfWrongThemeScript }} />
       </head>
       <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <TooltipProvider delayDuration={200}>{children}</TooltipProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

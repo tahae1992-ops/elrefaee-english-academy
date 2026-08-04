@@ -1,8 +1,9 @@
-import type { UserProfileRepositoryPort } from "@/modules/identity/application/ports/user-profile-repository-port";
+import type { CefrLevel, UserProfileRepositoryPort } from "@/modules/identity/application/ports/user-profile-repository-port";
 import type { RoleResolver } from "@/modules/identity/application/use-cases/resolve-user-permissions.use-case";
 
 export interface DashboardData {
   displayName: string;
+  currentLevel: CefrLevel | null;
   permissionKeys: string[];
 }
 
@@ -28,6 +29,7 @@ export class GetDashboardDataUseCase {
     const permissions = await this.roleResolver.resolveForUser(userId);
     return {
       displayName: profile.displayName,
+      currentLevel: profile.currentLevel,
       permissionKeys: [...permissions].sort(),
     };
   }

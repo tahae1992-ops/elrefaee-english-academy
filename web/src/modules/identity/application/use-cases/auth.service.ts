@@ -107,6 +107,17 @@ export class AuthService {
       roles: roleKeys,
     };
   }
+
+  /** API Spec §6.1's `/auth/logout` — revokes the current session. */
+  async logout(userId: string): Promise<void> {
+    await this.authProvider.signOut();
+    await this.auditLog.record({
+      actorId: userId,
+      action: "auth.logout",
+      entityType: "user",
+      entityId: userId,
+    });
+  }
 }
 
 /**

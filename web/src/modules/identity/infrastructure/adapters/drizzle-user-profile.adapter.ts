@@ -57,7 +57,11 @@ export class DrizzleUserProfileAdapter implements UserProfileRepositoryPort {
 
   async findById(userId: string): Promise<UserProfile | null> {
     const [profile] = await getDb()
-      .select({ userId: userProfiles.id, displayName: userProfiles.displayName })
+      .select({
+        userId: userProfiles.id,
+        displayName: userProfiles.displayName,
+        currentLevel: userProfiles.currentLevel,
+      })
       .from(userProfiles)
       .where(eq(userProfiles.id, userId))
       .limit(1);

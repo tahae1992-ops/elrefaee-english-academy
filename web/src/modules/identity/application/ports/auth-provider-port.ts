@@ -38,4 +38,5 @@ export class AuthProviderError extends Error {
 export interface AuthProviderPort {
   signUp(email: string, password: string): Promise<SignUpResult>;
   signIn(email: string, password: string): Promise<SignInResult>;
+  signOut(): Promise<void>;
 }

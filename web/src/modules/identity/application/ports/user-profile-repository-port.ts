@@ -4,9 +4,12 @@ export interface CreateUserProfileInput {
   defaultRoleKey: string;
 }
 
+export type CefrLevel = "pre_a1" | "a1" | "a2" | "b1" | "b2" | "c1";
+
 export interface UserProfile {
   userId: string;
   displayName: string;
+  currentLevel: CefrLevel | null;
 }
 
 export interface UserProfileRepositoryPort {

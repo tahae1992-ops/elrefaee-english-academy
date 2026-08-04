@@ -56,4 +56,12 @@ export class SupabaseAuthAdapter implements AuthProviderPort {
       expiresIn: data.session.expires_in,
     };
   }
+
+  async signOut(): Promise<void> {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      throw new AuthProviderError(error.message, error.code, error.status, error.toJSON());
+    }
+  }
 }

@@ -36,5 +36,69 @@
     "invalidCredentials": "Invalid email or password.",
     "noAccount": "New here?",
     "registerLink": "Create an account"
+  },
+  "AppShell": {
+    "nav": {
+      "label": "Main navigation",
+      "comingSoon": "Soon",
+      "home": { "label": "Home" },
+      "review": { "label": "Review", "comingSoonHint": "Spaced-repetition review — coming soon." },
+      "courses": { "label": "Courses", "comingSoonHint": "Course Catalog — coming soon." },
+      "certificates": { "label": "Certificates", "comingSoonHint": "Your earned certificates — coming soon." },
+      "profile": { "label": "Profile", "comingSoonHint": "Profile & settings — coming soon." }
+    },
+    "userMenu": {
+      "openMenu": "Open account menu",
+      "profile": "Profile",
+      "signOut": "Sign out",
+      "signingOut": "Signing out…"
+    }
+  },
+  "Dashboard": {
+    "pageTitle": "Dashboard",
+    "streakXp": {
+      "streakDays": "{count, plural, =0 {No streak yet} one {# day streak} other {# day streak}}",
+      "xp": "{count, plural, =0 {0 XP} other {# XP}}"
+    },
+    "continueLearning": {
+      "eyebrowStart": "Get started",
+      "eyebrowContinue": "Continue learning",
+      "title": "Find your starting point",
+      "description": "Take a short placement test so your lessons match your level from day one.",
+      "cta": "Take the placement test",
+      "comingSoon": "Coming soon",
+      "comingSoonHint": "The placement test is being built next — this will be your entry point into the curriculum."
+    },
+    "cefrLevel": {
+      "title": "Current level",
+      "notAssessed": "Not yet assessed",
+      "notAssessedHint": "Take the placement test to find your CEFR level.",
+      "assessedHint": "Based on your most recent assessment."
+    },
+    "weeklyGoal": {
+      "title": "Weekly goal",
+      "noGoal": "No goal set",
+      "noGoalHint": "Setting a weekly goal is coming soon."
+    },
+    "recommendedLesson": {
+      "title": "Recommended for you",
+      "emptyTitle": "No recommendation yet",
+      "emptyDescription": "Complete your placement test to get a lesson matched to your level."
+    },
+    "recentActivity": {
+      "title": "Recent activity",
+      "emptyTitle": "No activity yet",
+      "emptyDescription": "Lessons and quizzes you complete will show up here."
+    },
+    "courseProgress": {
+      "title": "Your courses",
+      "emptyTitle": "No courses yet",
+      "emptyDescription": "Enrolled courses will appear here once the Course Catalog is available."
+    },
+    "error": {
+      "title": "We couldn't load your dashboard data",
+      "description": "This is a temporary issue on our side — your account is fine.",
+      "retry": "Try again"
+    }
   }
 }
