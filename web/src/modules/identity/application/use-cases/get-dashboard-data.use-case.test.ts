@@ -7,6 +7,7 @@ describe("GetDashboardDataUseCase", () => {
   it("combines the profile and resolved permissions for an existing user", async () => {
     const userProfiles: UserProfileRepositoryPort = {
       createProfileWithDefaultRole: vi.fn(),
+      updateCurrentLevel: vi.fn(),
       findById: vi
         .fn()
         .mockResolvedValue({ userId: "user-1", displayName: "Yuki", currentLevel: "b1" }),
@@ -27,6 +28,7 @@ describe("GetDashboardDataUseCase", () => {
   it("returns null when no profile exists for the given user id", async () => {
     const userProfiles: UserProfileRepositoryPort = {
       createProfileWithDefaultRole: vi.fn(),
+      updateCurrentLevel: vi.fn(),
       findById: vi.fn().mockResolvedValue(null),
     };
     const roleResolver = { resolveForUser: vi.fn() } as unknown as RoleResolver;

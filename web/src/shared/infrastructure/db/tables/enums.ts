@@ -16,3 +16,13 @@ export const cefrLevel = sharedSchema.enum("cefr_level", [
   "b2",
   "c1",
 ]);
+
+/** DDD §2's shared `skill_type` enum. */
+export const skillType = sharedSchema.enum("skill_type", [
+  "listening",
+  "reading",
+  "writing",
+  "speaking",
+  "grammar",
+  "vocabulary",
+]);

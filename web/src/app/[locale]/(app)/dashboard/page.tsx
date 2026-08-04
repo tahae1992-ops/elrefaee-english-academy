@@ -21,9 +21,9 @@ import { WidgetsErrorState } from "@/components/dashboard/widgets-error-state";
  * `engagement`/gamification schema exists yet (Blueprint's E3 epic,
  * a later sprint), and no course/enrollment data exists until Course
  * Catalog ships. Rendered as designed empty/zero states, never
- * fabricated numbers — CEFR level is the one real field
- * (`user_profiles.current_level`), null until the Placement Test slice
- * lands.
+ * fabricated numbers. CEFR level is real and live — set by the
+ * Placement Test slice, which also drives the Continue Learning
+ * card's CTA below.
  */
 export default async function DashboardPage() {
   let current;
@@ -54,10 +54,10 @@ function DashboardContent({ currentLevel }: { currentLevel: CefrLevel | null }) 
       <StreakXpStrip streakDays={0} xp={0} />
       <h1 className="sr-only">{t("pageTitle")}</h1>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-        <ContinueLearningCard hasStartedLearning={false} />
+        <ContinueLearningCard currentLevel={currentLevel} />
         <CefrLevelCard currentLevel={currentLevel} />
         <WeeklyGoalCard />
-        <RecommendedLessonCard />
+        <RecommendedLessonCard currentLevel={currentLevel} />
         <RecentActivityCard />
         <CourseProgressSection />
       </div>

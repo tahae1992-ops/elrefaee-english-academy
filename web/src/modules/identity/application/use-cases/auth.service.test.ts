@@ -22,6 +22,7 @@ function buildService(overrides: {
   const userProfiles: UserProfileRepositoryPort = {
     createProfileWithDefaultRole: vi.fn(),
     findById: vi.fn(),
+    updateCurrentLevel: vi.fn(),
     ...overrides.userProfiles,
   };
   const roleRepository: RoleRepositoryPort = {

@@ -66,8 +66,10 @@
       "title": "Find your starting point",
       "description": "Take a short placement test so your lessons match your level from day one.",
       "cta": "Take the placement test",
+      "assessedTitle": "Lessons are coming soon",
+      "assessedDescription": "You're placed — lessons matched to your level will appear here once the Course Catalog launches.",
       "comingSoon": "Coming soon",
-      "comingSoonHint": "The placement test is being built next — this will be your entry point into the curriculum."
+      "comingSoonHint": "Course Catalog is being built next — this will be your entry point into lessons."
     },
     "cefrLevel": {
       "title": "Current level",
@@ -83,7 +85,8 @@
     "recommendedLesson": {
       "title": "Recommended for you",
       "emptyTitle": "No recommendation yet",
-      "emptyDescription": "Complete your placement test to get a lesson matched to your level."
+      "emptyDescription": "Complete your placement test to get a lesson matched to your level.",
+      "emptyDescriptionPlaced": "Lesson recommendations will appear here once the Course Catalog is available."
     },
     "recentActivity": {
       "title": "Recent activity",
@@ -99,6 +102,54 @@
       "title": "We couldn't load your dashboard data",
       "description": "This is a temporary issue on our side — your account is fine.",
       "retry": "Try again"
+    }
+  },
+  "PlacementTest": {
+    "selfAssessment": {
+      "title": "How would you describe your English?",
+      "description": "Pick the statement that best matches you right now — there's no wrong answer, this just helps us start you at the right level.",
+      "preA1": "I can recognize a few familiar words and very basic phrases.",
+      "a1": "I can understand and use familiar everyday expressions and very basic phrases.",
+      "a2": "I can communicate in simple, routine tasks on familiar topics.",
+      "b1": "I can deal with most situations while traveling, describe experiences, and give reasons for opinions.",
+      "b2": "I can interact with fluency, understand complex text, and discuss a wide range of subjects.",
+      "c1": "I can express myself fluently and spontaneously, and use language flexibly for social, academic, and professional purposes.",
+      "continue": "Continue"
+    },
+    "transition": {
+      "title": "Now a short check",
+      "description": "About 10 minutes. Answer as best you can — there's no running score, so don't worry about getting every item right.",
+      "start": "Start the check"
+    },
+    "diagnostic": {
+      "progress": "Question {current} of {total}",
+      "playAudio": "Play audio",
+      "playingAudio": "Playing…",
+      "speakingSkip": "Skip this section",
+      "speakingPlaceholder": "Type your answer here (this section is for future review, not scored automatically).",
+      "next": "Next",
+      "submitting": "Saving…"
+    },
+    "results": {
+      "title": "Your placement result",
+      "overallLevel": "Your level: {level}",
+      "skillBreakdown": "Skill breakdown",
+      "learningPathTitle": "Your learning path",
+      "learningPathPlaceholder": "Courses matching your {level} level will appear here once the Course Catalog is available.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "startFailed": "We couldn't start the placement test. Please try again.",
+      "submitFailed": "We couldn't save your answer. Please try again.",
+      "finalizeFailed": "We couldn't calculate your result. Please try again.",
+      "retry": "Try again"
+    },
+    "exitConfirm": {
+      "title": "Leave the placement test?",
+      "description": "Your progress on this attempt won't be saved if you leave now.",
+      "stay": "Stay",
+      "leave": "Leave"
     }
   }
 }

@@ -2,8 +2,9 @@ import { useTranslations } from "next-intl";
 import { Lightbulb } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/dashboard/empty-state";
+import type { CefrLevel } from "@/modules/identity/interface/current-user";
 
-export function RecommendedLessonCard() {
+export function RecommendedLessonCard({ currentLevel }: { currentLevel: CefrLevel | null }) {
   const t = useTranslations("Dashboard.recommendedLesson");
 
   return (
@@ -17,7 +18,7 @@ export function RecommendedLessonCard() {
         <EmptyState
           icon={Lightbulb}
           title={t("emptyTitle")}
-          description={t("emptyDescription")}
+          description={currentLevel ? t("emptyDescriptionPlaced") : t("emptyDescription")}
         />
       </CardContent>
     </Card>

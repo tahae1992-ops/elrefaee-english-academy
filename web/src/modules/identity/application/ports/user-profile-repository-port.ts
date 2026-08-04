@@ -22,4 +22,7 @@ export interface UserProfileRepositoryPort {
   createProfileWithDefaultRole(input: CreateUserProfileInput): Promise<void>;
 
   findById(userId: string): Promise<UserProfile | null>;
+
+  /** Placement Test slice — saves the calculated CEFR level to the learner's profile. */
+  updateCurrentLevel(userId: string, level: CefrLevel): Promise<void>;
 }

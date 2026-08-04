@@ -9,6 +9,14 @@ import { DrizzleUserProfileAdapter } from "@/modules/identity/infrastructure/ada
 import { GetDashboardDataUseCase } from "@/modules/identity/application/use-cases/get-dashboard-data.use-case";
 import { DrizzleAuditLogAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-audit-log.adapter";
 import { DrizzleRefreshTokenAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-refresh-token.adapter";
+import { UpdateLearnerLevelUseCase } from "@/modules/identity/application/use-cases/update-learner-level.use-case";
+import { StartPlacementAttemptUseCase } from "@/modules/assessment/application/use-cases/start-placement-attempt.use-case";
+import { SubmitResponseUseCase } from "@/modules/assessment/application/use-cases/submit-response.use-case";
+import { FinalizeAttemptUseCase } from "@/modules/assessment/application/use-cases/finalize-attempt.use-case";
+import { GetAttemptStatusUseCase } from "@/modules/assessment/application/use-cases/get-attempt-status.use-case";
+import { DrizzleItemBankAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-item-bank.adapter";
+import { DrizzleAttemptAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-attempt.adapter";
+import { DrizzleResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-result.adapter";
 
 /**
  * The single composition point that wires Infrastructure implementations
@@ -46,4 +54,28 @@ export function createAuthService(): AuthService {
 export function createGetDashboardDataUseCase(): GetDashboardDataUseCase {
   const userProfileRepository = new DrizzleUserProfileAdapter();
   return new GetDashboardDataUseCase(userProfileRepository, createRoleResolver());
+}
+
+export function createUpdateLearnerLevelUseCase(): UpdateLearnerLevelUseCase {
+  return new UpdateLearnerLevelUseCase(new DrizzleUserProfileAdapter());
+}
+
+export function createStartPlacementAttemptUseCase(): StartPlacementAttemptUseCase {
+  return new StartPlacementAttemptUseCase(new DrizzleItemBankAdapter(), new DrizzleAttemptAdapter());
+}
+
+export function createSubmitResponseUseCase(): SubmitResponseUseCase {
+  return new SubmitResponseUseCase(new DrizzleItemBankAdapter(), new DrizzleAttemptAdapter());
+}
+
+export function createFinalizeAttemptUseCase(): FinalizeAttemptUseCase {
+  return new FinalizeAttemptUseCase(
+    new DrizzleItemBankAdapter(),
+    new DrizzleAttemptAdapter(),
+    new DrizzleResultAdapter(),
+  );
+}
+
+export function createGetAttemptStatusUseCase(): GetAttemptStatusUseCase {
+  return new GetAttemptStatusUseCase(new DrizzleAttemptAdapter(), new DrizzleResultAdapter());
 }

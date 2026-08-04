@@ -3,6 +3,7 @@ import { getDb } from "@/shared/infrastructure/db/client";
 import { roles, userProfiles, userRoles } from "@/modules/identity/infrastructure/db/tables/identity";
 import { academies } from "@/shared/infrastructure/db/tables/academy";
 import type {
+  CefrLevel,
   CreateUserProfileInput,
   UserProfile,
   UserProfileRepositoryPort,
@@ -67,5 +68,12 @@ export class DrizzleUserProfileAdapter implements UserProfileRepositoryPort {
       .limit(1);
 
     return profile ?? null;
+  }
+
+  async updateCurrentLevel(userId: string, level: CefrLevel): Promise<void> {
+    await getDb()
+      .update(userProfiles)
+      .set({ currentLevel: level, updatedAt: new Date() })
+      .where(eq(userProfiles.id, userId));
   }
 }
