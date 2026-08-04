@@ -169,13 +169,21 @@
       "controlledPractice": "Practice",
       "communicativeTask": "Task",
       "wrapUp": "Wrap-up",
-      "checkAnswer": "Check answer",
-      "checking": "Checking…",
-      "correct": "Correct!",
-      "incorrect": "Not quite — the correct answer is highlighted above.",
       "taskPlaceholder": "Type your answer here.",
       "submitTask": "Submit",
       "taskSubmitted": "Submitted"
+    },
+    "exercises": {
+      "submit": "Submit",
+      "true": "True",
+      "false": "False",
+      "typeYourAnswer": "Type your answer",
+      "tapWordsBelow": "Tap the words below in order",
+      "correct": "Correct!",
+      "incorrect": "Not quite.",
+      "tryAgain": "Try again",
+      "showAnswer": "Show answer",
+      "answerRevealed": "The correct answer: {answer}"
     },
     "error": {
       "checkFailed": "Couldn't check your answer. Please try again.",
@@ -186,6 +194,9 @@
       "title": "Lesson complete!",
       "description": "Nice work — your progress has been saved.",
       "unitCompleteDescription": "You've completed this unit — the next one is now unlocked.",
+      "autoAdvancing": "Moving to the next lesson in {seconds}s…",
+      "continueNow": "Continue now",
+      "stayHere": "Stay here",
       "backToUnit": "Back to unit",
       "backToCourse": "Back to course"
     }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { blockRequiresInteraction, toClientLessonContent } from "./lesson-blocks";
+import { blockRequiresInteraction, collectExerciseIds, toClientLessonContent } from "./lesson-blocks";
 import type { LessonContent } from "./lesson-blocks";
+import type { ClientExercise } from "./exercise";
 
 function fakeLesson(): LessonContent {
   return {
@@ -10,29 +11,42 @@ function fakeLesson(): LessonContent {
     blocks: [
       { type: "warm_up", prompt: "p", content: "c" },
       { type: "presentation", explanation: "e", examples: ["ex"] },
-      {
-        type: "controlled_practice",
-        instructions: "i",
-        exercises: [{ itemType: "multiple_choice", prompt: "1+1?", options: ["1", "2"], correctOptionIndex: 1 }],
-      },
+      { type: "controlled_practice", instructions: "i", exerciseIds: ["ex-1", "ex-2"] },
       { type: "communicative_task", instructions: "i", prompt: "p" },
       { type: "wrap_up", summary: "s", targetVocabulary: ["v"] },
     ],
   };
 }
 
+describe("collectExerciseIds", () => {
+  it("gathers every exerciseId across all controlled_practice blocks", () => {
+    expect(collectExerciseIds(fakeLesson())).toEqual(["ex-1", "ex-2"]);
+  });
+});
+
 describe("toClientLessonContent", () => {
-  it("strips correctOptionIndex and teacherNote, keeps everything else", () => {
-    const client = toClientLessonContent(fakeLesson());
+  it("resolves exerciseIds into the given client-safe exercises, and strips teacherNote", () => {
+    const resolved = new Map<string, ClientExercise>([
+      ["ex-1", { exerciseType: "multiple_choice", prompt: "1+1?", options: ["1", "2"] }],
+      ["ex-2", { exerciseType: "true_false", prompt: "The sky is blue." }],
+    ]);
+
+    const client = toClientLessonContent(fakeLesson(), resolved);
 
     expect(client.title).toBe("Test Lesson");
     expect(client).not.toHaveProperty("teacherNote");
     const practiceBlock = client.blocks[2];
     expect(practiceBlock.type).toBe("controlled_practice");
     if (practiceBlock.type === "controlled_practice") {
-      expect(practiceBlock.exercises[0]).not.toHaveProperty("correctOptionIndex");
-      expect(practiceBlock.exercises[0]).toEqual({ itemType: "multiple_choice", prompt: "1+1?", options: ["1", "2"] });
+      expect(practiceBlock.exercises).toEqual([
+        { id: "ex-1", exercise: { exerciseType: "multiple_choice", prompt: "1+1?", options: ["1", "2"] } },
+        { id: "ex-2", exercise: { exerciseType: "true_false", prompt: "The sky is blue." } },
+      ]);
     }
+  });
+
+  it("throws if a referenced exerciseId wasn't resolved", () => {
+    expect(() => toClientLessonContent(fakeLesson(), new Map())).toThrow(/ex-1/);
   });
 });
 

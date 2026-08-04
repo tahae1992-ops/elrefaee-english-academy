@@ -19,3 +19,20 @@ export { UnitNotFoundError } from "@/modules/curriculum/application/use-cases/ge
 export type { UnitDetail } from "@/modules/curriculum/application/use-cases/get-unit-detail.use-case";
 export { LessonNotFoundError } from "@/modules/curriculum/application/use-cases/get-lesson.use-case";
 export type { ClientLesson } from "@/modules/curriculum/application/use-cases/get-lesson.use-case";
+export type { ClientExerciseSummary } from "@/modules/curriculum/application/use-cases/list-exercises-for-lesson.use-case";
+export { ExerciseNotFoundError as ScoreExerciseNotFoundError } from "@/modules/curriculum/application/use-cases/score-exercise.use-case";
+export { toClientExercise } from "@/modules/curriculum/domain/services/exercise";
+export type {
+  ExerciseType,
+  Exercise,
+  ClientExercise,
+  ClientMultipleChoiceExercise,
+  ClientFillInBlankExercise,
+  ClientMatchingExercise,
+  ClientOrderingExercise,
+  ClientTrueFalseExercise,
+  ClientShortAnswerExercise,
+  ClientSentenceBuildingExercise,
+} from "@/modules/curriculum/domain/services/exercise";
+export { ExerciseResponseTypeMismatchError } from "@/modules/curriculum/domain/services/score-exercise";
+export type { ExerciseResponse, ScoreResult } from "@/modules/curriculum/domain/services/score-exercise";

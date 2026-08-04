@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
-import { index, jsonb, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { learningSchema } from "@/shared/infrastructure/db/schemas";
 import { academies } from "@/shared/infrastructure/db/tables/academy";
 import { userProfiles } from "@/modules/identity/infrastructure/db/tables/identity";
-import { courses, units, lessons } from "@/modules/curriculum/infrastructure/db/tables/curriculum";
+import { contentItems, courses, units, lessons } from "@/modules/curriculum/infrastructure/db/tables/curriculum";
 
 /**
  * Lesson Viewer slice — DDD §3.5's `enrollments`/`progress_records`,
@@ -64,5 +64,50 @@ export const progressRecords = learningSchema.table(
   (table) => [
     uniqueIndex("progress_records_user_lesson_unique").on(table.userId, table.lessonId),
     index("progress_records_user_status_idx").on(table.userId, table.status),
+  ],
+);
+
+/**
+ * Exercise Engine slice — real per-attempt tracking (SRS FR-07's
+ * postcondition: "Correctness + latency event recorded"). Neither the
+ * DDD nor any other doc defines a table for this (research found zero
+ * `exercise_attempts`/`exercise_responses` table anywhere in doc 05,
+ * and `content_type='exercise'` has no satellite table the way
+ * `assessment_item`/`item_bank` does) — this is genuinely new schema.
+ * A `learning`, not `assessment`, home was chosen because exercise
+ * attempts are ongoing formative practice within a lesson, not a
+ * discrete test (EDD §14: "Formative... without being a 'test'"),
+ * matching this schema's existing `progress_records`, not
+ * `assessment.attempts`/`responses`.
+ *
+ * `lessonId` is not a derived/optimization denormalization — there is
+ * no FK path from an exercise `content_items` row back to the lesson
+ * that references it (a lesson's `controlled_practice` block holds
+ * `exerciseIds` inside its own jsonb payload, not the reverse), so
+ * this column is the only record of which lesson context an attempt
+ * happened in.
+ */
+export const exerciseAttempts = learningSchema.table(
+  "exercise_attempts",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => userProfiles.id),
+    exerciseId: uuid("exercise_id")
+      .notNull()
+      .references(() => contentItems.id),
+    lessonId: uuid("lesson_id")
+      .notNull()
+      .references(() => lessons.id),
+    attemptNumber: integer("attempt_number").notNull(),
+    responsePayload: jsonb("response_payload").notNull(),
+    isCorrect: boolean("is_correct").notNull(),
+    latencyMs: integer("latency_ms").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("exercise_attempts_user_exercise_idx").on(table.userId, table.exerciseId),
+    index("exercise_attempts_user_lesson_idx").on(table.userId, table.lessonId),
   ],
 );

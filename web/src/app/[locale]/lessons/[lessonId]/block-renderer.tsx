@@ -2,15 +2,12 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, XCircle } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import type { ClientLessonBlock } from "@/modules/curriculum/interface/types";
 import type { BlockInteractionRecord } from "./block-interaction";
+import { ExercisePractice } from "./exercise-renderer";
 
 const BLOCK_ACCENT: Record<ClientLessonBlock["type"], string> = {
   warm_up: "border-l-muted-foreground/40",
@@ -27,15 +24,19 @@ export function blockAccentClass(type: ClientLessonBlock["type"]): string {
 export function BlockRenderer({
   block,
   interaction,
-  onCheckPracticeAnswer,
+  onSubmitExercise,
+  onShowExerciseAnswer,
+  onRetryExercise,
+  submittingExerciseId,
   onSubmitTask,
-  checkingExerciseIndex,
 }: {
   block: ClientLessonBlock;
   interaction: BlockInteractionRecord | undefined;
-  onCheckPracticeAnswer: (exerciseIndex: number, selectedOptionIndex: number) => void;
+  onSubmitExercise: (exerciseId: string, response: Record<string, unknown>, latencyMs: number) => void;
+  onShowExerciseAnswer: (exerciseId: string) => void;
+  onRetryExercise: (exerciseId: string) => void;
+  submittingExerciseId: string | null;
   onSubmitTask: (text: string) => void;
-  checkingExerciseIndex: number | null;
 }) {
   const t = useTranslations("Lesson.blocks");
 
@@ -70,14 +71,15 @@ export function BlockRenderer({
       <div className="flex flex-col gap-4">
         <p className="text-xs font-semibold tracking-[0.06em] text-info uppercase">{t("controlledPractice")}</p>
         <p className="text-sm text-muted-foreground">{block.instructions}</p>
-        {block.exercises.map((exercise, exerciseIndex) => (
-          <PracticeExerciseView
-            key={exerciseIndex}
-            prompt={exercise.prompt}
-            options={exercise.options}
-            answer={interaction?.practiceAnswers?.[exerciseIndex]}
-            checking={checkingExerciseIndex === exerciseIndex}
-            onCheck={(selectedOptionIndex) => onCheckPracticeAnswer(exerciseIndex, selectedOptionIndex)}
+        {block.exercises.map(({ id, exercise }) => (
+          <ExercisePractice
+            key={id}
+            exercise={exercise}
+            attempt={interaction?.exerciseAttempts?.[id]}
+            submitting={submittingExerciseId === id}
+            onSubmit={(response, latencyMs) => onSubmitExercise(id, response, latencyMs)}
+            onShowAnswer={() => onShowExerciseAnswer(id)}
+            onRetry={() => onRetryExercise(id)}
           />
         ))}
       </div>
@@ -107,66 +109,6 @@ export function BlockRenderer({
           </Badge>
         ))}
       </div>
-    </div>
-  );
-}
-
-function PracticeExerciseView({
-  prompt,
-  options,
-  answer,
-  checking,
-  onCheck,
-}: {
-  prompt: string;
-  options: string[];
-  answer: { selectedOptionIndex: number; isCorrect: boolean; correctOptionIndex: number } | undefined;
-  checking: boolean;
-  onCheck: (selectedOptionIndex: number) => void;
-}) {
-  const t = useTranslations("Lesson.blocks");
-  const [selected, setSelected] = useState("");
-  const isAnswered = answer !== undefined;
-
-  return (
-    <div
-      className={cn(
-        "flex flex-col gap-2 rounded-md border p-3",
-        isAnswered && answer.isCorrect && "border-success bg-success-bg",
-        isAnswered && !answer.isCorrect && "border-destructive bg-destructive/5",
-      )}
-    >
-      <p className="text-sm font-medium">{prompt}</p>
-      <RadioGroup
-        value={isAnswered ? String(answer.selectedOptionIndex) : selected}
-        onValueChange={setSelected}
-        className="flex flex-col gap-2"
-      >
-        {options.map((option, optionIndex) => (
-          <div key={optionIndex} className="flex items-center gap-2">
-            <RadioGroupItem value={String(optionIndex)} id={`opt-${prompt}-${optionIndex}`} disabled={isAnswered} />
-            <Label htmlFor={`opt-${prompt}-${optionIndex}`} className="cursor-pointer font-normal">
-              {option}
-            </Label>
-            {isAnswered && optionIndex === answer.correctOptionIndex && (
-              <CheckCircle2 className="size-4 text-success" aria-hidden="true" />
-            )}
-            {isAnswered && optionIndex === answer.selectedOptionIndex && !answer.isCorrect && (
-              <XCircle className="size-4 text-destructive" aria-hidden="true" />
-            )}
-          </div>
-        ))}
-      </RadioGroup>
-      {!isAnswered && (
-        <Button size="sm" className="w-fit" disabled={!selected || checking} onClick={() => onCheck(Number(selected))}>
-          {checking ? t("checking") : t("checkAnswer")}
-        </Button>
-      )}
-      {isAnswered && (
-        <p className={cn("text-xs font-medium", answer.isCorrect ? "text-success" : "text-destructive")}>
-          {answer.isCorrect ? t("correct") : t("incorrect")}
-        </p>
-      )}
     </div>
   );
 }

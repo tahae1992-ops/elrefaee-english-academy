@@ -19,7 +19,17 @@ interface CompleteResponse {
   completed: boolean;
   unitCompleted: boolean;
   nextUnitId: string | null;
+  nextLessonId: string | null;
 }
+
+interface ScoreResponse {
+  isCorrect: boolean;
+  explanation: string;
+  correctAnswer: unknown;
+  itemResults?: boolean[];
+}
+
+const AUTO_ADVANCE_SECONDS = 5;
 
 export function LessonFlow({
   lesson,
@@ -39,7 +49,7 @@ export function LessonFlow({
   const [blockIndex, setBlockIndex] = useState(Math.min(initialBlockIndex, blocks.length - 1));
   const [maxVisited, setMaxVisited] = useState(Math.min(initialBlockIndex, blocks.length - 1));
   const [interactions, setInteractions] = useState<BlockInteractions>(initialBlockInteractions as BlockInteractions);
-  const [checkingExercise, setCheckingExercise] = useState<number | null>(null);
+  const [submittingExerciseId, setSubmittingExerciseId] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CompleteResponse | null>(null);
@@ -57,30 +67,55 @@ export function LessonFlow({
   const canContinue = !requiresInteraction || interactions[blockIndex]?.done === true;
   const isLastBlock = blockIndex === blocks.length - 1;
 
-  async function checkPracticeAnswer(exerciseIndex: number, selectedOptionIndex: number) {
-    if (currentBlock.type !== "controlled_practice") return;
-    setCheckingExercise(exerciseIndex);
+  function isBlockFullyDone(index: number, exerciseAttempts: Record<string, { done: boolean }>): boolean {
+    const block = blocks[index];
+    if (block.type !== "controlled_practice") return true;
+    return block.exercises.every(({ id }) => exerciseAttempts[id]?.done === true);
+  }
+
+  async function submitExercise(exerciseId: string, response: Record<string, unknown>, latencyMs: number) {
+    setSubmittingExerciseId(exerciseId);
     setError(null);
     try {
-      const response = await fetch(`/api/v1/lessons/${lesson.id}/practice-check`, {
+      const httpResponse = await fetch(`/api/v1/exercises/${exerciseId}/attempts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ blockIndex, exerciseIndex, selectedOptionIndex }),
+        body: JSON.stringify({ lessonId: lesson.id, latencyMs, response }),
       });
-      if (!response.ok) throw new Error("check-failed");
-      const data = (await response.json()) as { isCorrect: boolean; correctOptionIndex: number };
+      if (!httpResponse.ok) throw new Error("attempt-failed");
+      const data = (await httpResponse.json()) as ScoreResponse;
 
       setInteractions((prev) => {
-        const existing = prev[blockIndex]?.practiceAnswers ?? {};
-        const updatedAnswers = { ...existing, [exerciseIndex]: { selectedOptionIndex, ...data } };
-        const allAnswered = currentBlock.type === "controlled_practice" && Object.keys(updatedAnswers).length === currentBlock.exercises.length;
-        return { ...prev, [blockIndex]: { done: allAnswered, practiceAnswers: updatedAnswers } };
+        const existingAttempts = prev[blockIndex]?.exerciseAttempts ?? {};
+        const updatedAttempts = {
+          ...existingAttempts,
+          [exerciseId]: { done: data.isCorrect, isCorrect: data.isCorrect, correctAnswer: data.correctAnswer, explanation: data.explanation, itemResults: data.itemResults },
+        };
+        return { ...prev, [blockIndex]: { done: isBlockFullyDone(blockIndex, updatedAttempts), exerciseAttempts: updatedAttempts } };
       });
     } catch {
       setError(t("error.checkFailed"));
     } finally {
-      setCheckingExercise(null);
+      setSubmittingExerciseId(null);
     }
+  }
+
+  function showExerciseAnswer(exerciseId: string) {
+    setInteractions((prev) => {
+      const existingAttempts = prev[blockIndex]?.exerciseAttempts ?? {};
+      const current = existingAttempts[exerciseId];
+      if (!current) return prev;
+      const updatedAttempts = { ...existingAttempts, [exerciseId]: { ...current, done: true, revealed: true } };
+      return { ...prev, [blockIndex]: { done: isBlockFullyDone(blockIndex, updatedAttempts), exerciseAttempts: updatedAttempts } };
+    });
+  }
+
+  function retryExercise(exerciseId: string) {
+    setInteractions((prev) => {
+      const existingAttempts = { ...(prev[blockIndex]?.exerciseAttempts ?? {}) };
+      delete existingAttempts[exerciseId];
+      return { ...prev, [blockIndex]: { done: isBlockFullyDone(blockIndex, existingAttempts), exerciseAttempts: existingAttempts } };
+    });
   }
 
   function submitTask(text: string) {
@@ -146,6 +181,7 @@ export function LessonFlow({
         unitId={lesson.unitId}
         unitCompleted={result.unitCompleted}
         hasNextUnit={result.nextUnitId !== null}
+        nextLessonId={result.nextLessonId}
       />
     );
   }
@@ -198,9 +234,11 @@ export function LessonFlow({
               <BlockRenderer
                 block={currentBlock}
                 interaction={interactions[blockIndex]}
-                onCheckPracticeAnswer={checkPracticeAnswer}
+                onSubmitExercise={submitExercise}
+                onShowExerciseAnswer={showExerciseAnswer}
+                onRetryExercise={retryExercise}
+                submittingExerciseId={submittingExerciseId}
                 onSubmitTask={submitTask}
-                checkingExerciseIndex={checkingExercise}
               />
             </CardContent>
           </Card>
@@ -219,13 +257,32 @@ function LessonCompleteScreen({
   unitId,
   unitCompleted,
   hasNextUnit,
+  nextLessonId,
 }: {
   courseId: string;
   unitId: string;
   unitCompleted: boolean;
   hasNextUnit: boolean;
+  nextLessonId: string | null;
 }) {
   const t = useTranslations("Lesson.complete");
+  const router = useRouter();
+  const [secondsLeft, setSecondsLeft] = useState(AUTO_ADVANCE_SECONDS);
+  const [cancelled, setCancelled] = useState(false);
+
+  // Automatic lesson progression (per the requirement): the system has
+  // already determined the next lesson server-side (the /complete
+  // route's nextLessonId) — this just gives the learner a visible,
+  // cancellable countdown rather than yanking them away instantly.
+  useEffect(() => {
+    if (!nextLessonId || cancelled) return;
+    if (secondsLeft <= 0) {
+      router.push(`/lessons/${nextLessonId}`);
+      return;
+    }
+    const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [nextLessonId, cancelled, secondsLeft, router]);
 
   return (
     <main className="flex min-h-svh flex-col items-center justify-center gap-4 p-4 text-center">
@@ -238,17 +295,32 @@ function LessonCompleteScreen({
       <p className="max-w-sm text-sm text-muted-foreground">
         {unitCompleted && hasNextUnit ? t("unitCompleteDescription") : t("description")}
       </p>
-      <div className="flex flex-col gap-2">
-        <Button asChild>
-          <Link href={`/courses/${courseId}/units/${unitId}`}>
-            <ChevronLeft className="size-4" aria-hidden="true" />
-            {t("backToUnit")}
-          </Link>
-        </Button>
-        <Button asChild variant="outline">
-          <Link href={`/courses/${courseId}`}>{t("backToCourse")}</Link>
-        </Button>
-      </div>
+
+      {nextLessonId && !cancelled && (
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-sm text-muted-foreground">{t("autoAdvancing", { seconds: secondsLeft })}</p>
+          <div className="flex gap-2">
+            <Button onClick={() => router.push(`/lessons/${nextLessonId}`)}>{t("continueNow")}</Button>
+            <Button variant="outline" onClick={() => setCancelled(true)}>
+              {t("stayHere")}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {(!nextLessonId || cancelled) && (
+        <div className="flex flex-col gap-2">
+          <Button asChild>
+            <Link href={`/courses/${courseId}/units/${unitId}`}>
+              <ChevronLeft className="size-4" aria-hidden="true" />
+              {t("backToUnit")}
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/courses/${courseId}`}>{t("backToCourse")}</Link>
+          </Button>
+        </div>
+      )}
     </main>
   );
 }

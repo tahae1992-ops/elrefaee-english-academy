@@ -5,3 +5,4 @@ export { computeUnitAccess } from "@/modules/learning/domain/services/compute-un
 export type { LessonProgressStatus, UnitAccessState } from "@/modules/learning/domain/services/compute-unit-access";
 export type { Enrollment } from "@/modules/learning/application/ports/enrollment-repository-port";
 export type { LessonProgress, LastPosition } from "@/modules/learning/application/ports/progress-repository-port";
+export type { ExerciseAttempt, RecordExerciseAttemptInput } from "@/modules/learning/application/ports/exercise-attempt-repository-port";

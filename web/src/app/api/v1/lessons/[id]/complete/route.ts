@@ -48,5 +48,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   }
 
-  return NextResponse.json({ completed: true, unitCompleted: unitNowComplete, nextUnitId }, { status: 200 });
+  // Automatic lesson progression: the next lesson in this unit, or the
+  // first lesson of the newly-unlocked next unit, or null (course done).
+  let nextLessonId: string | null = null;
+  const lessonsInCurrentUnit = [...lessonsInUnit].sort((a, b) => a.orderIndex - b.orderIndex);
+  const currentIndex = lessonsInCurrentUnit.findIndex((unitLesson) => unitLesson.id === lesson.id);
+  if (currentIndex !== -1 && currentIndex + 1 < lessonsInCurrentUnit.length) {
+    nextLessonId = lessonsInCurrentUnit[currentIndex + 1].id;
+  } else if (nextUnitId) {
+    const lessonsInNextUnit = [...(snapshot.lessonsByUnit.get(nextUnitId) ?? [])].sort((a, b) => a.orderIndex - b.orderIndex);
+    nextLessonId = lessonsInNextUnit[0]?.id ?? null;
+  }
+
+  return NextResponse.json({ completed: true, unitCompleted: unitNowComplete, nextUnitId, nextLessonId }, { status: 200 });
 }
