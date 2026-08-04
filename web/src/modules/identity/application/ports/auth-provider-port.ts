@@ -4,6 +4,14 @@ export interface SignUpResult {
   emailConfirmationRequired: boolean;
 }
 
+export interface SignInResult {
+  userId: string;
+  accessToken: string;
+  refreshToken: string;
+  /** Seconds until the access token expires (API Spec §7.1's `expiresIn`). */
+  expiresIn: number;
+}
+
 /**
  * Thrown by AuthProviderPort implementations — carries everything
  * Supabase Auth returned (code/status/raw response), not just a
@@ -29,4 +37,5 @@ export class AuthProviderError extends Error {
  */
 export interface AuthProviderPort {
   signUp(email: string, password: string): Promise<SignUpResult>;
+  signIn(email: string, password: string): Promise<SignInResult>;
 }

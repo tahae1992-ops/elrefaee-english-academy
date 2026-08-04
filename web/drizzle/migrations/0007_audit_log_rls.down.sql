@@ -1,0 +1,1 @@
+ALTER TABLE "shared"."audit_log" DISABLE ROW LEVEL SECURITY;

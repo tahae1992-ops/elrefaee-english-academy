@@ -22,6 +22,19 @@
     "submitting": "Creating account…",
     "genericError": "Registration failed. Please try again.",
     "successConfirmEmail": "Account created — check {email} to confirm before signing in.",
-    "successReady": "Account created. You're signed in as {email}."
+    "successReady": "Account created. You're signed in as {email}.",
+    "haveAccount": "Already have an account?",
+    "signInLink": "Sign in"
+  },
+  "LoginPage": {
+    "title": "Sign in",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "genericError": "Sign-in failed. Please try again.",
+    "invalidCredentials": "Invalid email or password.",
+    "noAccount": "New here?",
+    "registerLink": "Create an account"
   }
 }

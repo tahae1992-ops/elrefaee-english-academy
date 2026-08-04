@@ -7,6 +7,8 @@ import { AuthService } from "@/modules/identity/application/use-cases/auth.servi
 import { SupabaseAuthAdapter } from "@/modules/identity/infrastructure/adapters/supabase-auth.adapter";
 import { DrizzleUserProfileAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-user-profile.adapter";
 import { GetDashboardDataUseCase } from "@/modules/identity/application/use-cases/get-dashboard-data.use-case";
+import { DrizzleAuditLogAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-audit-log.adapter";
+import { DrizzleRefreshTokenAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-refresh-token.adapter";
 
 /**
  * The single composition point that wires Infrastructure implementations
@@ -35,7 +37,10 @@ export function createRoleResolver(): RoleResolver {
 export function createAuthService(): AuthService {
   const authProvider = new SupabaseAuthAdapter();
   const userProfileRepository = new DrizzleUserProfileAdapter();
-  return new AuthService(authProvider, userProfileRepository);
+  const roleRepository = new DrizzleRoleAdapter();
+  const auditLog = new DrizzleAuditLogAdapter();
+  const refreshTokens = new DrizzleRefreshTokenAdapter();
+  return new AuthService(authProvider, userProfileRepository, roleRepository, auditLog, refreshTokens);
 }
 
 export function createGetDashboardDataUseCase(): GetDashboardDataUseCase {

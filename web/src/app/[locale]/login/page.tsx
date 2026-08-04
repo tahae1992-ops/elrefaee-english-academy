@@ -1,10 +1,10 @@
 import { useTranslations } from "next-intl";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
-import { RegisterForm } from "./register-form";
+import { LoginForm } from "./login-form";
 
-export default function RegisterPage() {
-  const t = useTranslations("RegisterPage");
+export default function LoginPage() {
+  const t = useTranslations("LoginPage");
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-8 p-8">
@@ -13,11 +13,11 @@ export default function RegisterPage() {
         <h1 className="text-center font-display text-2xl font-bold tracking-[-0.01em]">
           {t("title")}
         </h1>
-        <RegisterForm />
+        <LoginForm />
         <p className="text-center text-sm text-muted-foreground">
-          {t("haveAccount")}{" "}
-          <Link href="/login" className="text-primary underline-offset-4 hover:underline">
-            {t("signInLink")}
+          {t("noAccount")}{" "}
+          <Link href="/register" className="text-primary underline-offset-4 hover:underline">
+            {t("registerLink")}
           </Link>
         </p>
       </div>
