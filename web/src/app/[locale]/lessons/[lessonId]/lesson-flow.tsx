@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, MessageCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -13,6 +13,7 @@ import { blockRequiresInteraction } from "@/modules/curriculum/interface/types";
 import type { ClientLesson } from "@/modules/curriculum/interface/types";
 import { BlockRenderer, blockAccentClass } from "./block-renderer";
 import type { BlockInteractions } from "./block-interaction";
+import { TutorChat } from "./tutor-chat";
 import { cn } from "@/lib/utils";
 
 interface CompleteResponse {
@@ -36,11 +37,15 @@ export function LessonFlow({
   courseId,
   initialBlockIndex,
   initialBlockInteractions,
+  tutorUnitOrderIndex,
+  tutorStarters,
 }: {
   lesson: ClientLesson;
   courseId: string;
   initialBlockIndex: number;
   initialBlockInteractions: Record<number, unknown>;
+  tutorUnitOrderIndex: number | null;
+  tutorStarters: string[];
 }) {
   const t = useTranslations("Lesson");
   const router = useRouter();
@@ -53,6 +58,7 @@ export function LessonFlow({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<CompleteResponse | null>(null);
+  const [tutorOpen, setTutorOpen] = useState(false);
 
   useEffect(() => {
     function handleBeforeUnload(event: BeforeUnloadEvent) {
@@ -191,9 +197,15 @@ export function LessonFlow({
       <header className="flex shrink-0 flex-col gap-2 border-b border-border px-4 py-3">
         <div className="flex items-center justify-between gap-2">
           <Logo variant="mark" className="h-6 w-6" />
-          <Button variant="ghost" size="sm" disabled={submitting} onClick={handleSaveAndExit}>
-            {t("saveAndExit")}
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => setTutorOpen(true)}>
+              <MessageCircle className="size-4" aria-hidden="true" />
+              {t("openTutor")}
+            </Button>
+            <Button variant="ghost" size="sm" disabled={submitting} onClick={handleSaveAndExit}>
+              {t("saveAndExit")}
+            </Button>
+          </div>
         </div>
         <p className="text-xs font-medium text-muted-foreground" aria-live="polite">
           {t("progress", { current: blockIndex + 1, total: blocks.length })}
@@ -248,6 +260,14 @@ export function LessonFlow({
           </Button>
         </div>
       </div>
+
+      <TutorChat
+        open={tutorOpen}
+        onOpenChange={setTutorOpen}
+        lessonId={lesson.id}
+        unitOrderIndex={tutorUnitOrderIndex}
+        starters={tutorStarters}
+      />
     </main>
   );
 }

@@ -53,6 +53,14 @@ import { DrizzleXpAdapter } from "@/modules/engagement/infrastructure/adapters/d
 import { DrizzleStreakAdapter } from "@/modules/engagement/infrastructure/adapters/drizzle-streak.adapter";
 import { DrizzleBadgeAdapter } from "@/modules/engagement/infrastructure/adapters/drizzle-badge.adapter";
 import { DrizzleDailyGoalAdapter } from "@/modules/engagement/infrastructure/adapters/drizzle-daily-goal.adapter";
+import { SendTutorMessageUseCase } from "@/modules/ai/application/use-cases/send-tutor-message.use-case";
+import { GetConversationHistoryUseCase } from "@/modules/ai/application/use-cases/get-conversation-history.use-case";
+import { FlagTutorMessageUseCase } from "@/modules/ai/application/use-cases/flag-tutor-message.use-case";
+import { AiGateway } from "@/modules/ai/application/services/ai-gateway";
+import { AnthropicTutorAdapter } from "@/modules/ai/infrastructure/adapters/anthropic-tutor.adapter";
+import { DrizzleTutorConversationAdapter } from "@/modules/ai/infrastructure/adapters/drizzle-tutor-conversation.adapter";
+import { DrizzlePromptTemplateAdapter } from "@/modules/ai/infrastructure/adapters/drizzle-prompt-template.adapter";
+import { DrizzleAiInteractionAdapter } from "@/modules/ai/infrastructure/adapters/drizzle-ai-interaction.adapter";
 
 /**
  * The single composition point that wires Infrastructure implementations
@@ -237,4 +245,21 @@ export function createDrizzleVocabularyReviewStateAdapter(): DrizzleVocabularyRe
 
 export function createDrizzleXpAdapter(): DrizzleXpAdapter {
   return new DrizzleXpAdapter();
+}
+
+/** No secondary provider adapter is configured for this slice (SAD §7.6's fallback is conditional on "where one exists") — the Gateway itself already supports one via its optional third constructor argument, wired here the moment a second adapter is added. */
+function createAiGateway(): AiGateway {
+  return new AiGateway(new AnthropicTutorAdapter(), new DrizzleAiInteractionAdapter());
+}
+
+export function createSendTutorMessageUseCase(): SendTutorMessageUseCase {
+  return new SendTutorMessageUseCase(new DrizzleTutorConversationAdapter(), new DrizzlePromptTemplateAdapter(), createAiGateway());
+}
+
+export function createGetConversationHistoryUseCase(): GetConversationHistoryUseCase {
+  return new GetConversationHistoryUseCase(new DrizzleTutorConversationAdapter());
+}
+
+export function createFlagTutorMessageUseCase(): FlagTutorMessageUseCase {
+  return new FlagTutorMessageUseCase(new DrizzleTutorConversationAdapter());
 }

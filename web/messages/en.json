@@ -183,6 +183,7 @@
   },
   "Lesson": {
     "progress": "Block {current} of {total}",
+    "openTutor": "AI Tutor",
     "saveAndExit": "Save and exit",
     "continue": "Continue",
     "finishLesson": "Finish lesson",
@@ -224,6 +225,22 @@
       "stayHere": "Stay here",
       "backToUnit": "Back to unit",
       "backToCourse": "Back to course"
+    }
+  },
+  "Tutor": {
+    "headerLabel": "AI Tutor",
+    "headerWithUnit": "AI Tutor · Unit {unitNumber}",
+    "emptyState": "Ask me anything about this lesson — grammar, vocabulary, pronunciation, or your writing. Not sure where to start?",
+    "aiLabel": "AI Tutor",
+    "typing": "AI Tutor is typing…",
+    "inputPlaceholder": "Type a message",
+    "send": "Send",
+    "flag": "Flag for instructor",
+    "flagged": "Flagged",
+    "error": {
+      "unavailable": "Tutor is temporarily unavailable, try again shortly.",
+      "rateLimit": "You've reached today's message limit. Try again tomorrow.",
+      "generic": "Something went wrong sending your message. Please try again."
     }
   },
   "PlacementTest": {

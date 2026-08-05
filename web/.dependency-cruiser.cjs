@@ -70,6 +70,21 @@ module.exports = {
       from: {},
       to: { circular: true },
     },
+    {
+      name: "ai-provider-sdk-confined-to-adapter",
+      comment:
+        "SAD §7.1: 'Application code never imports a provider SDK " +
+        "directly outside a module's own adapter — enforced by a lint " +
+        "rule restricting provider-SDK imports to the " +
+        "/ai-gateway/adapters/* directory.' This codebase's equivalent " +
+        "location is src/modules/ai/infrastructure/adapters/ — every " +
+        "other call site goes through the AIGatewayPort instead, so a " +
+        "provider swap is one new adapter file, not a codebase-wide " +
+        "search-and-replace.",
+      severity: "error",
+      from: { pathNot: "^src/modules/ai/infrastructure/adapters/" },
+      to: { path: "^node_modules/@anthropic-ai/" },
+    },
   ],
   options: {
     tsPreCompilationDeps: true,

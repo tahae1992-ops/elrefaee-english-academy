@@ -1,4 +1,4 @@
-import { and, count, countDistinct, eq } from "drizzle-orm";
+import { and, count, countDistinct, desc, eq } from "drizzle-orm";
 import { getDb } from "@/shared/infrastructure/db/client";
 import { exerciseAttempts } from "@/modules/learning/infrastructure/db/tables/learning";
 import type {
@@ -51,5 +51,18 @@ export class DrizzleExerciseAttemptAdapter implements ExerciseAttemptRepositoryP
       .where(and(eq(exerciseAttempts.userId, userId), eq(exerciseAttempts.isCorrect, true)));
 
     return value;
+  }
+
+  async listDistinctIncorrectExerciseIdsForLesson(userId: string, lessonId: string, limit: number): Promise<string[]> {
+    const rows = await getDb()
+      .selectDistinctOn([exerciseAttempts.exerciseId], { exerciseId: exerciseAttempts.exerciseId, createdAt: exerciseAttempts.createdAt })
+      .from(exerciseAttempts)
+      .where(and(eq(exerciseAttempts.userId, userId), eq(exerciseAttempts.lessonId, lessonId), eq(exerciseAttempts.isCorrect, false)))
+      .orderBy(exerciseAttempts.exerciseId, desc(exerciseAttempts.createdAt));
+
+    return rows
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .slice(0, limit)
+      .map((row) => row.exerciseId);
   }
 }
