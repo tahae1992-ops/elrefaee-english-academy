@@ -1,9 +1,9 @@
 import { sql } from "drizzle-orm";
-import { boolean, index, integer, jsonb, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, index, integer, jsonb, numeric, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { learningSchema } from "@/shared/infrastructure/db/schemas";
 import { academies } from "@/shared/infrastructure/db/tables/academy";
 import { userProfiles } from "@/modules/identity/infrastructure/db/tables/identity";
-import { contentItems, courses, units, lessons } from "@/modules/curriculum/infrastructure/db/tables/curriculum";
+import { contentItems, courses, units, lessons, vocabularyEntries } from "@/modules/curriculum/infrastructure/db/tables/curriculum";
 
 /**
  * Lesson Viewer slice — DDD §3.5's `enrollments`/`progress_records`,
@@ -109,5 +109,41 @@ export const exerciseAttempts = learningSchema.table(
   (table) => [
     index("exercise_attempts_user_exercise_idx").on(table.userId, table.exerciseId),
     index("exercise_attempts_user_lesson_idx").on(table.userId, table.lessonId),
+  ],
+);
+
+/**
+ * Review Engine slice — DB Design §3.5's `learning.vocabulary_review_state`,
+ * the per-learner FSRS scheduler state (EDD §15), built to the documented
+ * column list exactly, plus one addition disclosed here:
+ *
+ * `lastEventId` is not in the DB Design doc. SAD §17 states the scheduler
+ * "is idempotent per review-event-id (mirrors FR-18's idempotency
+ * requirement for XP) — a duplicate response does not double-advance
+ * `dueAt`" — that requirement can't be satisfied without persisting
+ * something to compare against, and no other table exists to hold it.
+ * A single nullable column here is the narrowest fix; it does not change
+ * the documented table's meaning for any other column.
+ */
+export const vocabularyReviewState = learningSchema.table(
+  "vocabulary_review_state",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => userProfiles.id),
+    vocabularyEntryId: uuid("vocabulary_entry_id")
+      .notNull()
+      .references(() => vocabularyEntries.id),
+    stability: numeric("stability", { precision: 8, scale: 4, mode: "number" }).notNull(),
+    difficulty: numeric("difficulty", { precision: 8, scale: 4, mode: "number" }).notNull(),
+    dueAt: timestamp("due_at", { withTimezone: true }).notNull(),
+    lastReviewedAt: timestamp("last_reviewed_at", { withTimezone: true }),
+    reviewCount: integer("review_count").notNull().default(0),
+    lastEventId: uuid("last_event_id"),
+  },
+  (table) => [
+    uniqueIndex("vocabulary_review_state_user_entry_unique").on(table.userId, table.vocabularyEntryId),
+    index("vocabulary_review_state_user_due_idx").on(table.userId, table.dueAt),
   ],
 );

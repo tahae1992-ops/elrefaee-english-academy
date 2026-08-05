@@ -57,6 +57,13 @@
       "when": 1785867297738,
       "tag": "0017_exercise_attempts_table",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1785878355225,
+      "tag": "0020_vocabulary_engagement_tables",
+      "breakpoints": true
     }
   ]
 }

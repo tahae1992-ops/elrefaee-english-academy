@@ -1,4 +1,5 @@
 import type { ClientExercise } from "@/modules/curriculum/domain/services/exercise";
+import type { ClientVocabularyEntry } from "@/modules/curriculum/domain/services/vocabulary-entry";
 
 /**
  * The 5-block lesson shape (EDD §5: warm-up, presentation, controlled
@@ -55,7 +56,19 @@ export interface CommunicativeTaskBlock {
 export interface WrapUpBlock {
   type: "wrap_up";
   summary: string;
-  targetVocabulary: string[];
+  /** References real `curriculum.content_items` rows (type='vocabulary_entry') — Review Engine slice. Same reference-not-embed pattern as `ControlledPracticeBlock.exerciseIds`. */
+  targetVocabularyIds: string[];
+}
+
+export interface ResolvedVocabularyRef {
+  id: string;
+  entry: ClientVocabularyEntry;
+}
+
+export interface ClientWrapUpBlock {
+  type: "wrap_up";
+  summary: string;
+  targetVocabulary: ResolvedVocabularyRef[];
 }
 
 export type LessonBlock =
@@ -70,7 +83,7 @@ export type ClientLessonBlock =
   | PresentationBlock
   | ClientControlledPracticeBlock
   | CommunicativeTaskBlock
-  | WrapUpBlock;
+  | ClientWrapUpBlock;
 
 export interface TeacherNote {
   objective: string;
@@ -101,28 +114,54 @@ export function collectExerciseIds(content: LessonContent): string[] {
   return ids;
 }
 
+/** Every vocabularyEntryId referenced across a lesson's blocks (currently only wrap_up), e.g. to batch-fetch vocabulary content in one query. */
+export function collectVocabularyEntryIds(content: LessonContent): string[] {
+  const ids: string[] = [];
+  for (const block of content.blocks) {
+    if (block.type === "wrap_up") ids.push(...block.targetVocabularyIds);
+  }
+  return ids;
+}
+
 /**
  * Builds the client-safe lesson content once the caller has already
- * resolved every referenced exercise to its client-safe form (via
- * ExerciseRepositoryPort + exercise.ts's `toClientExercise`) — this
- * function only does the structural rewrite, not any DB access or
- * answer-key stripping itself.
+ * resolved every referenced exercise and vocabulary entry to its
+ * client-safe form (via ExerciseRepositoryPort/VocabularyEntryRepositoryPort)
+ * — this function only does the structural rewrite, not any DB access
+ * or answer-key stripping itself.
  */
-export function toClientLessonContent(content: LessonContent, resolvedExercises: Map<string, ClientExercise>): ClientLessonContent {
+export function toClientLessonContent(
+  content: LessonContent,
+  resolvedExercises: Map<string, ClientExercise>,
+  resolvedVocabulary: Map<string, ClientVocabularyEntry>,
+): ClientLessonContent {
   return {
     title: content.title,
     objective: content.objective,
     blocks: content.blocks.map((block): ClientLessonBlock => {
-      if (block.type !== "controlled_practice") return block;
-      return {
-        type: "controlled_practice",
-        instructions: block.instructions,
-        exercises: block.exerciseIds.map((id) => {
-          const exercise = resolvedExercises.get(id);
-          if (!exercise) throw new Error(`Exercise ${id} referenced by a lesson block was not found.`);
-          return { id, exercise };
-        }),
-      };
+      if (block.type === "controlled_practice") {
+        return {
+          type: "controlled_practice",
+          instructions: block.instructions,
+          exercises: block.exerciseIds.map((id) => {
+            const exercise = resolvedExercises.get(id);
+            if (!exercise) throw new Error(`Exercise ${id} referenced by a lesson block was not found.`);
+            return { id, exercise };
+          }),
+        };
+      }
+      if (block.type === "wrap_up") {
+        return {
+          type: "wrap_up",
+          summary: block.summary,
+          targetVocabulary: block.targetVocabularyIds.map((id) => {
+            const entry = resolvedVocabulary.get(id);
+            if (!entry) throw new Error(`Vocabulary entry ${id} referenced by a lesson block was not found.`);
+            return { id, entry };
+          }),
+        };
+      }
+      return block;
     }),
   };
 }

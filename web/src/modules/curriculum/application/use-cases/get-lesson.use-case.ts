@@ -1,8 +1,16 @@
 import type { LessonRepositoryPort } from "@/modules/curriculum/application/ports/lesson-repository-port";
 import type { ExerciseRepositoryPort } from "@/modules/curriculum/application/ports/exercise-repository-port";
-import { collectExerciseIds, toClientLessonContent, type ClientLessonContent } from "@/modules/curriculum/domain/services/lesson-blocks";
+import type { VocabularyEntryRepositoryPort } from "@/modules/curriculum/application/ports/vocabulary-entry-repository-port";
+import {
+  collectExerciseIds,
+  collectVocabularyEntryIds,
+  toClientLessonContent,
+  type ClientLessonContent,
+} from "@/modules/curriculum/domain/services/lesson-blocks";
 import { toClientExercise } from "@/modules/curriculum/domain/services/exercise";
 import type { ClientExercise } from "@/modules/curriculum/domain/services/exercise";
+import { toClientVocabularyEntry } from "@/modules/curriculum/domain/services/vocabulary-entry";
+import type { ClientVocabularyEntry } from "@/modules/curriculum/domain/services/vocabulary-entry";
 
 export class LessonNotFoundError extends Error {
   constructor() {
@@ -36,6 +44,7 @@ export class GetLessonUseCase {
   constructor(
     private readonly lessons: LessonRepositoryPort,
     private readonly exercises: ExerciseRepositoryPort,
+    private readonly vocabularyEntries: VocabularyEntryRepositoryPort,
   ) {}
 
   async execute(lessonId: string): Promise<ClientLesson> {
@@ -48,12 +57,18 @@ export class GetLessonUseCase {
       [...fullExercises.entries()].map(([id, exercise]) => [id, toClientExercise(exercise)]),
     );
 
+    const vocabularyEntryIds = collectVocabularyEntryIds(lesson.content);
+    const fullVocabularyEntries = await this.vocabularyEntries.listByIds(vocabularyEntryIds);
+    const clientVocabularyEntries = new Map<string, ClientVocabularyEntry>(
+      [...fullVocabularyEntries.entries()].map(([id, entry]) => [id, toClientVocabularyEntry(entry)]),
+    );
+
     return {
       id: lesson.id,
       unitId: lesson.unitId,
       courseId: lesson.courseId,
       orderIndex: lesson.orderIndex,
-      content: toClientLessonContent(lesson.content, clientExercises),
+      content: toClientLessonContent(lesson.content, clientExercises, clientVocabularyEntries),
     };
   }
 }

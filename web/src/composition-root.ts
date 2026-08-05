@@ -27,15 +27,23 @@ import { ScoreExerciseUseCase } from "@/modules/curriculum/application/use-cases
 import { DrizzleUnitAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-unit.adapter";
 import { DrizzleLessonAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-lesson.adapter";
 import { DrizzleExerciseAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-exercise.adapter";
+import { DrizzleVocabularyEntryAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-vocabulary-entry.adapter";
 import { EnterCourseUseCase } from "@/modules/learning/application/use-cases/enter-course.use-case";
 import { GetLessonProgressUseCase } from "@/modules/learning/application/use-cases/get-lesson-progress.use-case";
 import { SaveLessonPositionUseCase } from "@/modules/learning/application/use-cases/save-lesson-position.use-case";
 import { CompleteLessonUseCase } from "@/modules/learning/application/use-cases/complete-lesson.use-case";
 import { AdvanceEnrollmentUseCase } from "@/modules/learning/application/use-cases/advance-enrollment.use-case";
 import { RecordExerciseAttemptUseCase } from "@/modules/learning/application/use-cases/record-exercise-attempt.use-case";
+import { QueueVocabularyForReviewUseCase } from "@/modules/learning/application/use-cases/queue-vocabulary-for-review.use-case";
+import { GetDueReviewQueueUseCase } from "@/modules/learning/application/use-cases/get-due-review-queue.use-case";
+import { SubmitReviewResponseUseCase } from "@/modules/learning/application/use-cases/submit-review-response.use-case";
 import { DrizzleEnrollmentAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-enrollment.adapter";
 import { DrizzleProgressAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-progress.adapter";
 import { DrizzleExerciseAttemptAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-exercise-attempt.adapter";
+import { DrizzleVocabularyReviewStateAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-vocabulary-review-state.adapter";
+import { AwardXpUseCase } from "@/modules/engagement/application/use-cases/award-xp.use-case";
+import { GetXpBalanceUseCase } from "@/modules/engagement/application/use-cases/get-xp-balance.use-case";
+import { DrizzleXpAdapter } from "@/modules/engagement/infrastructure/adapters/drizzle-xp.adapter";
 
 /**
  * The single composition point that wires Infrastructure implementations
@@ -112,7 +120,7 @@ export function createGetUnitDetailUseCase(): GetUnitDetailUseCase {
 }
 
 export function createGetLessonUseCase(): GetLessonUseCase {
-  return new GetLessonUseCase(new DrizzleLessonAdapter(), new DrizzleExerciseAdapter());
+  return new GetLessonUseCase(new DrizzleLessonAdapter(), new DrizzleExerciseAdapter(), new DrizzleVocabularyEntryAdapter());
 }
 
 export function createListExercisesForLessonUseCase(): ListExercisesForLessonUseCase {
@@ -154,4 +162,29 @@ export function createDrizzleUnitAdapter(): DrizzleUnitAdapter {
 
 export function createDrizzleLessonAdapter(): DrizzleLessonAdapter {
   return new DrizzleLessonAdapter();
+}
+
+/** Exposed directly (not just via use-case factories) — src/lib/resolve-due-review-queue.ts's cross-module orchestration needs a repository instance to resolve due items' vocabulary content. */
+export function createDrizzleVocabularyEntryAdapter(): DrizzleVocabularyEntryAdapter {
+  return new DrizzleVocabularyEntryAdapter();
+}
+
+export function createQueueVocabularyForReviewUseCase(): QueueVocabularyForReviewUseCase {
+  return new QueueVocabularyForReviewUseCase(new DrizzleVocabularyReviewStateAdapter());
+}
+
+export function createGetDueReviewQueueUseCase(): GetDueReviewQueueUseCase {
+  return new GetDueReviewQueueUseCase(new DrizzleVocabularyReviewStateAdapter());
+}
+
+export function createSubmitReviewResponseUseCase(): SubmitReviewResponseUseCase {
+  return new SubmitReviewResponseUseCase(new DrizzleVocabularyReviewStateAdapter());
+}
+
+export function createAwardXpUseCase(): AwardXpUseCase {
+  return new AwardXpUseCase(new DrizzleXpAdapter());
+}
+
+export function createGetXpBalanceUseCase(): GetXpBalanceUseCase {
+  return new GetXpBalanceUseCase(new DrizzleXpAdapter());
 }

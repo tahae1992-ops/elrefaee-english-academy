@@ -36,3 +36,5 @@ export type {
 } from "@/modules/curriculum/domain/services/exercise";
 export { ExerciseResponseTypeMismatchError } from "@/modules/curriculum/domain/services/score-exercise";
 export type { ExerciseResponse, ScoreResult } from "@/modules/curriculum/domain/services/score-exercise";
+export { toClientVocabularyEntry } from "@/modules/curriculum/domain/services/vocabulary-entry";
+export type { VocabularyEntry, ClientVocabularyEntry, VocabularyTier, ExampleSentence } from "@/modules/curriculum/domain/services/vocabulary-entry";

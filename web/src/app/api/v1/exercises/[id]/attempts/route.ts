@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createRecordExerciseAttemptUseCase, createScoreExerciseUseCase } from "@/composition-root";
+import { createRecordExerciseAttemptUseCase, createScoreExerciseUseCase, createSubmitReviewResponseUseCase } from "@/composition-root";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { gateLessonAccess } from "@/lib/gate-lesson-access";
 import { handleScoreExercise } from "@/modules/curriculum/interface/score-exercise.controller";
+import { ReviewItemNotFoundError } from "@/modules/learning/interface/types";
 
 const requestSchema = z.object({
   lessonId: z.string(),
@@ -50,6 +51,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     isCorrect: scoreResult.score.isCorrect,
     latencyMs,
   });
+
+  // Review Engine integration: an incorrect answer demotes this lesson's
+  // already-tracked target vocabulary (as if the learner had rated it
+  // "again" in a review session) so it resurfaces sooner — this slice's
+  // "review queues from incorrect answers" requirement. Only demotes
+  // items already in the learner's queue (from a prior lesson
+  // completion); it never queues a brand-new item here, since queueing
+  // only happens at lesson completion (FR-09's own Main Flow).
+  if (!scoreResult.score.isCorrect) {
+    const wrapUpBlock = gate.lesson.content.blocks.find((block) => block.type === "wrap_up");
+    if (wrapUpBlock && wrapUpBlock.type === "wrap_up") {
+      const submitReviewResponse = createSubmitReviewResponseUseCase();
+      for (const { id: vocabularyEntryId } of wrapUpBlock.targetVocabulary) {
+        try {
+          await submitReviewResponse.execute(current.userId, vocabularyEntryId, "again", crypto.randomUUID(), new Date());
+        } catch (error) {
+          if (!(error instanceof ReviewItemNotFoundError)) throw error;
+        }
+      }
+    }
+  }
 
   return NextResponse.json({ ...scoreResult.score, attemptNumber: attempt.attemptNumber }, { status: 200 });
 }

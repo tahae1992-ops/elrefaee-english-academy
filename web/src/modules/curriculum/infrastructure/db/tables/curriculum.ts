@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, jsonb, timestamp, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { integer, jsonb, smallint, text, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { curriculumSchema } from "@/shared/infrastructure/db/schemas";
 import { academies } from "@/shared/infrastructure/db/tables/academy";
 import { cefrLevel, contentStatus, contentType } from "@/shared/infrastructure/db/tables/enums";
@@ -95,4 +95,43 @@ export const lessons = curriculumSchema.table(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [uniqueIndex("lessons_unit_order_unique").on(table.unitId, table.orderIndex)],
+);
+
+/**
+ * Review Engine slice — DB Design §3.3's `curriculum.vocabulary_entries`
+ * (the vocabulary spine, EDD §7), built to the documented schema exactly.
+ * `academy_id` is denormalized from `content_items` per the doc's own
+ * stated reason: review-queue reads filter on it directly and can't
+ * afford a join at that read volume.
+ *
+ * Lesson wrap-up blocks queue both genuine vocabulary words and short
+ * grammar chunks (EDD §5's "target vocabulary/grammar chunks are queued
+ * into spaced repetition") into this same table — the DB Design doc
+ * defines no separate grammar-chunk entity, so a chunk like "she is" is
+ * authored here with `part_of_speech = 'phrase'`, reusing the one
+ * approved reviewable-item schema rather than inventing a second one.
+ */
+export const vocabularyEntries = curriculumSchema.table(
+  "vocabulary_entries",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    contentItemId: uuid("content_item_id")
+      .notNull()
+      .references(() => contentItems.id),
+    academyId: uuid("academy_id")
+      .notNull()
+      .references(() => academies.id),
+    headword: varchar("headword", { length: 100 }).notNull(),
+    senseNumber: smallint("sense_number").notNull().default(1),
+    ipaTranscription: varchar("ipa_transcription", { length: 150 }).notNull(),
+    partOfSpeech: varchar("part_of_speech", { length: 30 }).notNull(),
+    cefrLevel: cefrLevel("cefr_level").notNull(),
+    // 'active' | 'receptive' (EDD §7) — enforced application-side only, matching this codebase's existing convention for similar small enums.
+    tier: varchar("tier", { length: 10 }).notNull(),
+    collocations: text("collocations").array().notNull().default([]),
+    synonyms: text("synonyms").array().notNull().default([]),
+    // { text: string }[] — at least one authored example sentence.
+    exampleSentences: jsonb("example_sentences").notNull(),
+  },
+  (table) => [uniqueIndex("vocabulary_entries_academy_headword_sense_unique").on(table.academyId, table.headword, table.senseNumber)],
 );

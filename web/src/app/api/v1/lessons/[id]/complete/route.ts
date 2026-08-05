@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createAdvanceEnrollmentUseCase, createCompleteLessonUseCase } from "@/composition-root";
+import { createAdvanceEnrollmentUseCase, createCompleteLessonUseCase, createQueueVocabularyForReviewUseCase } from "@/composition-root";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { gateLessonAccess } from "@/lib/gate-lesson-access";
 import { handleCompleteLesson } from "@/modules/learning/interface/complete-lesson.controller";
@@ -11,6 +11,14 @@ import { handleCompleteLesson } from "@/modules/learning/interface/complete-less
  * — needs both curriculum structure and learning progress, so it's
  * "other code," not either module's own logic, same pattern as the
  * Placement Test finalize route's identity write.
+ *
+ * Review Engine slice: FR-09's Main Flow step 1 ("lesson completion
+ * auto-populates notebook entries") + EDD §5's wrap-up step queueing
+ * target vocabulary/grammar chunks into spaced repetition. Also
+ * cross-module orchestration for the same reason — `learning`'s
+ * QueueVocabularyForReviewUseCase only knows vocabularyEntryIds, and
+ * only this route already has the lesson's resolved wrap_up block
+ * (via `gate.lesson`, curriculum's output).
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -31,6 +39,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const { lesson, snapshot } = gate;
+
+  const wrapUpBlock = lesson.content.blocks.find((block) => block.type === "wrap_up");
+  if (wrapUpBlock && wrapUpBlock.type === "wrap_up" && wrapUpBlock.targetVocabulary.length > 0) {
+    await createQueueVocabularyForReviewUseCase().execute(
+      current.userId,
+      wrapUpBlock.targetVocabulary.map((ref) => ref.id),
+      new Date(),
+    );
+  }
+
   const lessonsInUnit = snapshot.lessonsByUnit.get(lesson.unitId) ?? [];
   const unitNowComplete = lessonsInUnit.every(
     (unitLesson) => unitLesson.id === lesson.id || snapshot.statusByLesson.get(unitLesson.id) === "completed",

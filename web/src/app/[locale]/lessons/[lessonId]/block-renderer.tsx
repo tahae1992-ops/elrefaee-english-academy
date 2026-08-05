@@ -103,9 +103,9 @@ export function BlockRenderer({
       <p className="text-xs font-semibold tracking-[0.06em] text-success uppercase">{t("wrapUp")}</p>
       <p className="text-base leading-[1.7]">{block.summary}</p>
       <div className="flex flex-wrap gap-2">
-        {block.targetVocabulary.map((word) => (
-          <Badge key={word} variant="secondary">
-            {word}
+        {block.targetVocabulary.map(({ id, entry }) => (
+          <Badge key={id} variant="secondary">
+            {entry.headword}
           </Badge>
         ))}
       </div>
