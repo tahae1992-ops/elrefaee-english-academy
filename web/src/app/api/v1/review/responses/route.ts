@@ -3,6 +3,7 @@ import { createSubmitReviewResponseUseCase, createAwardXpUseCase } from "@/compo
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { handleSubmitReviewResponse } from "@/modules/learning/interface/submit-review-response.controller";
 import { XP_REWARDS } from "@/modules/engagement/interface/types";
+import { recordGamificationActivity } from "@/lib/record-gamification-activity";
 
 /**
  * API Spec §6.7: POST /review/responses. XP awarding is cross-module
@@ -19,12 +20,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "UNAUTHENTICATED", message: "Sign in required." }, { status: 401 });
   }
 
-  const body = await request.json();
+  const now = new Date();
   const { status, body: responseBody, result, rating } = await handleSubmitReviewResponse(
     createSubmitReviewResponseUseCase(),
     current.userId,
-    body,
-    new Date(),
+    await request.json(),
+    now,
   );
   if (status !== 200 || !result) {
     return NextResponse.json(responseBody, { status });
@@ -41,5 +42,8 @@ export async function POST(request: Request) {
     if (award.applied) xpAwarded = XP_REWARDS.successfulReview;
   }
 
-  return NextResponse.json({ ...result.state, xpAwarded }, { status: 200 });
+  // Gamification Engine slice: every review response (any rating) counts as today's activity.
+  const { newlyAwardedBadges } = await recordGamificationActivity(current.userId, now);
+
+  return NextResponse.json({ ...result.state, xpAwarded, newlyAwardedBadges }, { status: 200 });
 }

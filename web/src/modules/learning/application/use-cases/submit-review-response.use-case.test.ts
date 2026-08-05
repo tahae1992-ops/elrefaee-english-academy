@@ -27,6 +27,8 @@ function fakeRepo(record: VocabularyReviewStateRecord | null): VocabularyReviewS
     countDueForUser: vi.fn(),
     createInitial: vi.fn(),
     save,
+    countReviewedForUser: vi.fn(),
+    countMasteredForUser: vi.fn(),
   };
 }
 

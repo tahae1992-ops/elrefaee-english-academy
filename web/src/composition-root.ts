@@ -43,7 +43,16 @@ import { DrizzleExerciseAttemptAdapter } from "@/modules/learning/infrastructure
 import { DrizzleVocabularyReviewStateAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-vocabulary-review-state.adapter";
 import { AwardXpUseCase } from "@/modules/engagement/application/use-cases/award-xp.use-case";
 import { GetXpBalanceUseCase } from "@/modules/engagement/application/use-cases/get-xp-balance.use-case";
+import { ListRecentXpTransactionsUseCase } from "@/modules/engagement/application/use-cases/list-recent-xp-transactions.use-case";
+import { UpdateStreakUseCase } from "@/modules/engagement/application/use-cases/update-streak.use-case";
+import { GetStreakUseCase } from "@/modules/engagement/application/use-cases/get-streak.use-case";
+import { ListBadgesUseCase } from "@/modules/engagement/application/use-cases/list-badges.use-case";
+import { EvaluateAndAwardBadgesUseCase } from "@/modules/engagement/application/use-cases/evaluate-and-award-badges.use-case";
+import { GetDailyGoalProgressUseCase } from "@/modules/engagement/application/use-cases/get-daily-goal-progress.use-case";
 import { DrizzleXpAdapter } from "@/modules/engagement/infrastructure/adapters/drizzle-xp.adapter";
+import { DrizzleStreakAdapter } from "@/modules/engagement/infrastructure/adapters/drizzle-streak.adapter";
+import { DrizzleBadgeAdapter } from "@/modules/engagement/infrastructure/adapters/drizzle-badge.adapter";
+import { DrizzleDailyGoalAdapter } from "@/modules/engagement/infrastructure/adapters/drizzle-daily-goal.adapter";
 
 /**
  * The single composition point that wires Infrastructure implementations
@@ -187,4 +196,45 @@ export function createAwardXpUseCase(): AwardXpUseCase {
 
 export function createGetXpBalanceUseCase(): GetXpBalanceUseCase {
   return new GetXpBalanceUseCase(new DrizzleXpAdapter());
+}
+
+export function createListRecentXpTransactionsUseCase(): ListRecentXpTransactionsUseCase {
+  return new ListRecentXpTransactionsUseCase(new DrizzleXpAdapter());
+}
+
+export function createUpdateStreakUseCase(): UpdateStreakUseCase {
+  return new UpdateStreakUseCase(new DrizzleStreakAdapter());
+}
+
+export function createGetStreakUseCase(): GetStreakUseCase {
+  return new GetStreakUseCase(new DrizzleStreakAdapter());
+}
+
+export function createListBadgesUseCase(): ListBadgesUseCase {
+  return new ListBadgesUseCase(new DrizzleBadgeAdapter());
+}
+
+export function createEvaluateAndAwardBadgesUseCase(): EvaluateAndAwardBadgesUseCase {
+  return new EvaluateAndAwardBadgesUseCase(new DrizzleBadgeAdapter());
+}
+
+export function createGetDailyGoalProgressUseCase(): GetDailyGoalProgressUseCase {
+  return new GetDailyGoalProgressUseCase(new DrizzleDailyGoalAdapter(), new DrizzleXpAdapter());
+}
+
+/** Exposed directly (not just via use-case factories) — src/lib/build-learner-stats-snapshot.ts's cross-module orchestration needs repository instances the other factories don't expose. */
+export function createDrizzleProgressAdapter(): DrizzleProgressAdapter {
+  return new DrizzleProgressAdapter();
+}
+
+export function createDrizzleExerciseAttemptAdapter(): DrizzleExerciseAttemptAdapter {
+  return new DrizzleExerciseAttemptAdapter();
+}
+
+export function createDrizzleVocabularyReviewStateAdapter(): DrizzleVocabularyReviewStateAdapter {
+  return new DrizzleVocabularyReviewStateAdapter();
+}
+
+export function createDrizzleXpAdapter(): DrizzleXpAdapter {
+  return new DrizzleXpAdapter();
 }

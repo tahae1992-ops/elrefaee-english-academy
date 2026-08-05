@@ -11,8 +11,8 @@ export type ReviewLearningState = "new" | "learning" | "review" | "mastered";
 
 /** Stability (days) at/above which an item is considered out of the fragile "learning" phase. */
 const REVIEW_STABILITY_THRESHOLD_DAYS = 7;
-/** Stability (days) at/above which an item is considered durably retained. */
-const MASTERED_STABILITY_THRESHOLD_DAYS = 30;
+/** Stability (days) at/above which an item is considered durably retained. Exported so infrastructure-layer aggregate queries (e.g. "count mastered items") stay in sync with this single threshold rather than duplicating the number. */
+export const MASTERED_STABILITY_THRESHOLD_DAYS = 30;
 
 export function deriveReviewState(reviewCount: number, stability: number): ReviewLearningState {
   if (reviewCount === 0) return "new";

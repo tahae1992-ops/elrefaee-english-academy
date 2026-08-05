@@ -25,6 +25,8 @@ describe("GetDueReviewQueueUseCase", () => {
       countDueForUser: vi.fn().mockResolvedValue(18),
       createInitial: vi.fn(),
       save: vi.fn(),
+      countReviewedForUser: vi.fn(),
+      countMasteredForUser: vi.fn(),
     };
     const now = new Date("2026-08-05T00:00:00.000Z");
 

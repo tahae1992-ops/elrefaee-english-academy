@@ -1,4 +1,4 @@
-import { and, eq, inArray, ne } from "drizzle-orm";
+import { and, count, eq, inArray, ne } from "drizzle-orm";
 import { getDb } from "@/shared/infrastructure/db/client";
 import { progressRecords } from "@/modules/learning/infrastructure/db/tables/learning";
 import type { LastPosition, LessonProgress, ProgressRepositoryPort } from "@/modules/learning/application/ports/progress-repository-port";
@@ -55,5 +55,14 @@ export class DrizzleProgressAdapter implements ProgressRepositoryPort {
         target: [progressRecords.userId, progressRecords.lessonId],
         set: { status: "completed", lastPosition: position, completedAt: new Date() },
       });
+  }
+
+  async countCompletedForUser(userId: string): Promise<number> {
+    const [{ value }] = await getDb()
+      .select({ value: count() })
+      .from(progressRecords)
+      .where(and(eq(progressRecords.userId, userId), eq(progressRecords.status, "completed")));
+
+    return value;
   }
 }

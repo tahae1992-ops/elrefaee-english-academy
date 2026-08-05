@@ -1,4 +1,4 @@
-import { and, count, eq } from "drizzle-orm";
+import { and, count, countDistinct, eq } from "drizzle-orm";
 import { getDb } from "@/shared/infrastructure/db/client";
 import { exerciseAttempts } from "@/modules/learning/infrastructure/db/tables/learning";
 import type {
@@ -42,5 +42,14 @@ export class DrizzleExerciseAttemptAdapter implements ExerciseAttemptRepositoryP
       .returning();
 
     return toExerciseAttempt(row);
+  }
+
+  async countDistinctCorrectForUser(userId: string): Promise<number> {
+    const [{ value }] = await getDb()
+      .select({ value: countDistinct(exerciseAttempts.exerciseId) })
+      .from(exerciseAttempts)
+      .where(and(eq(exerciseAttempts.userId, userId), eq(exerciseAttempts.isCorrect, true)));
+
+    return value;
   }
 }

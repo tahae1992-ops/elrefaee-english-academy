@@ -7,6 +7,8 @@ describe("AwardXpUseCase", () => {
     const xp: XpRepositoryPort = {
       award: vi.fn().mockResolvedValue({ applied: true, totalXp: 20 }),
       getBalance: vi.fn(),
+      listRecentTransactions: vi.fn(),
+      getXpEarnedSince: vi.fn(),
     };
     const input = { userId: "user-1", amount: 10, sourceEventId: "event-1", reason: "successfulReview" };
 

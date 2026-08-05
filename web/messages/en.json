@@ -58,7 +58,8 @@
     "pageTitle": "Dashboard",
     "streakXp": {
       "streakDays": "{count, plural, =0 {No streak yet} one {# day streak} other {# day streak}}",
-      "xp": "{count, plural, =0 {0 XP} other {# XP}}"
+      "xp": "{count, plural, =0 {0 XP} other {# XP}}",
+      "level": "Level {level}"
     },
     "continueLearning": {
       "eyebrowStart": "Get started",
@@ -106,6 +107,23 @@
       "startReview": "Start review",
       "caughtUpTitle": "All caught up",
       "caughtUpDescription": "Nothing due right now — new words appear here as you finish lessons."
+    },
+    "dailyGoal": {
+      "title": "Daily goal",
+      "progress": "{earned} / {goal} XP today",
+      "reached": "Goal reached — nice work!"
+    },
+    "badges": {
+      "title": "Achievements ({earned}/{total})",
+      "emptyTitle": "No badges yet",
+      "emptyDescription": "Complete lessons, exercises, and reviews to start earning badges."
+    },
+    "progressStats": {
+      "title": "Your progress",
+      "lessonsCompleted": "Lessons completed",
+      "exercisesCorrect": "Exercises mastered",
+      "reviewsCompleted": "Words reviewed",
+      "vocabularyMastered": "Words mastered"
     },
     "error": {
       "title": "We couldn't load your dashboard data",

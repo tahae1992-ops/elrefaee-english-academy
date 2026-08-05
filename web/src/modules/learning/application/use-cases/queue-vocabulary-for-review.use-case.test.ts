@@ -11,6 +11,8 @@ describe("QueueVocabularyForReviewUseCase", () => {
       countDueForUser: vi.fn(),
       createInitial,
       save: vi.fn(),
+      countReviewedForUser: vi.fn(),
+      countMasteredForUser: vi.fn(),
     };
     const now = new Date("2026-08-05T00:00:00.000Z");
 
@@ -29,6 +31,8 @@ describe("QueueVocabularyForReviewUseCase", () => {
       countDueForUser: vi.fn(),
       createInitial,
       save: vi.fn(),
+      countReviewedForUser: vi.fn(),
+      countMasteredForUser: vi.fn(),
     };
 
     await new QueueVocabularyForReviewUseCase(reviewStates).execute("user-1", [], new Date());

@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createRecordExerciseAttemptUseCase, createScoreExerciseUseCase, createSubmitReviewResponseUseCase } from "@/composition-root";
+import { createRecordExerciseAttemptUseCase, createScoreExerciseUseCase, createSubmitReviewResponseUseCase, createAwardXpUseCase } from "@/composition-root";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { gateLessonAccess } from "@/lib/gate-lesson-access";
 import { handleScoreExercise } from "@/modules/curriculum/interface/score-exercise.controller";
 import { ReviewItemNotFoundError } from "@/modules/learning/interface/types";
+import { recordGamificationActivity } from "@/lib/record-gamification-activity";
+import { deterministicEventId } from "@/lib/deterministic-event-id";
+import { XP_REWARDS } from "@/modules/engagement/interface/types";
 
 const requestSchema = z.object({
   lessonId: z.string(),
@@ -59,13 +62,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // items already in the learner's queue (from a prior lesson
   // completion); it never queues a brand-new item here, since queueing
   // only happens at lesson completion (FR-09's own Main Flow).
+  const now = new Date();
   if (!scoreResult.score.isCorrect) {
     const wrapUpBlock = gate.lesson.content.blocks.find((block) => block.type === "wrap_up");
     if (wrapUpBlock && wrapUpBlock.type === "wrap_up") {
       const submitReviewResponse = createSubmitReviewResponseUseCase();
       for (const { id: vocabularyEntryId } of wrapUpBlock.targetVocabulary) {
         try {
-          await submitReviewResponse.execute(current.userId, vocabularyEntryId, "again", crypto.randomUUID(), new Date());
+          await submitReviewResponse.execute(current.userId, vocabularyEntryId, "again", crypto.randomUUID(), now);
         } catch (error) {
           if (!(error instanceof ReviewItemNotFoundError)) throw error;
         }
@@ -73,5 +77,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
   }
 
-  return NextResponse.json({ ...scoreResult.score, attemptNumber: attempt.attemptNumber }, { status: 200 });
+  // Gamification Engine slice: FR-18's "XP awarded per completed
+  // exercise" — only for a correct answer, idempotent per (user,
+  // exercise) so retrying an already-correct exercise never re-awards.
+  // Attempting at all (correct or not) still counts as today's
+  // activity for streak purposes.
+  let xpAwarded = 0;
+  if (scoreResult.score.isCorrect) {
+    const xpAward = await createAwardXpUseCase().execute({
+      userId: current.userId,
+      amount: XP_REWARDS.exerciseCorrect,
+      sourceEventId: deterministicEventId(`xp:exercise:${current.userId}:${id}`),
+      reason: "exerciseCorrect",
+    });
+    if (xpAward.applied) xpAwarded = XP_REWARDS.exerciseCorrect;
+  }
+  const { newlyAwardedBadges } = await recordGamificationActivity(current.userId, now);
+
+  return NextResponse.json({ ...scoreResult.score, attemptNumber: attempt.attemptNumber, xpAwarded, newlyAwardedBadges }, { status: 200 });
 }

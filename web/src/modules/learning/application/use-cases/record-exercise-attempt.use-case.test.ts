@@ -15,7 +15,7 @@ describe("RecordExerciseAttemptUseCase", () => {
       latencyMs: 1200,
       createdAt: new Date(),
     };
-    const attempts: ExerciseAttemptRepositoryPort = { record: vi.fn().mockResolvedValue(recorded) };
+    const attempts: ExerciseAttemptRepositoryPort = { record: vi.fn().mockResolvedValue(recorded), countDistinctCorrectForUser: vi.fn() };
     const input = {
       userId: "u1",
       exerciseId: "ex-1",

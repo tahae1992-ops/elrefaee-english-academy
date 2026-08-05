@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
-import { createAdvanceEnrollmentUseCase, createCompleteLessonUseCase, createQueueVocabularyForReviewUseCase } from "@/composition-root";
+import { createAdvanceEnrollmentUseCase, createCompleteLessonUseCase, createQueueVocabularyForReviewUseCase, createAwardXpUseCase } from "@/composition-root";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { gateLessonAccess } from "@/lib/gate-lesson-access";
 import { handleCompleteLesson } from "@/modules/learning/interface/complete-lesson.controller";
+import { recordGamificationActivity } from "@/lib/record-gamification-activity";
+import { deterministicEventId } from "@/lib/deterministic-event-id";
+import { XP_REWARDS } from "@/modules/engagement/interface/types";
 
 /**
  * API Spec §6.3: POST /lessons/{id}/complete (FR-05). The unit-advance
@@ -19,6 +22,13 @@ import { handleCompleteLesson } from "@/modules/learning/interface/complete-less
  * QueueVocabularyForReviewUseCase only knows vocabularyEntryIds, and
  * only this route already has the lesson's resolved wrap_up block
  * (via `gate.lesson`, curriculum's output).
+ *
+ * Gamification Engine slice: awards XP through the one AwardXpUseCase
+ * (FR-18's "single domain service" requirement), idempotent per
+ * (user, lesson) via a deterministic sourceEventId — revisiting an
+ * already-completed lesson never re-awards. Also records the day's
+ * activity (streak) and re-evaluates badge eligibility via
+ * src/lib/record-gamification-activity.ts.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -39,15 +49,27 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const { lesson, snapshot } = gate;
+  const now = new Date();
 
   const wrapUpBlock = lesson.content.blocks.find((block) => block.type === "wrap_up");
   if (wrapUpBlock && wrapUpBlock.type === "wrap_up" && wrapUpBlock.targetVocabulary.length > 0) {
     await createQueueVocabularyForReviewUseCase().execute(
       current.userId,
       wrapUpBlock.targetVocabulary.map((ref) => ref.id),
-      new Date(),
+      now,
     );
   }
+
+  // Gamification Engine slice: FR-18's "XP awarded per completed lesson."
+  // Deterministic sourceEventId per (user, lesson) — revisiting an
+  // already-completed lesson (the UI allows this) never re-awards XP.
+  const xpAward = await createAwardXpUseCase().execute({
+    userId: current.userId,
+    amount: XP_REWARDS.lessonCompleted,
+    sourceEventId: deterministicEventId(`xp:lesson:${current.userId}:${lesson.id}`),
+    reason: "lessonCompleted",
+  });
+  const { newlyAwardedBadges } = await recordGamificationActivity(current.userId, now);
 
   const lessonsInUnit = snapshot.lessonsByUnit.get(lesson.unitId) ?? [];
   const unitNowComplete = lessonsInUnit.every(
@@ -78,5 +100,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     nextLessonId = lessonsInNextUnit[0]?.id ?? null;
   }
 
-  return NextResponse.json({ completed: true, unitCompleted: unitNowComplete, nextUnitId, nextLessonId }, { status: 200 });
+  return NextResponse.json(
+    {
+      completed: true,
+      unitCompleted: unitNowComplete,
+      nextUnitId,
+      nextLessonId,
+      xpAwarded: xpAward.applied ? XP_REWARDS.lessonCompleted : 0,
+      newlyAwardedBadges,
+    },
+    { status: 200 },
+  );
 }

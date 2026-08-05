@@ -11,6 +11,7 @@ describe("GetLessonProgressUseCase", () => {
       ]),
       savePosition: vi.fn(),
       markCompleted: vi.fn(),
+      countCompletedForUser: vi.fn(),
     };
 
     const result = await new GetLessonProgressUseCase(progress).execute("u1", ["l1", "l2"]);

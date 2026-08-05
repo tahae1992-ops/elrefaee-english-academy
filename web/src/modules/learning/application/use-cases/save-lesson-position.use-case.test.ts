@@ -9,6 +9,7 @@ describe("SaveLessonPositionUseCase", () => {
       listForLessons: vi.fn(),
       savePosition: vi.fn().mockResolvedValue(undefined),
       markCompleted: vi.fn(),
+      countCompletedForUser: vi.fn(),
     };
     const position = { blockIndex: 2, blockInteractions: { 1: { done: true } } };
 

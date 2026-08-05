@@ -1,10 +1,11 @@
-import { and, asc, eq, lte, count } from "drizzle-orm";
+import { and, asc, eq, gt, gte, lte, count } from "drizzle-orm";
 import { getDb } from "@/shared/infrastructure/db/client";
 import { vocabularyReviewState } from "@/modules/learning/infrastructure/db/tables/learning";
 import type {
   VocabularyReviewStateRecord,
   VocabularyReviewStateRepositoryPort,
 } from "@/modules/learning/application/ports/vocabulary-review-state-repository-port";
+import { MASTERED_STABILITY_THRESHOLD_DAYS } from "@/modules/learning/domain/services/review-state";
 
 function toRecord(row: typeof vocabularyReviewState.$inferSelect): VocabularyReviewStateRecord {
   return {
@@ -94,5 +95,23 @@ export class DrizzleVocabularyReviewStateAdapter implements VocabularyReviewStat
       .returning();
 
     return toRecord(row);
+  }
+
+  async countReviewedForUser(userId: string): Promise<number> {
+    const [{ value }] = await getDb()
+      .select({ value: count() })
+      .from(vocabularyReviewState)
+      .where(and(eq(vocabularyReviewState.userId, userId), gt(vocabularyReviewState.reviewCount, 0)));
+
+    return value;
+  }
+
+  async countMasteredForUser(userId: string): Promise<number> {
+    const [{ value }] = await getDb()
+      .select({ value: count() })
+      .from(vocabularyReviewState)
+      .where(and(eq(vocabularyReviewState.userId, userId), gte(vocabularyReviewState.stability, MASTERED_STABILITY_THRESHOLD_DAYS)));
+
+    return value;
   }
 }

@@ -19,4 +19,6 @@ export interface ProgressRepositoryPort {
   listForLessons(userId: string, lessonIds: string[]): Promise<LessonProgress[]>;
   savePosition(userId: string, lessonId: string, position: LastPosition): Promise<void>;
   markCompleted(userId: string, lessonId: string, position: LastPosition): Promise<void>;
+  /** Gamification Engine slice — progress-statistics input. */
+  countCompletedForUser(userId: string): Promise<number>;
 }

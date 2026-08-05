@@ -18,4 +18,8 @@ export interface VocabularyReviewStateRepositoryPort {
   /** Idempotent: creates a fresh "new" row (due immediately) unless one already exists for this (user, entry) pair, in which case the existing row is returned untouched. */
   createInitial(userId: string, vocabularyEntryId: string, now: Date): Promise<VocabularyReviewStateRecord>;
   save(record: VocabularyReviewStateRecord): Promise<VocabularyReviewStateRecord>;
+  /** Gamification Engine slice — progress-statistics input: items with at least one real review (reviewCount > 0), i.e. excluding freshly-queued "new" items never yet reviewed. */
+  countReviewedForUser(userId: string): Promise<number>;
+  /** Gamification Engine slice — progress-statistics input: items whose stability crosses the "mastered" threshold (review-state.ts's own derivation threshold, kept in sync there). */
+  countMasteredForUser(userId: string): Promise<number>;
 }
