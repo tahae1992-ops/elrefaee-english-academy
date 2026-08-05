@@ -52,7 +52,7 @@ export default function DesignSystemPage() {
           Internal — Component Library Verification
         </p>
         <h1 className="font-display text-3xl font-bold">
-          EREA Design System
+          ERA Design System
         </h1>
         <div className="flex items-center gap-3">
           <ThemeToggle />

@@ -2,7 +2,7 @@
 -- generates content, user reviews/approves" workflow) — one published
 -- content_item + one course per CEFR level (Pre-A1 through C1), giving
 -- the Course Catalog real curriculum data instead of a fake/hardcoded
--- list. Titles/descriptions are original copy in EREA's voice, not
+-- list. Titles/descriptions are original copy in ERA's voice, not
 -- reproduced from any external CEFR framework text.
 
 WITH academy AS (SELECT id FROM "academy"."academies" LIMIT 1),

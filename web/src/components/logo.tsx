@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * The live, theme-aware EREA mark — distinct from the static files in
+ * The live, theme-aware ERA mark — distinct from the static files in
  * public/brand/ (which are fixed-color, portable assets for external
  * use). This component uses `currentColor` so it inherits whichever
  * text-color token its container sets, meaning it's correct in light
@@ -34,7 +34,7 @@ type LogoProps = {
 
 /**
  * The Primary/Secondary Logo and bare Monogram, as one component (Brand
- * Book §2.2) — "EREA" is always real text, never baked into the SVG, so
+ * Book §2.2) — "ERA" is always real text, never baked into the SVG, so
  * it stays a genuine heading for accessibility/SEO rather than an
  * opaque image.
  */
@@ -48,7 +48,7 @@ export function Logo({ variant = "primary", className }: LogoProps) {
       <span className={cn("inline-flex flex-col items-center gap-2", className)}>
         <Mark className="h-10 w-10" />
         <span className="font-display text-2xl font-bold tracking-[-0.01em]">
-          EREA
+          ERA
         </span>
       </span>
     );
@@ -58,7 +58,7 @@ export function Logo({ variant = "primary", className }: LogoProps) {
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <Mark className="h-7 w-7" />
       <span className="font-display text-2xl font-bold tracking-[-0.01em]">
-        EREA
+        ERA
       </span>
     </span>
   );
