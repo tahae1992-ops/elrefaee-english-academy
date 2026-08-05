@@ -12,11 +12,14 @@ import { defineRouting } from "next-intl/routing";
  * exists to keep the two honest and separate.
  */
 export const routing = defineRouting({
-  locales: ["en"],
+  locales: ["en", "ar"],
   defaultLocale: "en",
-  // English has no URL prefix ("/") at launch (Blueprint §1's
-  // English-only-at-launch decision); a future non-default locale gets an
-  // explicit prefix ("/es/...") — next-intl's "as-needed" mode, chosen so
-  // launch URLs stay clean rather than always carrying "/en/".
+  // English has no URL prefix ("/") — Blueprint §12's English-default
+  // decision; Arabic (and any future locale) gets an explicit prefix
+  // ("/ar/...") — next-intl's "as-needed" mode, chosen so the default
+  // locale's URLs stay clean rather than always carrying "/en/". Adding
+  // Arabic here is exactly the "one array entry + one message catalog"
+  // change the comment above describes — no other code in this file
+  // changed to support it.
   localePrefix: "as-needed",
 });

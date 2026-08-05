@@ -34,7 +34,7 @@ export function SidebarNav() {
                 >
                   <Icon className="size-4" aria-hidden="true" />
                   {t(`${item.key}.label`)}
-                  <Badge variant="outline" className="ml-auto text-[10px]">
+                  <Badge variant="outline" className="ms-auto text-[10px]">
                     {t("comingSoon")}
                   </Badge>
                 </span>

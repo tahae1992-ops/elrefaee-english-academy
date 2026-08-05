@@ -113,7 +113,7 @@ export function ReviewSession({ items }: { items: ClientReviewQueueItem[] }) {
                 {t("reveal")}
               </Button>
             ) : (
-              <div className="flex w-full flex-col gap-3 text-left">
+              <div className="flex w-full flex-col gap-3 text-start">
                 <p className="text-center text-muted-foreground">{current.entry.ipaTranscription}</p>
                 <ul className="flex flex-col gap-1.5 rounded-md bg-muted p-3">
                   {current.entry.exampleSentences.map((sentence, sentenceIndex) => (

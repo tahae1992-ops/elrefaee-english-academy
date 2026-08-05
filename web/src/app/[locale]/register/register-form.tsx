@@ -17,21 +17,34 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { registerAction, type RegisterErrorDebugInfo } from "@/modules/identity/interface/register.action";
+import { registerAction, type RegisterErrorDebugInfo, type RegisterFieldErrorCode } from "@/modules/identity/interface/register.action";
 import { useRouter } from "@/i18n/navigation";
 
-const formSchema = z.object({
-  displayName: z.string().trim().min(1, "Name is required").max(60),
-  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
-  password: z.string().min(8, "At least 8 characters"),
-});
+type Translator = ReturnType<typeof useTranslations>;
 
-type FormValues = z.infer<typeof formSchema>;
+function buildFormSchema(t: Translator) {
+  return z.object({
+    displayName: z.string().trim().min(1, t("validation.nameRequired")).max(60),
+    email: z.string().trim().toLowerCase().email(t("validation.emailInvalid")),
+    password: z.string().min(8, t("validation.passwordTooShort")),
+  });
+}
+
+type FormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 
 type SubmitState =
   | { status: "idle" | "submitting" }
   | { status: "success"; emailConfirmationRequired: boolean; email: string }
   | { status: "error"; message: string; debug?: RegisterErrorDebugInfo };
+
+// Maps register.action.ts's semantic field-error codes to translated
+// text — the Server Action has no locale context to translate into
+// itself (same boundary as the login API), so the client does it.
+function translateFieldError(t: Translator, code: RegisterFieldErrorCode) {
+  if (code === "required") return t("validation.nameRequired");
+  if (code === "invalid") return t("validation.emailInvalid");
+  return t("validation.passwordTooShort");
+}
 
 export function RegisterForm() {
   const t = useTranslations("RegisterPage");
@@ -39,7 +52,7 @@ export function RegisterForm() {
   const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(buildFormSchema(t)),
     defaultValues: { displayName: "", email: "", password: "" },
   });
 
@@ -64,9 +77,9 @@ export function RegisterForm() {
     }
 
     if (result.fieldErrors) {
-      for (const [field, message] of Object.entries(result.fieldErrors)) {
-        if (message) {
-          form.setError(field as keyof FormValues, { message });
+      for (const [field, code] of Object.entries(result.fieldErrors)) {
+        if (code) {
+          form.setError(field as keyof FormValues, { message: translateFieldError(t, code) });
         }
       }
     }

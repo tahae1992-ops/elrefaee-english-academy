@@ -22,7 +22,7 @@ export function CourseDetailsContent({ snapshot }: { snapshot: CourseProgressSna
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8">
       <Card>
-        <CardContent className="flex flex-col items-center gap-4 py-6 text-center sm:flex-row sm:items-center sm:text-left">
+        <CardContent className="flex flex-col items-center gap-4 py-6 text-center sm:flex-row sm:items-center sm:text-start">
           <ProgressRing percent={progressPercent} label={t("progressLabel", { percent: progressPercent })} />
           <div className="flex-1">
             <Badge variant="outline" className="mb-1">

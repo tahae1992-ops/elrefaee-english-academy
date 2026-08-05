@@ -1,4 +1,7 @@
 {
+  "Common": {
+    "loading": "Loading"
+  },
   "ThemeToggle": {
     "switchToLight": "Switch to light mode",
     "switchToDark": "Switch to dark mode"
@@ -18,7 +21,12 @@
     "successConfirmEmail": "Account created — check {email} to confirm before signing in.",
     "successReady": "Account created. You're signed in as {email}.",
     "haveAccount": "Already have an account?",
-    "signInLink": "Sign in"
+    "signInLink": "Sign in",
+    "validation": {
+      "nameRequired": "Name is required",
+      "emailInvalid": "Enter a valid email address",
+      "passwordTooShort": "At least 8 characters"
+    }
   },
   "LoginPage": {
     "title": "Sign in",
@@ -28,8 +36,13 @@
     "submitting": "Signing in…",
     "genericError": "Sign-in failed. Please try again.",
     "invalidCredentials": "Invalid email or password.",
+    "mfaNotImplemented": "MFA is required for this account but not yet supported.",
     "noAccount": "New here?",
-    "registerLink": "Create an account"
+    "registerLink": "Create an account",
+    "validation": {
+      "emailInvalid": "Enter a valid email address",
+      "passwordRequired": "Password is required"
+    }
   },
   "AppShell": {
     "nav": {

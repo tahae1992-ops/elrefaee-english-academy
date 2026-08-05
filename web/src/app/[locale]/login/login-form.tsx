@@ -17,18 +17,35 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRouter } from "@/i18n/navigation";
-import type { LoginErrorDebugInfo } from "@/modules/identity/interface/login.controller";
+import type { LoginErrorDebugInfo, LoginResponseBody } from "@/modules/identity/interface/login.controller";
 
-const formSchema = z.object({
-  email: z.string().trim().toLowerCase().email("Enter a valid email address"),
-  password: z.string().min(1, "Password is required"),
-});
+type Translator = ReturnType<typeof useTranslations>;
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 
 type SubmitState =
   | { status: "idle" | "submitting" }
   | { status: "error"; message: string; debug?: LoginErrorDebugInfo };
+
+function buildFormSchema(t: Translator) {
+  return z.object({
+    email: z.string().trim().toLowerCase().email(t("validation.emailInvalid")),
+    password: z.string().min(1, t("validation.passwordRequired")),
+  });
+}
+
+/**
+ * The API only ever returns a semantic `error` code (never a message
+ * meant for display) — translating by code here, rather than trusting
+ * `result.message`, is what actually makes login errors respect the
+ * active locale (the route handler has no locale context of its own,
+ * SAD §5 addendum: the API is deliberately locale-segment-agnostic).
+ */
+function translateApiError(t: Translator, error: string | undefined) {
+  if (error === "UNAUTHENTICATED") return t("invalidCredentials");
+  if (error === "MFA_NOT_IMPLEMENTED") return t("mfaNotImplemented");
+  return t("genericError");
+}
 
 export function LoginForm() {
   const t = useTranslations("LoginPage");
@@ -36,7 +53,7 @@ export function LoginForm() {
   const [submitState, setSubmitState] = useState<SubmitState>({ status: "idle" });
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(buildFormSchema(t)),
     defaultValues: { email: "", password: "" },
   });
 
@@ -48,7 +65,7 @@ export function LoginForm() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     });
-    const result = await response.json();
+    const result = (await response.json()) as LoginResponseBody & { debug?: LoginErrorDebugInfo };
 
     if (response.ok) {
       router.push("/dashboard");
@@ -57,8 +74,8 @@ export function LoginForm() {
 
     setSubmitState({
       status: "error",
-      message: result.message ?? t("genericError"),
-      debug: result.debug,
+      message: translateApiError(t, "error" in result ? result.error : undefined),
+      debug: "debug" in result ? result.debug : undefined,
     });
   }
 

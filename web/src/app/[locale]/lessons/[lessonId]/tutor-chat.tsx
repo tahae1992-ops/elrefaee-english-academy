@@ -130,7 +130,7 @@ export function TutorChat({
                     key={starter}
                     variant="outline"
                     size="sm"
-                    className="h-auto justify-start whitespace-normal text-left"
+                    className="h-auto justify-start whitespace-normal text-start"
                     onClick={() => sendMessage(starter)}
                   >
                     {starter}

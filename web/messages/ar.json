@@ -1,0 +1,327 @@
+{
+  "Common": {
+    "loading": "جارٍ التحميل"
+  },
+  "ThemeToggle": {
+    "switchToLight": "التبديل إلى الوضع الفاتح",
+    "switchToDark": "التبديل إلى الوضع الداكن"
+  },
+  "LocaleSwitcher": {
+    "label": "اللغة"
+  },
+  "RegisterPage": {
+    "title": "إنشاء حسابك",
+    "displayNameLabel": "الاسم",
+    "emailLabel": "البريد الإلكتروني",
+    "passwordLabel": "كلمة المرور",
+    "passwordHint": "8 أحرف على الأقل",
+    "submit": "إنشاء حساب",
+    "submitting": "جارٍ إنشاء الحساب…",
+    "genericError": "فشل إنشاء الحساب. يرجى المحاولة مرة أخرى.",
+    "successConfirmEmail": "تم إنشاء الحساب — تحقق من {email} لتأكيده قبل تسجيل الدخول.",
+    "successReady": "تم إنشاء الحساب. أنت مسجَّل الدخول الآن باسم {email}.",
+    "haveAccount": "لديك حساب بالفعل؟",
+    "signInLink": "تسجيل الدخول",
+    "validation": {
+      "nameRequired": "الاسم مطلوب",
+      "emailInvalid": "أدخل بريدًا إلكترونيًا صحيحًا",
+      "passwordTooShort": "8 أحرف على الأقل"
+    }
+  },
+  "LoginPage": {
+    "title": "تسجيل الدخول",
+    "emailLabel": "البريد الإلكتروني",
+    "passwordLabel": "كلمة المرور",
+    "submit": "تسجيل الدخول",
+    "submitting": "جارٍ تسجيل الدخول…",
+    "genericError": "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.",
+    "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "mfaNotImplemented": "يتطلب هذا الحساب مصادقة متعددة العوامل، وهي غير مدعومة بعد.",
+    "noAccount": "جديد هنا؟",
+    "registerLink": "إنشاء حساب",
+    "validation": {
+      "emailInvalid": "أدخل بريدًا إلكترونيًا صحيحًا",
+      "passwordRequired": "كلمة المرور مطلوبة"
+    }
+  },
+  "AppShell": {
+    "nav": {
+      "label": "التنقل الرئيسي",
+      "comingSoon": "قريبًا",
+      "home": { "label": "الرئيسية" },
+      "review": { "label": "المراجعة", "comingSoonHint": "المراجعة بالتكرار المتباعد — قريبًا." },
+      "courses": { "label": "الدورات" },
+      "certificates": { "label": "الشهادات", "comingSoonHint": "شهاداتك المكتسبة — قريبًا." },
+      "profile": { "label": "الملف الشخصي", "comingSoonHint": "الملف الشخصي والإعدادات — قريبًا." }
+    },
+    "userMenu": {
+      "openMenu": "فتح قائمة الحساب",
+      "profile": "الملف الشخصي",
+      "signOut": "تسجيل الخروج",
+      "signingOut": "جارٍ تسجيل الخروج…"
+    }
+  },
+  "Dashboard": {
+    "pageTitle": "لوحة التحكم",
+    "streakXp": {
+      "streakDays": "{count, plural, =0 {لا يوجد تتابع بعد} one {تتابع يوم واحد} two {تتابع يومين} other {تتابع # أيام}}",
+      "xp": "{count, plural, =0 {0 نقطة خبرة} one {نقطة خبرة واحدة} two {نقطتا خبرة} other {# نقطة خبرة}}",
+      "level": "المستوى {level}"
+    },
+    "continueLearning": {
+      "eyebrowStart": "ابدأ الآن",
+      "eyebrowContinue": "تابع التعلم",
+      "title": "حدد نقطة انطلاقك",
+      "description": "أجرِ اختبار تحديد المستوى القصير لتتناسب دروسك مع مستواك منذ اليوم الأول.",
+      "cta": "إجراء اختبار تحديد المستوى",
+      "assessedTitle": "تصفح دوراتك",
+      "assessedDescription": "تم تحديد مستواك — انتقل إلى دليل الدورات للعثور على دورتك. ستظهر الدروس نفسها فور إطلاقها.",
+      "comingSoon": "قريبًا",
+      "comingSoonHint": "يجري حاليًا إعداد محتوى الدروس — دليل الدورات هو نقطة انطلاقك في هذه الأثناء."
+    },
+    "cefrLevel": {
+      "title": "المستوى الحالي",
+      "notAssessed": "لم يُحدَّد بعد",
+      "notAssessedHint": "أجرِ اختبار تحديد المستوى لمعرفة مستواك وفق إطار CEFR.",
+      "assessedHint": "استنادًا إلى أحدث تقييم لك."
+    },
+    "weeklyGoal": {
+      "title": "الهدف الأسبوعي",
+      "noGoal": "لم يُحدَّد هدف",
+      "noGoalHint": "تحديد هدف أسبوعي متاح قريبًا."
+    },
+    "recommendedLesson": {
+      "title": "موصى به لك",
+      "emptyTitle": "لا توجد توصية بعد",
+      "emptyDescription": "أكمل اختبار تحديد المستوى للحصول على درس يناسب مستواك.",
+      "emptyDescriptionPlaced": "توصيات الدروس متاحة قريبًا — تصفح دليل الدورات للعثور على دورتك في هذه الأثناء.",
+      "browseCourses": "تصفح الدورات"
+    },
+    "recentActivity": {
+      "title": "النشاط الأخير",
+      "emptyTitle": "لا يوجد نشاط بعد",
+      "emptyDescription": "ستظهر هنا الدروس والاختبارات التي تكملها."
+    },
+    "courseProgress": {
+      "title": "دوراتك",
+      "emptyTitle": "لا توجد دورات بعد",
+      "emptyDescription": "ستظهر هنا الدورات المسجَّل بها بمجرد أن تبدأ إحداها من دليل الدورات.",
+      "browseCourses": "تصفح الدورات"
+    },
+    "pendingReviews": {
+      "title": "المراجعة",
+      "dueCount": "{count, plural, one {كلمة واحدة مستحقة} two {كلمتان مستحقتان} other {# كلمات مستحقة}}",
+      "startReview": "بدء المراجعة",
+      "caughtUpTitle": "لا يوجد شيء معلَّق",
+      "caughtUpDescription": "لا توجد مراجعات مستحقة الآن — تظهر الكلمات الجديدة هنا كلما أنهيت دروسًا."
+    },
+    "dailyGoal": {
+      "title": "الهدف اليومي",
+      "progress": "{earned} / {goal} نقطة خبرة اليوم",
+      "reached": "تم بلوغ الهدف — عمل رائع!"
+    },
+    "badges": {
+      "title": "الإنجازات ({earned}/{total})",
+      "emptyTitle": "لا توجد أوسمة بعد",
+      "emptyDescription": "أكمل الدروس والتمارين والمراجعات لتبدأ في كسب الأوسمة."
+    },
+    "progressStats": {
+      "title": "تقدُّمك",
+      "lessonsCompleted": "الدروس المكتملة",
+      "exercisesCorrect": "التمارين المتقنة",
+      "reviewsCompleted": "الكلمات التي روجعت",
+      "vocabularyMastered": "الكلمات المتقَنة"
+    },
+    "error": {
+      "title": "تعذّر تحميل بيانات لوحة التحكم",
+      "description": "هذه مشكلة مؤقتة من جانبنا — حسابك بخير.",
+      "retry": "إعادة المحاولة"
+    }
+  },
+  "Courses": {
+    "title": "دليل الدورات",
+    "description": "تصفح جميع المستويات، من كلماتك الأولى إلى إتقان الإنجليزية باحترافية.",
+    "filters": {
+      "label": "تصفية الدورات",
+      "myLevel": "مستواي",
+      "all": "الكل"
+    },
+    "card": {
+      "currentLevel": "مستواك",
+      "lockedReason": "أكمل {level} لفتح هذا المستوى",
+      "requiresPlacementReason": "أجرِ اختبار تحديد المستوى لمعرفة مستواك"
+    },
+    "placementBanner": {
+      "title": "اكتشف من أين تبدأ",
+      "description": "أجرِ اختبار تحديد المستوى لفتح الدورات المناسبة لمستواك.",
+      "cta": "إجراء اختبار تحديد المستوى"
+    },
+    "error": {
+      "title": "تعذّر تحميل دليل الدورات",
+      "description": "هذه مشكلة مؤقتة من جانبنا — حسابك بخير.",
+      "retry": "إعادة المحاولة"
+    }
+  },
+  "CourseDetails": {
+    "progressLabel": "اكتمل {percent}%",
+    "continueCta": "متابعة",
+    "startCta": "بدء الدورة",
+    "courseComplete": "اكتملت الدورة",
+    "unitLabel": "الوحدة {number}",
+    "unitInProgress": "قيد التقدم",
+    "lessonCount": "{completed}/{total} دروس",
+    "locked": {
+      "title": "لم تُفتح هذه الدورة بعد",
+      "description": "بلوغ المستوى المطلوب يفتح هذه الدورة."
+    },
+    "error": {
+      "title": "تعذّر تحميل هذه الدورة",
+      "description": "هذه مشكلة مؤقتة من جانبنا — حسابك بخير.",
+      "retry": "إعادة المحاولة"
+    }
+  },
+  "Unit": {
+    "backToCourse": "العودة إلى الدورة",
+    "checkpoint": {
+      "title": "نقطة تفتيش الوحدة",
+      "comingSoon": "أكمل كل الدروس أعلاه لإنهاء هذه الوحدة.",
+      "unitComplete": "اكتملت الوحدة — تم فتح الوحدة التالية."
+    }
+  },
+  "Lesson": {
+    "progress": "الجزء {current} من {total}",
+    "openTutor": "المعلم الذكي",
+    "saveAndExit": "حفظ وخروج",
+    "continue": "متابعة",
+    "finishLesson": "إنهاء الدرس",
+    "saving": "جارٍ الحفظ…",
+    "outlineLabel": "مخطط الدرس",
+    "blocks": {
+      "warmUp": "تمهيد",
+      "presentation": "عرض",
+      "controlledPractice": "تدريب",
+      "communicativeTask": "مهمة",
+      "wrapUp": "ختام",
+      "taskPlaceholder": "اكتب إجابتك هنا.",
+      "submitTask": "إرسال",
+      "taskSubmitted": "تم الإرسال"
+    },
+    "exercises": {
+      "submit": "إرسال",
+      "true": "صحيح",
+      "false": "خطأ",
+      "typeYourAnswer": "اكتب إجابتك",
+      "tapWordsBelow": "اضغط على الكلمات أدناه بالترتيب",
+      "correct": "إجابة صحيحة!",
+      "incorrect": "ليست صحيحة تمامًا.",
+      "tryAgain": "حاول مرة أخرى",
+      "showAnswer": "إظهار الإجابة",
+      "answerRevealed": "الإجابة الصحيحة: {answer}"
+    },
+    "error": {
+      "checkFailed": "تعذّر التحقق من إجابتك. يرجى المحاولة مرة أخرى.",
+      "saveFailed": "تعذّر حفظ تقدُّمك. يرجى المحاولة مرة أخرى.",
+      "completeFailed": "تعذّر إكمال الدرس. يرجى المحاولة مرة أخرى."
+    },
+    "complete": {
+      "title": "اكتمل الدرس!",
+      "description": "عمل رائع — تم حفظ تقدُّمك.",
+      "unitCompleteDescription": "أكملت هذه الوحدة — تم فتح الوحدة التالية.",
+      "autoAdvancing": "سينتقل إلى الدرس التالي خلال {seconds} ثانية…",
+      "continueNow": "المتابعة الآن",
+      "stayHere": "البقاء هنا",
+      "backToUnit": "العودة إلى الوحدة",
+      "backToCourse": "العودة إلى الدورة"
+    }
+  },
+  "Tutor": {
+    "headerLabel": "المعلم الذكي",
+    "headerWithUnit": "المعلم الذكي · الوحدة {unitNumber}",
+    "emptyState": "اسألني أي شيء عن هذا الدرس — القواعد، أو المفردات، أو النطق، أو كتابتك. لست متأكدًا من أين تبدأ؟",
+    "aiLabel": "المعلم الذكي",
+    "typing": "المعلم الذكي يكتب الآن…",
+    "inputPlaceholder": "اكتب رسالة",
+    "send": "إرسال",
+    "flag": "الإبلاغ إلى المدرّس",
+    "flagged": "تم الإبلاغ",
+    "error": {
+      "unavailable": "المعلم الذكي غير متاح مؤقتًا، حاول مرة أخرى بعد قليل.",
+      "rateLimit": "لقد بلغت حد الرسائل اليومي. حاول مرة أخرى غدًا.",
+      "generic": "حدث خطأ ما أثناء إرسال رسالتك. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "PlacementTest": {
+    "selfAssessment": {
+      "title": "كيف تصف مستواك في اللغة الإنجليزية؟",
+      "description": "اختر العبارة الأقرب إلى وضعك الحالي — لا توجد إجابة خاطئة، هذا يساعدنا فقط على البدء بك من المستوى الصحيح.",
+      "preA1": "أستطيع التعرف على بعض الكلمات المألوفة والعبارات الأساسية جدًا.",
+      "a1": "أستطيع فهم واستخدام التعبيرات اليومية المألوفة والعبارات الأساسية جدًا.",
+      "a2": "أستطيع التواصل في مهام بسيطة ومألوفة.",
+      "b1": "أستطيع التعامل مع معظم المواقف أثناء السفر، ووصف تجاربي، وتقديم أسباب لآرائي.",
+      "b2": "أستطيع التفاعل بطلاقة وفهم نصوص معقدة ومناقشة مجموعة واسعة من المواضيع.",
+      "c1": "أستطيع التعبير عن نفسي بطلاقة وعفوية، واستخدام اللغة بمرونة في السياقات الاجتماعية والأكاديمية والمهنية.",
+      "continue": "متابعة"
+    },
+    "transition": {
+      "title": "الآن اختبار قصير",
+      "description": "نحو 10 دقائق. أجب بأفضل ما لديك — لا توجد نتيجة فورية، فلا داعي للقلق بشأن كل سؤال.",
+      "start": "بدء الاختبار"
+    },
+    "diagnostic": {
+      "progress": "السؤال {current} من {total}",
+      "playAudio": "تشغيل الصوت",
+      "playingAudio": "جارٍ التشغيل…",
+      "speakingSkip": "تخطي هذا القسم",
+      "speakingPlaceholder": "اكتب إجابتك هنا (هذا القسم لمراجعة لاحقة، ولا يُقيَّم تلقائيًا).",
+      "next": "التالي",
+      "submitting": "جارٍ الحفظ…"
+    },
+    "results": {
+      "title": "نتيجة تحديد مستواك",
+      "overallLevel": "مستواك: {level}",
+      "skillBreakdown": "تفصيل المهارات",
+      "learningPathTitle": "مسار تعلُّمك",
+      "learningPathPlaceholder": "دورتك لمستوى {level} جاهزة في دليل الدورات — محتوى الدروس داخلها في طريقه إليك.",
+      "viewCourse": "عرض دورتي",
+      "goToDashboard": "الانتقال إلى لوحة التحكم"
+    },
+    "error": {
+      "title": "حدث خطأ ما",
+      "startFailed": "تعذّر بدء اختبار تحديد المستوى. يرجى المحاولة مرة أخرى.",
+      "submitFailed": "تعذّر حفظ إجابتك. يرجى المحاولة مرة أخرى.",
+      "finalizeFailed": "تعذّر احتساب نتيجتك. يرجى المحاولة مرة أخرى.",
+      "retry": "إعادة المحاولة"
+    },
+    "exitConfirm": {
+      "title": "مغادرة اختبار تحديد المستوى؟",
+      "description": "لن يُحفظ تقدُّمك في هذه المحاولة إذا غادرت الآن.",
+      "stay": "البقاء",
+      "leave": "مغادرة"
+    }
+  },
+  "Review": {
+    "exit": "خروج",
+    "progress": "البطاقة {current} من {total}",
+    "reveal": "إظهار",
+    "synonyms": "تعني أيضًا",
+    "rating": {
+      "again": "مرة أخرى",
+      "hard": "صعبة",
+      "good": "جيدة",
+      "easy": "سهلة"
+    },
+    "summary": {
+      "title": "اكتملت المراجعة!",
+      "description": "{count, plural, one {راجعت كلمة واحدة.} two {راجعت كلمتين.} other {راجعت # كلمات.}}",
+      "xpEarned": "+{count} نقطة خبرة",
+      "backToDashboard": "العودة إلى لوحة التحكم"
+    },
+    "emptyState": {
+      "title": "لا يوجد شيء معلَّق",
+      "description": "لا توجد مراجعات مستحقة الآن — تظهر الكلمات الجديدة هنا كلما أنهيت دروسًا."
+    },
+    "error": {
+      "submitFailed": "تعذّر حفظ إجابتك. يرجى المحاولة مرة أخرى."
+    }
+  }
+}

@@ -9,11 +9,19 @@ const registerSchema = z.object({
   // Length only, deliberately no composition rules (no forced mixed
   // case/symbols) — WCAG 2.2 Accessible Authentication (SRS §12.1)
   // steers away from arbitrary complexity requirements.
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(8),
   displayName: z.string().trim().min(1).max(60),
 });
 
-export type RegisterFieldErrors = Partial<Record<"email" | "password" | "displayName", string>>;
+/**
+ * Semantic codes, not display text — this Server Action has no
+ * request-scoped locale context of its own to translate into (same
+ * "API/action layer is locale-agnostic" boundary as the REST API, SAD §5
+ * addendum), so the client (RegisterForm) maps each code to a translated
+ * message via next-intl instead of displaying server-authored English.
+ */
+export type RegisterFieldErrorCode = "required" | "invalid" | "tooShort";
+export type RegisterFieldErrors = Partial<Record<"email" | "password" | "displayName", RegisterFieldErrorCode>>;
 
 /**
  * Full failure detail (code/status/raw response/stack) — populated
@@ -47,9 +55,9 @@ export async function registerAction(input: unknown): Promise<RegisterActionResu
     const fieldErrors: RegisterFieldErrors = {};
     for (const issue of parsed.error.issues) {
       const field = issue.path[0];
-      if (field === "email" || field === "password" || field === "displayName") {
-        fieldErrors[field] = issue.message;
-      }
+      if (field === "email") fieldErrors.email = "invalid";
+      else if (field === "password") fieldErrors.password = "tooShort";
+      else if (field === "displayName") fieldErrors.displayName = "required";
     }
     return { status: "error", fieldErrors };
   }
@@ -90,6 +98,10 @@ export async function registerAction(input: unknown): Promise<RegisterActionResu
         },
       };
     }
-    return { status: "error", message: "Registration failed. Please try again." };
+    // No `message` here (unlike the dev branch above): this Server
+    // Action has no locale context to translate into, so the client
+    // (RegisterForm) falls back to its own translated genericError
+    // instead of displaying server-authored English.
+    return { status: "error" };
   }
 }
