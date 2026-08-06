@@ -17,6 +17,7 @@ export async function handleSubmitResponse(
   userId: string,
   attemptId: string,
   rawInput: unknown,
+  revealCorrectness = false,
 ): Promise<{ status: number; body: unknown }> {
   const parsed = schema.safeParse(rawInput);
   if (!parsed.success) {
@@ -24,10 +25,14 @@ export async function handleSubmitResponse(
   }
 
   try {
-    // Deliberately no `isCorrect` in the response — doc 09 §5.3's rule
-    // against showing a running score during Stage 2.
-    await useCase.execute({ attemptId, userId, ...parsed.data });
-    return { status: 200, body: { received: true } };
+    // For Placement Test attempts, revealCorrectness stays false and
+    // this returns undefined — doc 09 §5.3's rule against showing a
+    // running score during Stage 2. Unit Checkpoint attempts pass
+    // revealCorrectness: true (the Route Handler decides which, per
+    // the attempt's own blueprint kind) for doc 08 §3.9's immediate
+    // correct/incorrect + explanation feedback.
+    const result = await useCase.execute({ attemptId, userId, ...parsed.data, revealCorrectness });
+    return { status: 200, body: result ?? { received: true } };
   } catch (error) {
     if (error instanceof AttemptNotFoundError) return { status: 404, body: { error: "NOT_FOUND", message: error.message } };
     if (error instanceof AttemptNotOwnedError) return { status: 403, body: { error: "FORBIDDEN", message: error.message } };

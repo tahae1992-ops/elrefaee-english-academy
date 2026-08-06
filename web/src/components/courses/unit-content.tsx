@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
-import { CheckCircle2, ChevronLeft, CircleDot, Lock } from "lucide-react";
+import { CheckCircle2, ChevronLeft, CircleDot, ClipboardCheck, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import type { PublishedLessonSummary, PublishedUnit } from "@/modules/curriculum/interface/types";
 import type { LessonProgressStatus, UnitAccessState } from "@/modules/learning/interface/types";
@@ -53,18 +54,37 @@ export function UnitContent({
         })}
       </div>
 
-      {/* doc 08 §4.9: "checkpoint stays visibly present-but-locked (not hidden)". No mastery-checkpoint exam is built (FR-06 simplification, see compute-unit-access.ts) — completing every lesson above is what actually unlocks the next unit. */}
-      <Card className="gap-2 opacity-60">
-        <CardContent className="flex items-center gap-3 py-3">
-          <Lock className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
-          <div>
-            <p className="text-sm font-medium">{t("checkpoint.title")}</p>
-            <p className="text-xs text-muted-foreground">
-              {unitAccess === "completed" ? t("checkpoint.unitComplete") : t("checkpoint.comingSoon")}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* doc 08 §4.9: "checkpoint stays visibly present-but-locked (not hidden)" — now a real, gating mastery checkpoint (SRS FR-06/FR-08), not a placeholder. */}
+      {unitAccess === "checkpoint_available" ? (
+        <Card className="gap-2 border-primary/40 bg-accent">
+          <CardContent className="flex items-center gap-3 py-3">
+            <ClipboardCheck className="size-5 shrink-0 text-primary" aria-hidden="true" />
+            <div className="flex-1">
+              <p className="text-sm font-medium">{t("checkpoint.title")}</p>
+              <p className="text-xs text-muted-foreground">{t("checkpoint.available")}</p>
+            </div>
+            <Button asChild size="sm">
+              <Link href={`/units/${unit.id}/checkpoint`}>{t("checkpoint.start")}</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="gap-2 opacity-60">
+          <CardContent className="flex items-center gap-3 py-3">
+            {unitAccess === "completed" ? (
+              <CheckCircle2 className="size-5 shrink-0 text-success" aria-hidden="true" />
+            ) : (
+              <Lock className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            )}
+            <div>
+              <p className="text-sm font-medium">{t("checkpoint.title")}</p>
+              <p className="text-xs text-muted-foreground">
+                {unitAccess === "completed" ? t("checkpoint.unitComplete") : t("checkpoint.comingSoon")}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

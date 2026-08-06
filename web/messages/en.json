@@ -184,8 +184,33 @@
     "backToCourse": "Back to course",
     "checkpoint": {
       "title": "Unit checkpoint",
+      "available": "All lessons complete — take the checkpoint to finish this unit.",
+      "start": "Start checkpoint",
       "comingSoon": "Complete every lesson above to finish this unit.",
       "unitComplete": "Unit complete — the next unit is now unlocked."
+    }
+  },
+  "Quiz": {
+    "progress": "Question {current} of {total}",
+    "submitAnswer": "Submit answer",
+    "submitting": "Submitting…",
+    "next": "Next",
+    "error": {
+      "submitFailed": "We couldn't submit that answer — check your connection and try again.",
+      "startFailed": "We couldn't load the checkpoint — your account and progress are fine.",
+      "finalizeFailed": "We couldn't score the checkpoint — your answers are saved, try again.",
+      "retry": "Try again"
+    },
+    "results": {
+      "passedTitle": "Checkpoint passed!",
+      "failedTitle": "Not quite there yet",
+      "unitLabel": "{unit}",
+      "scorePercent": "{percent}%",
+      "skillBreakdown": "Skill breakdown",
+      "remediationHint": "Review the lessons in this unit, then try the checkpoint again.",
+      "continue": "Continue",
+      "tryAgain": "Try again",
+      "backToUnit": "Back to unit"
     }
   },
   "Lesson": {

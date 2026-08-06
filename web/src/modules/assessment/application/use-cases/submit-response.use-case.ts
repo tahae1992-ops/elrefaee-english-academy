@@ -6,6 +6,13 @@ export interface SubmitResponseInput {
   userId: string;
   itemId: string;
   responsePayload: Record<string, unknown>;
+  /** Unit Checkpoint quizzes show immediate correct/incorrect + explanation feedback (doc 08 §3.9's Quiz behavior, distinct from Placement Test's Stage 2 diagnostic, doc 09 §5.3, which withholds it). Callers decide this per attempt kind; default false preserves Placement's existing contract exactly. */
+  revealCorrectness?: boolean;
+}
+
+export interface SubmitResponseResult {
+  isCorrect: boolean | null;
+  explanation?: string;
 }
 
 export class AttemptNotFoundError extends Error {
@@ -45,7 +52,7 @@ export class SubmitResponseUseCase {
     private readonly attempts: AttemptRepositoryPort,
   ) {}
 
-  async execute(input: SubmitResponseInput): Promise<void> {
+  async execute(input: SubmitResponseInput): Promise<SubmitResponseResult | void> {
     const attempt = await this.attempts.findById(input.attemptId);
     if (!attempt) throw new AttemptNotFoundError();
     if (attempt.userId !== input.userId) throw new AttemptNotOwnedError();
@@ -71,7 +78,8 @@ export class SubmitResponseUseCase {
         isCorrect,
         scoredBy: "auto",
       });
-      return;
+      if (!input.revealCorrectness) return;
+      return { isCorrect, explanation: item.scoringKey?.explanation };
     }
 
     // free_text (Speaking) — ungraded at MVP, no auto/AI pronunciation
@@ -83,5 +91,6 @@ export class SubmitResponseUseCase {
       isCorrect: null,
       scoredBy: "human",
     });
+    if (input.revealCorrectness) return { isCorrect: null };
   }
 }

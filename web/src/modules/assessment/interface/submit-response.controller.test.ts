@@ -30,6 +30,21 @@ describe("handleSubmitResponse", () => {
     expect(body).toEqual({ received: true });
   });
 
+  it("returns the use case's isCorrect/explanation payload when revealCorrectness is true (Unit Checkpoint)", async () => {
+    const execute = vi.fn().mockResolvedValue({ isCorrect: true, explanation: "Use 'is' with she/he/it." });
+    const { status, body } = await handleSubmitResponse(
+      fakeUseCase(execute),
+      "user-1",
+      "attempt-1",
+      { itemId: validItemId, responsePayload: { selectedOptionIndex: 0 } },
+      true,
+    );
+
+    expect(status).toBe(200);
+    expect(body).toEqual({ isCorrect: true, explanation: "Use 'is' with she/he/it." });
+    expect(execute).toHaveBeenCalledWith(expect.objectContaining({ revealCorrectness: true }));
+  });
+
   it.each([
     [AttemptNotFoundError, 404],
     [AttemptNotOwnedError, 403],

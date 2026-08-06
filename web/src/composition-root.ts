@@ -14,9 +14,13 @@ import { StartPlacementAttemptUseCase } from "@/modules/assessment/application/u
 import { SubmitResponseUseCase } from "@/modules/assessment/application/use-cases/submit-response.use-case";
 import { FinalizeAttemptUseCase } from "@/modules/assessment/application/use-cases/finalize-attempt.use-case";
 import { GetAttemptStatusUseCase } from "@/modules/assessment/application/use-cases/get-attempt-status.use-case";
+import { StartCheckpointAttemptUseCase } from "@/modules/assessment/application/use-cases/start-checkpoint-attempt.use-case";
+import { FinalizeCheckpointAttemptUseCase } from "@/modules/assessment/application/use-cases/finalize-checkpoint-attempt.use-case";
+import { GetAttemptKindUseCase } from "@/modules/assessment/application/use-cases/get-attempt-kind.use-case";
 import { DrizzleItemBankAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-item-bank.adapter";
 import { DrizzleAttemptAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-attempt.adapter";
 import { DrizzleResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-result.adapter";
+import { DrizzleCheckpointResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-checkpoint-result.adapter";
 import { ListCoursesUseCase } from "@/modules/curriculum/application/use-cases/list-courses.use-case";
 import { DrizzleCourseAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-course.adapter";
 import { GetCourseDetailUseCase } from "@/modules/curriculum/application/use-cases/get-course-detail.use-case";
@@ -121,7 +125,32 @@ export function createFinalizeAttemptUseCase(): FinalizeAttemptUseCase {
 }
 
 export function createGetAttemptStatusUseCase(): GetAttemptStatusUseCase {
-  return new GetAttemptStatusUseCase(new DrizzleAttemptAdapter(), new DrizzleResultAdapter());
+  return new GetAttemptStatusUseCase(
+    new DrizzleAttemptAdapter(),
+    new DrizzleItemBankAdapter(),
+    new DrizzleResultAdapter(),
+    new DrizzleCheckpointResultAdapter(),
+  );
+}
+
+export function createStartCheckpointAttemptUseCase(): StartCheckpointAttemptUseCase {
+  return new StartCheckpointAttemptUseCase(new DrizzleItemBankAdapter(), new DrizzleAttemptAdapter());
+}
+
+export function createFinalizeCheckpointAttemptUseCase(): FinalizeCheckpointAttemptUseCase {
+  return new FinalizeCheckpointAttemptUseCase(
+    new DrizzleItemBankAdapter(),
+    new DrizzleAttemptAdapter(),
+    new DrizzleCheckpointResultAdapter(),
+  );
+}
+
+export function createGetAttemptKindUseCase(): GetAttemptKindUseCase {
+  return new GetAttemptKindUseCase(new DrizzleAttemptAdapter(), new DrizzleItemBankAdapter());
+}
+
+export function createDrizzleCheckpointResultAdapter(): DrizzleCheckpointResultAdapter {
+  return new DrizzleCheckpointResultAdapter();
 }
 
 export function createListCoursesUseCase(): ListCoursesUseCase {

@@ -8,6 +8,21 @@ export interface PlacementBlueprint {
   gradedSkills: string[];
 }
 
+export interface CheckpointBlueprint {
+  id: string;
+  unitId: string;
+  itemCount: number;
+  passThresholdPercent: number;
+  skills: string[];
+}
+
+/** What a route handler needs to dispatch `/assessment-attempts/{id}/submit` and `/{id}` to the right (placement vs. checkpoint) use-case, without either module reaching into the other's internals. */
+export interface AttemptBlueprintMeta {
+  kind: "placement" | "unit_checkpoint";
+  unitId: string | null;
+  passThresholdPercent: number;
+}
+
 /** Client-safe shape — deliberately excludes `scoringKey`. */
 export interface AssessmentItem {
   id: string;
@@ -39,5 +54,17 @@ export interface ItemBankPort {
    */
   getItemForScoring(
     itemId: string,
-  ): Promise<{ skill: string; cefrLevel: CefrLevel; itemType: string; scoringKey: { correctOptionIndex: number } | null } | null>;
+  ): Promise<{ skill: string; cefrLevel: CefrLevel; itemType: string; scoringKey: { correctOptionIndex: number; explanation?: string } | null } | null>;
+
+  /** FR-06/FR-08: the one checkpoint blueprint for a unit, if items have been authored for it. */
+  getCheckpointBlueprint(unitId: string): Promise<CheckpointBlueprint | null>;
+
+  /** All items authored for this unit's checkpoint (unlike placement, the full set is used every attempt — no per-attempt sampling at this MVP scope). */
+  assembleCheckpointItems(unitId: string, itemCount: number): Promise<AssessmentItem[]>;
+
+  /** Resume path: re-fetch the client-safe shape of an already-assembled item set by id, in the given order. */
+  getItemsByIds(itemIds: string[]): Promise<AssessmentItem[]>;
+
+  /** What `/assessment-attempts/{id}/submit` and `/{id}` need to dispatch to the right scoring path. */
+  getBlueprintMeta(blueprintId: string): Promise<AttemptBlueprintMeta | null>;
 }

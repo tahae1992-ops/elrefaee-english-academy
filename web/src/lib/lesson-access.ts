@@ -16,20 +16,21 @@ export function computeAllUnitAccess(
   units: Pick<PublishedUnit, "id" | "orderIndex">[],
   lessonsByUnit: Map<string, PublishedLessonSummary[]>,
   progressByLesson: Map<string, LessonProgressStatus>,
+  passedCheckpointUnitIds: ReadonlySet<string>,
 ): Map<string, UnitAccessState> {
   const sorted = [...units].sort((a, b) => a.orderIndex - b.orderIndex);
   const result = new Map<string, UnitAccessState>();
 
-  let previousUnitAllCompleted = true;
+  let previousUnitFullyCompleted = true;
   for (let i = 0; i < sorted.length; i++) {
     const unit = sorted[i];
     const lessons = lessonsByUnit.get(unit.id) ?? [];
     const statuses = lessons.map((lesson) => progressByLesson.get(lesson.id) ?? "not_started");
 
-    const access = computeUnitAccess(i === 0, previousUnitAllCompleted, statuses);
+    const access = computeUnitAccess(i === 0, previousUnitFullyCompleted, statuses, passedCheckpointUnitIds.has(unit.id));
     result.set(unit.id, access);
 
-    previousUnitAllCompleted = statuses.length > 0 && statuses.every((status) => status === "completed");
+    previousUnitFullyCompleted = access === "completed";
   }
 
   return result;

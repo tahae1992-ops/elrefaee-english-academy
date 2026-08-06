@@ -15,22 +15,43 @@ function item(id: string): AssessmentItem {
   return { id, skill: "grammar", cefrLevel: "b1", itemType: "multiple_choice", prompt: {} };
 }
 
+function fakeItemBank(overrides: Partial<ItemBankPort> = {}): ItemBankPort {
+  return {
+    getBlueprint: vi.fn(),
+    assembleItems: vi.fn(),
+    getSpeakingPrompt: vi.fn(),
+    getItemForScoring: vi.fn(),
+    getCheckpointBlueprint: vi.fn(),
+    assembleCheckpointItems: vi.fn(),
+    getItemsByIds: vi.fn(),
+    getBlueprintMeta: vi.fn(),
+    ...overrides,
+  };
+}
+
+function fakeAttempts(overrides: Partial<AttemptRepositoryPort> = {}): AttemptRepositoryPort {
+  return {
+    create: vi.fn(),
+    findById: vi.fn(),
+    findInProgressByUserAndBlueprint: vi.fn(),
+    hasResponseForItem: vi.fn(),
+    recordResponse: vi.fn(),
+    getResponses: vi.fn(),
+    markCompleted: vi.fn(),
+    ...overrides,
+  };
+}
+
 describe("StartPlacementAttemptUseCase", () => {
   it("assembles tiers around the self-assessed level, includes a speaking prompt, and creates the attempt", async () => {
-    const itemBank: ItemBankPort = {
+    const itemBank: ItemBankPort = fakeItemBank({
       getBlueprint: vi.fn().mockResolvedValue(blueprint),
       assembleItems: vi.fn().mockResolvedValue([item("g1"), item("g2")]),
       getSpeakingPrompt: vi.fn().mockResolvedValue(item("speak-1")),
-      getItemForScoring: vi.fn(),
-    };
-    const attempts: AttemptRepositoryPort = {
-      create: vi.fn().mockResolvedValue({ id: "attempt-1", userId: "user-1", status: "in_progress", assembledItems: ["g1", "g2", "speak-1"] }),
-      findById: vi.fn(),
-      hasResponseForItem: vi.fn(),
-      recordResponse: vi.fn(),
-      getResponses: vi.fn(),
-      markCompleted: vi.fn(),
-    };
+    });
+    const attempts: AttemptRepositoryPort = fakeAttempts({
+      create: vi.fn().mockResolvedValue({ id: "attempt-1", userId: "user-1", blueprintId: "blueprint-1", status: "in_progress", assembledItems: ["g1", "g2", "speak-1"] }),
+    });
 
     const result = await new StartPlacementAttemptUseCase(itemBank, attempts).execute({
       userId: "user-1",
@@ -45,20 +66,14 @@ describe("StartPlacementAttemptUseCase", () => {
   });
 
   it("still assembles a valid attempt when no speaking prompt is available", async () => {
-    const itemBank: ItemBankPort = {
+    const itemBank: ItemBankPort = fakeItemBank({
       getBlueprint: vi.fn().mockResolvedValue(blueprint),
       assembleItems: vi.fn().mockResolvedValue([item("g1")]),
       getSpeakingPrompt: vi.fn().mockResolvedValue(null),
-      getItemForScoring: vi.fn(),
-    };
-    const attempts: AttemptRepositoryPort = {
-      create: vi.fn().mockResolvedValue({ id: "attempt-1", userId: "user-1", status: "in_progress", assembledItems: ["g1"] }),
-      findById: vi.fn(),
-      hasResponseForItem: vi.fn(),
-      recordResponse: vi.fn(),
-      getResponses: vi.fn(),
-      markCompleted: vi.fn(),
-    };
+    });
+    const attempts: AttemptRepositoryPort = fakeAttempts({
+      create: vi.fn().mockResolvedValue({ id: "attempt-1", userId: "user-1", blueprintId: "blueprint-1", status: "in_progress", assembledItems: ["g1"] }),
+    });
 
     const result = await new StartPlacementAttemptUseCase(itemBank, attempts).execute({
       userId: "user-1",
@@ -69,20 +84,8 @@ describe("StartPlacementAttemptUseCase", () => {
   });
 
   it("throws BlueprintNotFoundError when the placement blueprint isn't configured", async () => {
-    const itemBank: ItemBankPort = {
-      getBlueprint: vi.fn().mockResolvedValue(null),
-      assembleItems: vi.fn(),
-      getSpeakingPrompt: vi.fn(),
-      getItemForScoring: vi.fn(),
-    };
-    const attempts: AttemptRepositoryPort = {
-      create: vi.fn(),
-      findById: vi.fn(),
-      hasResponseForItem: vi.fn(),
-      recordResponse: vi.fn(),
-      getResponses: vi.fn(),
-      markCompleted: vi.fn(),
-    };
+    const itemBank: ItemBankPort = fakeItemBank({ getBlueprint: vi.fn().mockResolvedValue(null) });
+    const attempts: AttemptRepositoryPort = fakeAttempts();
 
     await expect(
       new StartPlacementAttemptUseCase(itemBank, attempts).execute({ userId: "user-1", selfAssessedLevel: "b1" }),

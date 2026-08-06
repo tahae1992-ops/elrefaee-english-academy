@@ -6,33 +6,53 @@ import type { ItemBankPort } from "@/modules/assessment/application/ports/item-b
 import type { ResultRepositoryPort } from "@/modules/assessment/application/ports/result-repository-port";
 
 function fakeAttempt(overrides: Partial<AttemptRecord> = {}): AttemptRecord {
-  return { id: "attempt-1", userId: "user-1", status: "in_progress", assembledItems: [], ...overrides };
+  return { id: "attempt-1", userId: "user-1", blueprintId: "blueprint-1", status: "in_progress", assembledItems: [], ...overrides };
+}
+
+function fakeItemBank(overrides: Partial<ItemBankPort> = {}): ItemBankPort {
+  return {
+    getBlueprint: vi.fn(),
+    assembleItems: vi.fn(),
+    getSpeakingPrompt: vi.fn(),
+    getItemForScoring: vi.fn(),
+    getCheckpointBlueprint: vi.fn(),
+    assembleCheckpointItems: vi.fn(),
+    getItemsByIds: vi.fn(),
+    getBlueprintMeta: vi.fn(),
+    ...overrides,
+  };
+}
+
+function fakeAttempts(overrides: Partial<AttemptRepositoryPort> = {}): AttemptRepositoryPort {
+  return {
+    create: vi.fn(),
+    findById: vi.fn(),
+    findInProgressByUserAndBlueprint: vi.fn(),
+    hasResponseForItem: vi.fn(),
+    recordResponse: vi.fn(),
+    getResponses: vi.fn(),
+    markCompleted: vi.fn(),
+    ...overrides,
+  };
 }
 
 describe("FinalizeAttemptUseCase", () => {
   it("scores only graded (non-null isCorrect) responses, saves the result, and marks the attempt completed", async () => {
-    const itemBank: ItemBankPort = {
-      getBlueprint: vi.fn(),
-      assembleItems: vi.fn(),
-      getSpeakingPrompt: vi.fn(),
+    const itemBank: ItemBankPort = fakeItemBank({
       // Only g1/g2 are ever looked up — the "speak-1" response is
       // filtered out (isCorrect: null) before any item lookup happens.
       getItemForScoring: vi
         .fn()
         .mockResolvedValue({ skill: "grammar", cefrLevel: "b1", itemType: "multiple_choice", scoringKey: null }),
-    };
-    const attempts: AttemptRepositoryPort = {
-      create: vi.fn(),
+    });
+    const attempts: AttemptRepositoryPort = fakeAttempts({
       findById: vi.fn().mockResolvedValue(fakeAttempt()),
-      hasResponseForItem: vi.fn(),
-      recordResponse: vi.fn(),
       getResponses: vi.fn().mockResolvedValue([
         { itemId: "g1", isCorrect: true },
         { itemId: "g2", isCorrect: true },
         { itemId: "speak-1", isCorrect: null }, // ungraded, must be excluded from scoring
       ]),
-      markCompleted: vi.fn(),
-    };
+    });
     const results: ResultRepositoryPort = {
       save: vi.fn().mockResolvedValue({ id: "result-1", attemptId: "attempt-1", userId: "user-1", skillLevels: {}, overallLevel: "b1", createdAt: new Date() }),
       findByAttemptId: vi.fn(),
@@ -48,20 +68,10 @@ describe("FinalizeAttemptUseCase", () => {
   });
 
   it("throws AttemptNotOwnedError rather than scoring another user's attempt", async () => {
-    const itemBank: ItemBankPort = {
-      getBlueprint: vi.fn(),
-      assembleItems: vi.fn(),
-      getSpeakingPrompt: vi.fn(),
-      getItemForScoring: vi.fn(),
-    };
-    const attempts: AttemptRepositoryPort = {
-      create: vi.fn(),
+    const itemBank: ItemBankPort = fakeItemBank();
+    const attempts: AttemptRepositoryPort = fakeAttempts({
       findById: vi.fn().mockResolvedValue(fakeAttempt({ userId: "someone-else" })),
-      hasResponseForItem: vi.fn(),
-      recordResponse: vi.fn(),
-      getResponses: vi.fn(),
-      markCompleted: vi.fn(),
-    };
+    });
     const results: ResultRepositoryPort = { save: vi.fn(), findByAttemptId: vi.fn() };
 
     await expect(

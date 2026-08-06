@@ -10,7 +10,7 @@ import type { AttemptRepositoryPort, AttemptRecord } from "@/modules/assessment/
 import type { ItemBankPort } from "@/modules/assessment/application/ports/item-bank-port";
 
 function fakeAttempt(overrides: Partial<AttemptRecord> = {}): AttemptRecord {
-  return { id: "attempt-1", userId: "user-1", status: "in_progress", assembledItems: ["item-1"], ...overrides };
+  return { id: "attempt-1", userId: "user-1", blueprintId: "blueprint-1", status: "in_progress", assembledItems: ["item-1"], ...overrides };
 }
 
 function buildPorts(overrides: { itemBank?: Partial<ItemBankPort>; attempts?: Partial<AttemptRepositoryPort> } = {}) {
@@ -21,11 +21,16 @@ function buildPorts(overrides: { itemBank?: Partial<ItemBankPort>; attempts?: Pa
     getItemForScoring: vi
       .fn()
       .mockResolvedValue({ skill: "grammar", cefrLevel: "b1", itemType: "multiple_choice", scoringKey: { correctOptionIndex: 1 } }),
+    getCheckpointBlueprint: vi.fn(),
+    assembleCheckpointItems: vi.fn(),
+    getItemsByIds: vi.fn(),
+    getBlueprintMeta: vi.fn(),
     ...overrides.itemBank,
   };
   const attempts: AttemptRepositoryPort = {
     create: vi.fn(),
     findById: vi.fn().mockResolvedValue(fakeAttempt()),
+    findInProgressByUserAndBlueprint: vi.fn(),
     hasResponseForItem: vi.fn().mockResolvedValue(false),
     recordResponse: vi.fn().mockResolvedValue(undefined),
     getResponses: vi.fn(),
@@ -75,6 +80,36 @@ describe("SubmitResponseUseCase", () => {
     expect(attempts.recordResponse).toHaveBeenCalledWith(
       expect.objectContaining({ isCorrect: null, scoredBy: "human" }),
     );
+  });
+
+  it("returns nothing when revealCorrectness is not set (Placement Test's Stage 2 contract)", async () => {
+    const { itemBank, attempts } = buildPorts();
+    const useCase = new SubmitResponseUseCase(itemBank, attempts);
+
+    const result = await useCase.execute({ attemptId: "attempt-1", userId: "user-1", itemId: "item-1", responsePayload: { selectedOptionIndex: 1 } });
+
+    expect(result).toBeUndefined();
+  });
+
+  it("returns isCorrect + explanation when revealCorrectness is set (Unit Checkpoint's immediate-feedback contract)", async () => {
+    const { itemBank, attempts } = buildPorts({
+      itemBank: {
+        getItemForScoring: vi
+          .fn()
+          .mockResolvedValue({ skill: "grammar", cefrLevel: "a1", itemType: "multiple_choice", scoringKey: { correctOptionIndex: 1, explanation: "Use 'is' with she/he/it." } }),
+      },
+    });
+    const useCase = new SubmitResponseUseCase(itemBank, attempts);
+
+    const result = await useCase.execute({
+      attemptId: "attempt-1",
+      userId: "user-1",
+      itemId: "item-1",
+      responsePayload: { selectedOptionIndex: 1 },
+      revealCorrectness: true,
+    });
+
+    expect(result).toEqual({ isCorrect: true, explanation: "Use 'is' with she/he/it." });
   });
 
   it("throws AttemptNotOwnedError when the attempt belongs to a different user", async () => {

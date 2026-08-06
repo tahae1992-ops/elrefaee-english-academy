@@ -9,6 +9,24 @@ import type {
   StoredResponse,
 } from "@/modules/assessment/application/ports/attempt-repository-port";
 
+const ATTEMPT_COLUMNS = {
+  id: attempts.id,
+  userId: attempts.userId,
+  blueprintId: attempts.blueprintId,
+  status: attempts.status,
+  assembledItems: attempts.assembledItems,
+};
+
+function toAttemptRecord(row: {
+  id: string;
+  userId: string;
+  blueprintId: string;
+  status: string;
+  assembledItems: string[];
+}): AttemptRecord {
+  return { id: row.id, userId: row.userId, blueprintId: row.blueprintId, status: row.status as AttemptRecord["status"], assembledItems: row.assembledItems };
+}
+
 export class DrizzleAttemptAdapter implements AttemptRepositoryPort {
   async create(input: CreateAttemptInput): Promise<AttemptRecord> {
     const [row] = await getDb()
@@ -19,19 +37,25 @@ export class DrizzleAttemptAdapter implements AttemptRepositoryPort {
         selfAssessedLevel: input.selfAssessedLevel,
         assembledItems: input.assembledItemIds,
       })
-      .returning({ id: attempts.id, userId: attempts.userId, status: attempts.status, assembledItems: attempts.assembledItems });
+      .returning(ATTEMPT_COLUMNS);
 
-    return { id: row.id, userId: row.userId, status: row.status as AttemptRecord["status"], assembledItems: row.assembledItems };
+    return toAttemptRecord(row);
   }
 
   async findById(attemptId: string): Promise<AttemptRecord | null> {
+    const [row] = await getDb().select(ATTEMPT_COLUMNS).from(attempts).where(eq(attempts.id, attemptId)).limit(1);
+
+    return row ? toAttemptRecord(row) : null;
+  }
+
+  async findInProgressByUserAndBlueprint(userId: string, blueprintId: string): Promise<AttemptRecord | null> {
     const [row] = await getDb()
-      .select({ id: attempts.id, userId: attempts.userId, status: attempts.status, assembledItems: attempts.assembledItems })
+      .select(ATTEMPT_COLUMNS)
       .from(attempts)
-      .where(eq(attempts.id, attemptId))
+      .where(and(eq(attempts.userId, userId), eq(attempts.blueprintId, blueprintId), eq(attempts.status, "in_progress")))
       .limit(1);
 
-    return row ? { id: row.id, userId: row.userId, status: row.status as AttemptRecord["status"], assembledItems: row.assembledItems } : null;
+    return row ? toAttemptRecord(row) : null;
   }
 
   async hasResponseForItem(attemptId: string, itemId: string): Promise<boolean> {

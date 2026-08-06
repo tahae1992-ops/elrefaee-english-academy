@@ -2,6 +2,7 @@ import {
   createGetCourseDetailUseCase,
   createGetLessonProgressUseCase,
   createDrizzleLessonAdapter,
+  createDrizzleCheckpointResultAdapter,
 } from "@/composition-root";
 import { computeAllUnitAccess, resolveResumeTarget } from "@/lib/lesson-access";
 import type { CourseDetail, PublishedLessonSummary } from "@/modules/curriculum/interface/types";
@@ -22,9 +23,10 @@ export interface CourseProgressSnapshot {
  * Course Details/Unit/Lesson pages and every access-gated lesson API
  * route, so this exact composition (and its access-gating guarantee)
  * isn't duplicated with subtly different logic in each call site.
- * Three round trips total (course+units, all lessons for the course,
- * progress for those lessons) regardless of how many units/lessons
- * exist — same N+1-avoidance discipline as the Placement Test fixes.
+ * Four round trips total (course+units, all lessons for the course,
+ * progress for those lessons, passed-checkpoint unit ids) regardless of
+ * how many units/lessons exist — same N+1-avoidance discipline as the
+ * Placement Test fixes.
  */
 export async function resolveCourseProgress(courseId: string, userId: string): Promise<CourseProgressSnapshot> {
   const courseDetail = await createGetCourseDetailUseCase().execute(courseId);
@@ -44,7 +46,12 @@ export async function resolveCourseProgress(courseId: string, userId: string): P
     lessonsByUnit.set(lesson.unitId, existing);
   }
 
-  const unitAccess = computeAllUnitAccess(courseDetail.units, lessonsByUnit, statusByLesson);
+  const passedCheckpointUnitIds = await createDrizzleCheckpointResultAdapter().findPassedUnitIds(
+    userId,
+    courseDetail.units.map((unit) => unit.id),
+  );
+
+  const unitAccess = computeAllUnitAccess(courseDetail.units, lessonsByUnit, statusByLesson, passedCheckpointUnitIds);
   const resumeTarget = resolveResumeTarget(courseDetail.units, lessonsByUnit, statusByLesson, unitAccess);
 
   return { courseDetail, lessonsForCourse, lessonsByUnit, statusByLesson, unitAccess, resumeTarget };

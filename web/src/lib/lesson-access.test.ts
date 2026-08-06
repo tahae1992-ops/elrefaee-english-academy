@@ -23,13 +23,13 @@ describe("computeAllUnitAccess", () => {
       ["l2", "not_started"],
     ]);
 
-    const result = computeAllUnitAccess(units, lessonsByUnit, progress);
+    const result = computeAllUnitAccess(units, lessonsByUnit, progress, new Set());
 
     expect(result.get("unit-1")).toBe("in_progress");
     expect(result.get("unit-2")).toBe("locked");
   });
 
-  it("unlocks unit 2 once every lesson in unit 1 is completed", () => {
+  it("unit 1 becomes checkpoint_available (not completed) once its lessons are done but its checkpoint isn't passed — unit 2 stays locked", () => {
     const lessonsByUnit = new Map([
       ["unit-1", [lesson("l1", "unit-1", 1), lesson("l2", "unit-1", 2)]],
       ["unit-2", [lesson("l3", "unit-2", 1)]],
@@ -39,7 +39,23 @@ describe("computeAllUnitAccess", () => {
       ["l2", "completed"],
     ]);
 
-    const result = computeAllUnitAccess(units, lessonsByUnit, progress);
+    const result = computeAllUnitAccess(units, lessonsByUnit, progress, new Set());
+
+    expect(result.get("unit-1")).toBe("checkpoint_available");
+    expect(result.get("unit-2")).toBe("locked");
+  });
+
+  it("unlocks unit 2 once unit 1's lessons are done AND its checkpoint is passed", () => {
+    const lessonsByUnit = new Map([
+      ["unit-1", [lesson("l1", "unit-1", 1), lesson("l2", "unit-1", 2)]],
+      ["unit-2", [lesson("l3", "unit-2", 1)]],
+    ]);
+    const progress = new Map<string, LessonProgressStatus>([
+      ["l1", "completed"],
+      ["l2", "completed"],
+    ]);
+
+    const result = computeAllUnitAccess(units, lessonsByUnit, progress, new Set(["unit-1"]));
 
     expect(result.get("unit-1")).toBe("completed");
     expect(result.get("unit-2")).toBe("available");

@@ -4,9 +4,17 @@ import { itemBank, testBlueprints } from "@/modules/assessment/infrastructure/db
 import type { CefrLevel } from "@/modules/assessment/domain/services/score-placement-attempt";
 import type {
   AssessmentItem,
+  AttemptBlueprintMeta,
+  CheckpointBlueprint,
   ItemBankPort,
   PlacementBlueprint,
 } from "@/modules/assessment/application/ports/item-bank-port";
+
+interface CheckpointBlueprintRules {
+  itemCount: number;
+  passThresholdPercent: number;
+  skills: string[];
+}
 
 interface BlueprintRules {
   itemsPerSkillPerTier: number;
@@ -108,7 +116,7 @@ export class DrizzleItemBankAdapter implements ItemBankPort {
 
   async getItemForScoring(
     itemId: string,
-  ): Promise<{ skill: string; cefrLevel: CefrLevel; itemType: string; scoringKey: { correctOptionIndex: number } | null } | null> {
+  ): Promise<{ skill: string; cefrLevel: CefrLevel; itemType: string; scoringKey: { correctOptionIndex: number; explanation?: string } | null } | null> {
     const [row] = await getDb()
       .select({
         skill: itemBank.skill,
@@ -125,7 +133,57 @@ export class DrizzleItemBankAdapter implements ItemBankPort {
       skill: row.skill,
       cefrLevel: row.cefrLevel,
       itemType: row.itemType,
-      scoringKey: (row.scoringKey as { correctOptionIndex: number } | null) ?? null,
+      scoringKey: (row.scoringKey as { correctOptionIndex: number; explanation?: string } | null) ?? null,
     };
+  }
+
+  async getCheckpointBlueprint(unitId: string): Promise<CheckpointBlueprint | null> {
+    const [row] = await getDb()
+      .select({ id: testBlueprints.id, unitId: testBlueprints.unitId, rules: testBlueprints.rules })
+      .from(testBlueprints)
+      .where(and(eq(testBlueprints.unitId, unitId), eq(testBlueprints.kind, "unit_checkpoint")))
+      .limit(1);
+
+    if (!row || !row.unitId) return null;
+    const rules = row.rules as CheckpointBlueprintRules;
+    return { id: row.id, unitId: row.unitId, itemCount: rules.itemCount, passThresholdPercent: rules.passThresholdPercent, skills: rules.skills };
+  }
+
+  async assembleCheckpointItems(unitId: string, itemCount: number): Promise<AssessmentItem[]> {
+    // The full authored set is used every attempt at this MVP scope
+    // (no per-attempt sampling, unlike placement's tiered assembly) —
+    // `itemCount` is the blueprint's own declared size, used here only
+    // as a defensive cap in case the item bank ever grows past it.
+    const rows = await getDb()
+      .select({ id: itemBank.id, skill: itemBank.skill, cefrLevel: itemBank.cefrLevel, itemType: itemBank.itemType, prompt: itemBank.prompt })
+      .from(itemBank)
+      .where(eq(itemBank.unitId, unitId))
+      .limit(itemCount);
+
+    return rows.map(toAssessmentItem);
+  }
+
+  async getItemsByIds(itemIds: string[]): Promise<AssessmentItem[]> {
+    if (itemIds.length === 0) return [];
+    const rows = await getDb()
+      .select({ id: itemBank.id, skill: itemBank.skill, cefrLevel: itemBank.cefrLevel, itemType: itemBank.itemType, prompt: itemBank.prompt })
+      .from(itemBank)
+      .where(inArray(itemBank.id, itemIds));
+
+    const byId = new Map(rows.map((row) => [row.id, toAssessmentItem(row)]));
+    return itemIds.map((id) => byId.get(id)).filter((item): item is AssessmentItem => item !== undefined);
+  }
+
+  async getBlueprintMeta(blueprintId: string): Promise<AttemptBlueprintMeta | null> {
+    const [row] = await getDb()
+      .select({ kind: testBlueprints.kind, unitId: testBlueprints.unitId, rules: testBlueprints.rules })
+      .from(testBlueprints)
+      .where(eq(testBlueprints.id, blueprintId))
+      .limit(1);
+
+    if (!row) return null;
+    const kind = row.kind as AttemptBlueprintMeta["kind"];
+    const rules = row.rules as { passThresholdPercent: number };
+    return { kind, unitId: row.unitId, passThresholdPercent: rules.passThresholdPercent };
   }
 }
