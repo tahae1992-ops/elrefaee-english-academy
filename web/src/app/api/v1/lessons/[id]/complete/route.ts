@@ -42,7 +42,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json(gate.body, { status: gate.status });
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
   const { status, body: responseBody } = await handleCompleteLesson(createCompleteLessonUseCase(), current.userId, id, body);
   if (status !== 200) {
     return NextResponse.json(responseBody, { status });

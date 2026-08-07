@@ -17,7 +17,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json(gate.body, { status: gate.status });
   }
 
-  const body = await request.json();
+  const body = await request.json().catch(() => null);
   const { status, body: responseBody } = await handleSaveLessonPosition(createSaveLessonPositionUseCase(), current.userId, id, body);
   return NextResponse.json(responseBody, { status });
 }

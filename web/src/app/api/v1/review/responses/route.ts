@@ -24,7 +24,7 @@ export async function POST(request: Request) {
   const { status, body: responseBody, result, rating } = await handleSubmitReviewResponse(
     createSubmitReviewResponseUseCase(),
     current.userId,
-    await request.json(),
+    await request.json().catch(() => null),
     now,
   );
   if (status !== 200 || !result) {

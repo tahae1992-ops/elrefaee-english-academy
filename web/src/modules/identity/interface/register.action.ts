@@ -1,8 +1,16 @@
 "use server";
 
+import { headers } from "next/headers";
 import { z } from "zod";
-import { createAuthService } from "@/composition-root";
+import { createAuthService, createDrizzleRateLimiterAdapter } from "@/composition-root";
 import { AuthProviderError } from "@/modules/identity/application/ports/auth-provider-port";
+
+// Phase 17 security audit: no auth gate exists before an account is
+// created, so this is rate-limited by IP the same way login is --
+// mass-signup/enumeration protection, not a per-account check (there
+// is no account yet at this point).
+const REGISTER_IP_LIMIT = 10;
+const REGISTER_RATE_LIMIT_WINDOW_MINUTES = 10;
 
 const registerSchema = z.object({
   email: z.string().trim().toLowerCase().email(),
@@ -39,7 +47,7 @@ export interface RegisterErrorDebugInfo {
 
 export type RegisterActionResult =
   | { status: "success"; emailConfirmationRequired: boolean }
-  | { status: "error"; fieldErrors?: RegisterFieldErrors; message?: string; debug?: RegisterErrorDebugInfo };
+  | { status: "error"; code?: "rateLimited"; fieldErrors?: RegisterFieldErrors; message?: string; debug?: RegisterErrorDebugInfo };
 
 /**
  * Interface layer (SAD §6.1) — a Server Action instead of a REST route:
@@ -50,6 +58,16 @@ export type RegisterActionResult =
  * react-hook-form validation — never trust client validation alone.
  */
 export async function registerAction(input: unknown): Promise<RegisterActionResult> {
+  const headerList = await headers();
+  const forwardedFor = headerList.get("x-forwarded-for");
+  const ip = forwardedFor ? forwardedFor.split(",")[0].trim() : "unknown";
+  const allowed = await createDrizzleRateLimiterAdapter().checkAndIncrement(`register:ip:${ip}`, REGISTER_IP_LIMIT, REGISTER_RATE_LIMIT_WINDOW_MINUTES);
+  if (!allowed) {
+    // Semantic code, not English text -- same "no locale context here"
+    // boundary as fieldErrors; the client (RegisterForm) translates it.
+    return { status: "error", code: "rateLimited" };
+  }
+
   const parsed = registerSchema.safeParse(input);
   if (!parsed.success) {
     const fieldErrors: RegisterFieldErrors = {};

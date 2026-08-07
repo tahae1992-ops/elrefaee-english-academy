@@ -29,7 +29,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json({ error: "UNAUTHENTICATED", message: "Sign in required." }, { status: 401 });
   }
 
-  const rawBody = await request.json();
+  const rawBody = await request.json().catch(() => null);
   const parsedRequest = requestSchema.safeParse(rawBody);
   if (!parsedRequest.success) {
     return NextResponse.json({ error: "VALIDATION_FAILED", message: "Invalid request." }, { status: 400 });

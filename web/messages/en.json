@@ -18,6 +18,7 @@
     "submit": "Create account",
     "submitting": "Creating account…",
     "genericError": "Registration failed. Please try again.",
+    "rateLimited": "Too many attempts. Try again shortly.",
     "successConfirmEmail": "Account created — check {email} to confirm before signing in.",
     "successReady": "Account created. You're signed in as {email}.",
     "haveAccount": "Already have an account?",
@@ -37,6 +38,7 @@
     "genericError": "Sign-in failed. Please try again.",
     "invalidCredentials": "Invalid email or password.",
     "mfaNotImplemented": "MFA is required for this account but not yet supported.",
+    "rateLimited": "Too many attempts. Try again shortly.",
     "noAccount": "New here?",
     "registerLink": "Create an account",
     "validation": {

@@ -11,6 +11,7 @@ import { handleFinalizeAttempt } from "@/modules/assessment/interface/finalize-a
 import { handleFinalizeCheckpointAttempt } from "@/modules/assessment/interface/finalize-checkpoint-attempt.controller";
 import { handleFinalizeCertificationAttempt } from "@/modules/assessment/interface/finalize-certification-attempt.controller";
 import { AttemptNotFoundError, AttemptNotOwnedError } from "@/modules/assessment/interface/types";
+import { logAccessDenied } from "@/lib/log-access-denied";
 
 /**
  * API Spec §6.5: POST /assessment-attempts/{id}/submit — one shared
@@ -37,7 +38,10 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     kind = await createGetAttemptKindUseCase().execute(id, user.id);
   } catch (error) {
     if (error instanceof AttemptNotFoundError) return NextResponse.json({ error: "NOT_FOUND", message: error.message }, { status: 404 });
-    if (error instanceof AttemptNotOwnedError) return NextResponse.json({ error: "FORBIDDEN", message: error.message }, { status: 403 });
+    if (error instanceof AttemptNotOwnedError) {
+      await logAccessDenied(user.id, "assessment_attempt.access_denied", "assessment_attempt", id);
+      return NextResponse.json({ error: "FORBIDDEN", message: error.message }, { status: 403 });
+    }
     throw error;
   }
 

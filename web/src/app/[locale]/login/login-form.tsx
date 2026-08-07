@@ -44,6 +44,7 @@ function buildFormSchema(t: Translator) {
 function translateApiError(t: Translator, error: string | undefined) {
   if (error === "UNAUTHENTICATED") return t("invalidCredentials");
   if (error === "MFA_NOT_IMPLEMENTED") return t("mfaNotImplemented");
+  if (error === "RATE_LIMITED") return t("rateLimited");
   return t("genericError");
 }
 

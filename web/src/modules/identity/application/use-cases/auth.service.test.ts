@@ -3,7 +3,7 @@ import { AuthService } from "./auth.service";
 import type { AuthProviderPort } from "@/modules/identity/application/ports/auth-provider-port";
 import type { UserProfileRepositoryPort } from "@/modules/identity/application/ports/user-profile-repository-port";
 import type { RoleRepositoryPort } from "@/modules/identity/application/ports/role-repository-port";
-import type { AuditLogPort } from "@/modules/identity/application/ports/audit-log-port";
+import type { AuditLogPort } from "@/shared/application/ports/audit-log-port";
 import type { RefreshTokenRepositoryPort } from "@/modules/identity/application/ports/refresh-token-repository-port";
 
 function buildService(overrides: {

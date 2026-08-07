@@ -1,5 +1,7 @@
 import { createListRolesUseCase } from "@/composition-root";
 import { handleListRoles } from "@/modules/identity/interface/roles.controller";
+import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
+import { redirect } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -8,9 +10,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
  * SRS §4's matrix), read through the real Application/Infrastructure
  * stack (ListRolesWithPermissionsUseCase → DrizzleRoleAdapter), not a
  * one-off query. Doubles as the seed of the future Admin "Manage
- * Roles" screen.
+ * Roles" screen. Phase 17 security audit finding: this page lives
+ * outside the `(app)` route group, so it never got that layout's auth
+ * guard -- the entire role/permission matrix was readable by anyone,
+ * unauthenticated. Guarded directly here rather than relocated, since
+ * this is scaffolding for a future admin-only screen (Phase 15), not
+ * a page every logged-in learner should see either.
  */
-export default async function RolesPage() {
+export default async function RolesPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  const current = await getCurrentUserWithDashboardData();
+  if (!current) {
+    redirect({ href: "/login", locale });
+    return;
+  }
+
   const roles = await handleListRoles(createListRolesUseCase());
 
   return (

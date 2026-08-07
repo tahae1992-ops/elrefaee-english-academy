@@ -85,7 +85,7 @@ export function RegisterForm() {
     }
     setSubmitState({
       status: "error",
-      message: result.message ?? t("genericError"),
+      message: result.code === "rateLimited" ? t("rateLimited") : (result.message ?? t("genericError")),
       debug: result.debug,
     });
   }

@@ -3,6 +3,7 @@ import { createGetAttemptKindUseCase, createSubmitResponseUseCase } from "@/comp
 import { createSupabaseServerClient } from "@/shared/infrastructure/supabase/server-client";
 import { handleSubmitResponse } from "@/modules/assessment/interface/submit-response.controller";
 import { AttemptNotFoundError, AttemptNotOwnedError } from "@/modules/assessment/interface/types";
+import { logAccessDenied } from "@/lib/log-access-denied";
 
 /**
  * API Spec §6.5: POST /assessment-attempts/{id}/responses — shared by
@@ -27,7 +28,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     revealCorrectness = kind.kind === "unit_checkpoint";
   } catch (error) {
     if (error instanceof AttemptNotFoundError) return NextResponse.json({ error: "NOT_FOUND", message: error.message }, { status: 404 });
-    if (error instanceof AttemptNotOwnedError) return NextResponse.json({ error: "FORBIDDEN", message: error.message }, { status: 403 });
+    if (error instanceof AttemptNotOwnedError) {
+      await logAccessDenied(user.id, "assessment_attempt.access_denied", "assessment_attempt", id);
+      return NextResponse.json({ error: "FORBIDDEN", message: error.message }, { status: 403 });
+    }
     throw error;
   }
 

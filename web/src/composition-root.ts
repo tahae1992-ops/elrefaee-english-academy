@@ -7,7 +7,7 @@ import { AuthService } from "@/modules/identity/application/use-cases/auth.servi
 import { SupabaseAuthAdapter } from "@/modules/identity/infrastructure/adapters/supabase-auth.adapter";
 import { DrizzleUserProfileAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-user-profile.adapter";
 import { GetDashboardDataUseCase } from "@/modules/identity/application/use-cases/get-dashboard-data.use-case";
-import { DrizzleAuditLogAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-audit-log.adapter";
+import { DrizzleAuditLogAdapter } from "@/shared/infrastructure/adapters/drizzle-audit-log.adapter";
 import { DrizzleRefreshTokenAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-refresh-token.adapter";
 import { UpdateLearnerLevelUseCase } from "@/modules/identity/application/use-cases/update-learner-level.use-case";
 import { StartPlacementAttemptUseCase } from "@/modules/assessment/application/use-cases/start-placement-attempt.use-case";
@@ -107,6 +107,11 @@ export function createAuthService(): AuthService {
   const auditLog = new DrizzleAuditLogAdapter();
   const refreshTokens = new DrizzleRefreshTokenAdapter();
   return new AuthService(authProvider, userProfileRepository, roleRepository, auditLog, refreshTokens);
+}
+
+/** Exposed directly (not just via createAuthService) — Phase 17 security audit: every module's interface layer needs this to log ownership-violation (403) events, not just identity's own login flow. */
+export function createDrizzleAuditLogAdapter(): DrizzleAuditLogAdapter {
+  return new DrizzleAuditLogAdapter();
 }
 
 export function createGetDashboardDataUseCase(): GetDashboardDataUseCase {

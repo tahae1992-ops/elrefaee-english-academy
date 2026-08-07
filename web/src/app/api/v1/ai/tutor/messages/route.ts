@@ -17,7 +17,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "UNAUTHENTICATED", message: "Sign in required." }, { status: 401 });
   }
 
-  const rawBody = await request.json();
+  const rawBody = await request.json().catch(() => null);
   const parsed = sendTutorMessageRequestSchema.safeParse(rawBody);
   if (!parsed.success) {
     return NextResponse.json({ error: "VALIDATION_FAILED", message: "Invalid request." }, { status: 400 });

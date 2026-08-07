@@ -20,7 +20,8 @@ export type LoginResponseBody =
   | { accessToken: string; refreshToken: string; expiresIn: number; roles: string[] }
   | { error: "VALIDATION_FAILED"; message: string }
   | { error: "UNAUTHENTICATED"; message: string; debug?: LoginErrorDebugInfo }
-  | { error: "MFA_NOT_IMPLEMENTED"; message: string };
+  | { error: "MFA_NOT_IMPLEMENTED"; message: string }
+  | { error: "RATE_LIMITED"; message: string };
 
 /**
  * Interface layer for API Spec §7.1 `POST /api/v1/auth/login` — a real

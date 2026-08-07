@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createGetAttemptStatusUseCase } from "@/composition-root";
 import { createSupabaseServerClient } from "@/shared/infrastructure/supabase/server-client";
 import { handleGetAttemptStatus } from "@/modules/assessment/interface/get-attempt-status.controller";
+import { logAccessDenied } from "@/lib/log-access-denied";
 
 // API Spec §7: GET /assessment-attempts/{id}.
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -16,5 +17,8 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   }
 
   const { status, body } = await handleGetAttemptStatus(createGetAttemptStatusUseCase(), user.id, id);
+  if (status === 403) {
+    await logAccessDenied(user.id, "assessment_attempt.access_denied", "assessment_attempt", id);
+  }
   return NextResponse.json(body, { status });
 }
