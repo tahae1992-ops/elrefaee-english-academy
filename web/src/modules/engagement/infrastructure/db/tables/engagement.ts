@@ -33,7 +33,10 @@ export const xpTransactions = engagementSchema.table(
     reason: varchar("reason", { length: 60 }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("xp_transactions_user_idx").on(table.userId)],
+  // Phase 16: composite replaces the plain user_id index -- every
+  // read (recent transactions, XP-earned-since) filters userId AND
+  // orders/ranges on createdAt (migration 0036).
+  (table) => [index("xp_transactions_user_created_idx").on(table.userId, table.createdAt)],
 );
 
 export const xpBalances = engagementSchema.table("xp_balances", {

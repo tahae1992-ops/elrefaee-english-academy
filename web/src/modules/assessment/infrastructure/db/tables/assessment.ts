@@ -49,7 +49,11 @@ export const itemBank = assessmentSchema.table("item_bank", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   // Unit Checkpoint slice: null for placement items (unit-agnostic); set for checkpoint items, scoping them to the one unit they test (SRS FR-06/FR-08).
   unitId: uuid("unit_id").references(() => units.id),
-});
+}, (table) => [
+  // Phase 16: assembleItems/getSpeakingPrompt/assembleCertificationItems all filter by (skill, cefrLevel); assembleCheckpointItems filters by unitId alone (migration 0036). Low-urgency (item_bank is small today) but cheap insurance against Phase 10 CMS growth.
+  index("item_bank_skill_cefr_level_idx").on(table.skill, table.cefrLevel),
+  index("item_bank_unit_idx").on(table.unitId),
+]);
 
 export const testBlueprints = assessmentSchema.table("test_blueprints", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -66,7 +70,11 @@ export const testBlueprints = assessmentSchema.table("test_blueprints", {
   unitId: uuid("unit_id").references(() => units.id),
   // Certification Exam slice (migration 0033): scopes a blueprint to a level, the way unitId scopes a checkpoint blueprint to a unit.
   cefrLevel: cefrLevel("cefr_level"),
-});
+}, (table) => [
+  // Hand-added in migrations 0031/0033 -- backfilled here so drizzle-kit's own view of the schema matches the live database (Phase 16 audit finding: these were previously invisible to this file).
+  uniqueIndex("test_blueprints_one_per_unit").on(table.unitId).where(sql`${table.kind} = 'unit_checkpoint'`),
+  uniqueIndex("test_blueprints_one_per_level").on(table.academyId, table.cefrLevel).where(sql`${table.kind} = 'certification_exam'`),
+]);
 
 export const attempts = assessmentSchema.table(
   "attempts",
@@ -84,7 +92,11 @@ export const attempts = assessmentSchema.table(
     startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
     completedAt: timestamp("completed_at", { withTimezone: true }),
   },
-  (table) => [index("assessment_attempts_user_id_idx").on(table.userId)],
+  (table) => [
+    index("assessment_attempts_user_id_idx").on(table.userId),
+    // findInProgressByUserAndBlueprint filters both together on every attempt-start (migration 0036).
+    index("assessment_attempts_user_blueprint_idx").on(table.userId, table.blueprintId),
+  ],
 );
 
 export const responses = assessmentSchema.table(
@@ -128,7 +140,11 @@ export const checkpointResults = assessmentSchema.table(
     skillBreakdown: jsonb("skill_breakdown").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("checkpoint_results_user_id_idx").on(table.userId)],
+  (table) => [
+    index("checkpoint_results_user_id_idx").on(table.userId),
+    // findPassedUnitIds filters both together on every mastery-gate check (migration 0036).
+    index("checkpoint_results_user_unit_idx").on(table.userId, table.unitId),
+  ],
 );
 
 /** Immutable — DDD §3.9: no UPDATE/DELETE grant, corrections are a new attempt, never an edit. */
@@ -166,7 +182,11 @@ export const certificationResults = assessmentSchema.table(
     pendingReviewCount: integer("pending_review_count").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("certification_results_user_id_idx").on(table.userId)],
+  (table) => [
+    index("certification_results_user_id_idx").on(table.userId),
+    // findHistoryByUserAndLevel filters both together on every certification cooldown/eligibility check (migration 0036).
+    index("certification_results_user_cefr_level_idx").on(table.userId, table.cefrLevel),
+  ],
 );
 
 /** DDD §3.4. Immutable except the active->revoked status transition (no revoke workflow built yet — named gap, no doc specifies a revocation actor/endpoint). disclaimerText/locale are frozen at issuance from shared.certificate_templates, not live-linked. */
@@ -192,5 +212,12 @@ export const certificates = assessmentSchema.table(
     status: varchar("status", { length: 10 }).notNull().default("active"),
     issuedAt: timestamp("issued_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [index("certificates_user_id_idx").on(table.userId)],
+  // Phase 16: the plain user_id index is replaced by two composites --
+  // findByUserId orders by issuedAt, existsForUserAndLevel filters by
+  // cefrLevel -- both still serve a bare user_id lookup via their
+  // leading column, so no single-column index is needed alongside them (migration 0036).
+  (table) => [
+    index("certificates_user_issued_idx").on(table.userId, table.issuedAt),
+    index("certificates_user_cefr_level_idx").on(table.userId, table.cefrLevel),
+  ],
 );

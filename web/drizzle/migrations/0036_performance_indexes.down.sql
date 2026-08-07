@@ -1,0 +1,10 @@
+DROP INDEX IF EXISTS "assessment"."item_bank_unit_idx";
+DROP INDEX IF EXISTS "assessment"."item_bank_skill_cefr_level_idx";
+DROP INDEX IF EXISTS "assessment"."certificates_user_cefr_level_idx";
+DROP INDEX IF EXISTS "assessment"."certification_results_user_cefr_level_idx";
+DROP INDEX IF EXISTS "assessment"."checkpoint_results_user_unit_idx";
+DROP INDEX IF EXISTS "assessment"."assessment_attempts_user_blueprint_idx";
+CREATE INDEX "certificates_user_id_idx" ON "assessment"."certificates" ("user_id");
+DROP INDEX IF EXISTS "assessment"."certificates_user_issued_idx";
+CREATE INDEX "xp_transactions_user_idx" ON "engagement"."xp_transactions" ("user_id");
+DROP INDEX IF EXISTS "engagement"."xp_transactions_user_created_idx";
