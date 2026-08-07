@@ -19,7 +19,9 @@ function fakeItemBank(overrides: Partial<ItemBankPort> = {}): ItemBankPort {
     getCheckpointBlueprint: vi.fn(),
     assembleCheckpointItems: vi.fn(),
     getItemsByIds: vi.fn(),
-    getBlueprintMeta: vi.fn().mockResolvedValue({ kind: "unit_checkpoint", unitId: "unit-1", passThresholdPercent: 0.7 }),
+    getBlueprintMeta: vi.fn().mockResolvedValue({ kind: "unit_checkpoint", unitId: "unit-1", cefrLevel: null, academyId: "academy-1", passThresholdPercent: 0.7 }),
+    getCertificationBlueprint: vi.fn(),
+    assembleCertificationItems: vi.fn(),
     ...overrides,
   };
 }
@@ -89,7 +91,7 @@ describe("FinalizeCheckpointAttemptUseCase", () => {
   });
 
   it("throws CheckpointBlueprintNotFoundError if the attempt's blueprint isn't a checkpoint kind", async () => {
-    const itemBank = fakeItemBank({ getBlueprintMeta: vi.fn().mockResolvedValue({ kind: "placement", unitId: null, passThresholdPercent: 0.7 }) });
+    const itemBank = fakeItemBank({ getBlueprintMeta: vi.fn().mockResolvedValue({ kind: "placement", unitId: null, cefrLevel: null, academyId: "academy-1", passThresholdPercent: 0.7 }) });
     const attempts = fakeAttempts();
     const checkpointResults = fakeCheckpointResults();
 

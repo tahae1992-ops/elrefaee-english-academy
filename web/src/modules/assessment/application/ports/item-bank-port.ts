@@ -16,10 +16,24 @@ export interface CheckpointBlueprint {
   skills: string[];
 }
 
-/** What a route handler needs to dispatch `/assessment-attempts/{id}/submit` and `/{id}` to the right (placement vs. checkpoint) use-case, without either module reaching into the other's internals. */
+export interface CertificationBlueprint {
+  id: string;
+  academyId: string;
+  cefrLevel: CefrLevel;
+  itemCount: number;
+  passThresholdPercent: number;
+  gradedSkills: string[];
+  timeLimitMinutes: number;
+  cooldownDays: number;
+  maxFailuresBeforeEscalation: number;
+}
+
+/** What a route handler needs to dispatch `/assessment-attempts/{id}/submit` and `/{id}` to the right (placement vs. checkpoint vs. certification) use-case, without either module reaching into the other's internals. */
 export interface AttemptBlueprintMeta {
-  kind: "placement" | "unit_checkpoint";
+  kind: "placement" | "unit_checkpoint" | "certification_exam";
   unitId: string | null;
+  cefrLevel: CefrLevel | null;
+  academyId: string;
   passThresholdPercent: number;
 }
 
@@ -67,4 +81,10 @@ export interface ItemBankPort {
 
   /** What `/assessment-attempts/{id}/submit` and `/{id}` need to dispatch to the right scoring path. */
   getBlueprintMeta(blueprintId: string): Promise<AttemptBlueprintMeta | null>;
+
+  /** SRS FR-11: the one certification-exam blueprint for a CEFR level, if content has been authored for it. */
+  getCertificationBlueprint(cefrLevel: CefrLevel): Promise<CertificationBlueprint | null>;
+
+  /** Master Blueprint §6: certification items are the same unit-agnostic item-bank rows placement already uses for this level (unit_id IS NULL) -- "authored once, reused everywhere." */
+  assembleCertificationItems(cefrLevel: CefrLevel, itemCount: number): Promise<AssessmentItem[]>;
 }

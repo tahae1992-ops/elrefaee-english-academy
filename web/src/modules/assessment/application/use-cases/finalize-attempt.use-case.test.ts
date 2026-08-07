@@ -19,6 +19,8 @@ function fakeItemBank(overrides: Partial<ItemBankPort> = {}): ItemBankPort {
     assembleCheckpointItems: vi.fn(),
     getItemsByIds: vi.fn(),
     getBlueprintMeta: vi.fn(),
+    getCertificationBlueprint: vi.fn(),
+    assembleCertificationItems: vi.fn(),
     ...overrides,
   };
 }

@@ -2,8 +2,10 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   index,
+  integer,
   jsonb,
   numeric,
+  text,
   timestamp,
   uniqueIndex,
   uuid,
@@ -59,9 +61,11 @@ export const testBlueprints = assessmentSchema.table("test_blueprints", {
   // Unit checkpoint: { itemCount, passThresholdPercent, skills }
   rules: jsonb("rules").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  // 'placement' | 'unit_checkpoint' — Unit Checkpoint slice (migration 0031).
+  // 'placement' | 'unit_checkpoint' | 'certification_exam' — migrations 0031, 0033.
   kind: varchar("kind", { length: 20 }).notNull().default("placement"),
   unitId: uuid("unit_id").references(() => units.id),
+  // Certification Exam slice (migration 0033): scopes a blueprint to a level, the way unitId scopes a checkpoint blueprint to a unit.
+  cefrLevel: cefrLevel("cefr_level"),
 });
 
 export const attempts = assessmentSchema.table(
@@ -142,3 +146,51 @@ export const results = assessmentSchema.table("results", {
   overallLevel: cefrLevel("overall_level").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** Immutable — Certification Exam slice (Master Blueprint §8, SRS FR-11, migration 0033). Its own table for the same reason checkpointResults has one: a level-end, multi-skill pass/fail+breakdown outcome is a different shape than placement's CEFR-level result. pendingReviewCount: free-text (Speaking) responses aren't auto-scored yet (same MVP gap as placement/checkpoint) — excluded from scorePercent, but counted so the result is never silently partial. */
+export const certificationResults = assessmentSchema.table(
+  "certification_results",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    attemptId: uuid("attempt_id")
+      .notNull()
+      .unique()
+      .references(() => attempts.id),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => userProfiles.id),
+    cefrLevel: cefrLevel("cefr_level").notNull(),
+    scorePercent: numeric("score_percent", { precision: 5, scale: 2, mode: "number" }).notNull(),
+    passed: boolean("passed").notNull(),
+    skillBreakdown: jsonb("skill_breakdown").notNull(),
+    pendingReviewCount: integer("pending_review_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("certification_results_user_id_idx").on(table.userId)],
+);
+
+/** DDD §3.4. Immutable except the active->revoked status transition (no revoke workflow built yet — named gap, no doc specifies a revocation actor/endpoint). disclaimerText/locale are frozen at issuance from shared.certificate_templates, not live-linked. */
+export const certificates = assessmentSchema.table(
+  "certificates",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => userProfiles.id),
+    academyId: uuid("academy_id")
+      .notNull()
+      .references(() => academies.id),
+    cefrLevel: cefrLevel("cefr_level").notNull(),
+    resultId: uuid("result_id")
+      .notNull()
+      .unique()
+      .references(() => certificationResults.id),
+    issuer: varchar("issuer", { length: 120 }).notNull().default("Elrefaee English Academy"),
+    verificationCode: varchar("verification_code", { length: 20 }).notNull().unique(),
+    disclaimerText: text("disclaimer_text").notNull(),
+    locale: varchar("locale", { length: 35 }).notNull().default("en"),
+    status: varchar("status", { length: 10 }).notNull().default("active"),
+    issuedAt: timestamp("issued_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("certificates_user_id_idx").on(table.userId)],
+);

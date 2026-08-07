@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import {
   createFinalizeAttemptUseCase,
   createFinalizeCheckpointAttemptUseCase,
+  createFinalizeCertificationAttemptUseCase,
   createGetAttemptKindUseCase,
   createUpdateLearnerLevelUseCase,
 } from "@/composition-root";
 import { createSupabaseServerClient } from "@/shared/infrastructure/supabase/server-client";
 import { handleFinalizeAttempt } from "@/modules/assessment/interface/finalize-attempt.controller";
 import { handleFinalizeCheckpointAttempt } from "@/modules/assessment/interface/finalize-checkpoint-attempt.controller";
+import { handleFinalizeCertificationAttempt } from "@/modules/assessment/interface/finalize-certification-attempt.controller";
 import { AttemptNotFoundError, AttemptNotOwnedError } from "@/modules/assessment/interface/types";
 
 /**
@@ -41,6 +43,11 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
 
   if (kind.kind === "unit_checkpoint") {
     const result = await handleFinalizeCheckpointAttempt(createFinalizeCheckpointAttemptUseCase(), user.id, id);
+    return NextResponse.json(result.body, { status: result.status });
+  }
+
+  if (kind.kind === "certification_exam") {
+    const result = await handleFinalizeCertificationAttempt(createFinalizeCertificationAttemptUseCase(), user.id, id);
     return NextResponse.json(result.body, { status: result.status });
   }
 

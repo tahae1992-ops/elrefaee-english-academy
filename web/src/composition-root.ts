@@ -17,10 +17,20 @@ import { GetAttemptStatusUseCase } from "@/modules/assessment/application/use-ca
 import { StartCheckpointAttemptUseCase } from "@/modules/assessment/application/use-cases/start-checkpoint-attempt.use-case";
 import { FinalizeCheckpointAttemptUseCase } from "@/modules/assessment/application/use-cases/finalize-checkpoint-attempt.use-case";
 import { GetAttemptKindUseCase } from "@/modules/assessment/application/use-cases/get-attempt-kind.use-case";
+import { StartCertificationAttemptUseCase } from "@/modules/assessment/application/use-cases/start-certification-attempt.use-case";
+import { FinalizeCertificationAttemptUseCase } from "@/modules/assessment/application/use-cases/finalize-certification-attempt.use-case";
+import { IssueCertificateUseCase } from "@/modules/assessment/application/use-cases/issue-certificate.use-case";
+import { VerifyCertificateUseCase } from "@/modules/assessment/application/use-cases/verify-certificate.use-case";
+import { ListCertificatesUseCase } from "@/modules/assessment/application/use-cases/list-certificates.use-case";
+import { GetCertificateUseCase } from "@/modules/assessment/application/use-cases/get-certificate.use-case";
 import { DrizzleItemBankAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-item-bank.adapter";
 import { DrizzleAttemptAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-attempt.adapter";
 import { DrizzleResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-result.adapter";
 import { DrizzleCheckpointResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-checkpoint-result.adapter";
+import { DrizzleCertificationResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-certification-result.adapter";
+import { DrizzleCertificateAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-certificate.adapter";
+import { DrizzleCertificateTemplateAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-certificate-template.adapter";
+import { DrizzleRateLimiterAdapter } from "@/shared/infrastructure/adapters/drizzle-rate-limiter.adapter";
 import { ListCoursesUseCase } from "@/modules/curriculum/application/use-cases/list-courses.use-case";
 import { DrizzleCourseAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-course.adapter";
 import { GetCourseDetailUseCase } from "@/modules/curriculum/application/use-cases/get-course-detail.use-case";
@@ -130,6 +140,7 @@ export function createGetAttemptStatusUseCase(): GetAttemptStatusUseCase {
     new DrizzleItemBankAdapter(),
     new DrizzleResultAdapter(),
     new DrizzleCheckpointResultAdapter(),
+    new DrizzleCertificationResultAdapter(),
   );
 }
 
@@ -151,6 +162,44 @@ export function createGetAttemptKindUseCase(): GetAttemptKindUseCase {
 
 export function createDrizzleCheckpointResultAdapter(): DrizzleCheckpointResultAdapter {
   return new DrizzleCheckpointResultAdapter();
+}
+
+export function createIssueCertificateUseCase(): IssueCertificateUseCase {
+  return new IssueCertificateUseCase(new DrizzleCertificateAdapter(), new DrizzleCertificateTemplateAdapter());
+}
+
+export function createStartCertificationAttemptUseCase(): StartCertificationAttemptUseCase {
+  return new StartCertificationAttemptUseCase(
+    new DrizzleItemBankAdapter(),
+    new DrizzleAttemptAdapter(),
+    new DrizzleCertificationResultAdapter(),
+  );
+}
+
+export function createFinalizeCertificationAttemptUseCase(): FinalizeCertificationAttemptUseCase {
+  return new FinalizeCertificationAttemptUseCase(
+    new DrizzleItemBankAdapter(),
+    new DrizzleAttemptAdapter(),
+    new DrizzleCertificationResultAdapter(),
+    new DrizzleCertificateAdapter(),
+    createIssueCertificateUseCase(),
+  );
+}
+
+export function createVerifyCertificateUseCase(): VerifyCertificateUseCase {
+  return new VerifyCertificateUseCase(new DrizzleCertificateAdapter());
+}
+
+export function createListCertificatesUseCase(): ListCertificatesUseCase {
+  return new ListCertificatesUseCase(new DrizzleCertificateAdapter());
+}
+
+export function createGetCertificateUseCase(): GetCertificateUseCase {
+  return new GetCertificateUseCase(new DrizzleCertificateAdapter());
+}
+
+export function createDrizzleRateLimiterAdapter(): DrizzleRateLimiterAdapter {
+  return new DrizzleRateLimiterAdapter();
 }
 
 export function createListCoursesUseCase(): ListCoursesUseCase {

@@ -1,10 +1,11 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, isNull } from "drizzle-orm";
 import { getDb } from "@/shared/infrastructure/db/client";
 import { itemBank, testBlueprints } from "@/modules/assessment/infrastructure/db/tables/assessment";
 import type { CefrLevel } from "@/modules/assessment/domain/services/score-placement-attempt";
 import type {
   AssessmentItem,
   AttemptBlueprintMeta,
+  CertificationBlueprint,
   CheckpointBlueprint,
   ItemBankPort,
   PlacementBlueprint,
@@ -14,6 +15,15 @@ interface CheckpointBlueprintRules {
   itemCount: number;
   passThresholdPercent: number;
   skills: string[];
+}
+
+interface CertificationBlueprintRules {
+  itemCount: number;
+  passThresholdPercent: number;
+  gradedSkills: string[];
+  timeLimitMinutes: number;
+  cooldownDays: number;
+  maxFailuresBeforeEscalation: number;
 }
 
 interface BlueprintRules {
@@ -176,7 +186,13 @@ export class DrizzleItemBankAdapter implements ItemBankPort {
 
   async getBlueprintMeta(blueprintId: string): Promise<AttemptBlueprintMeta | null> {
     const [row] = await getDb()
-      .select({ kind: testBlueprints.kind, unitId: testBlueprints.unitId, rules: testBlueprints.rules })
+      .select({
+        kind: testBlueprints.kind,
+        unitId: testBlueprints.unitId,
+        cefrLevel: testBlueprints.cefrLevel,
+        academyId: testBlueprints.academyId,
+        rules: testBlueprints.rules,
+      })
       .from(testBlueprints)
       .where(eq(testBlueprints.id, blueprintId))
       .limit(1);
@@ -184,6 +200,41 @@ export class DrizzleItemBankAdapter implements ItemBankPort {
     if (!row) return null;
     const kind = row.kind as AttemptBlueprintMeta["kind"];
     const rules = row.rules as { passThresholdPercent: number };
-    return { kind, unitId: row.unitId, passThresholdPercent: rules.passThresholdPercent };
+    return { kind, unitId: row.unitId, cefrLevel: row.cefrLevel, academyId: row.academyId, passThresholdPercent: rules.passThresholdPercent };
+  }
+
+  async getCertificationBlueprint(cefrLevel: CefrLevel): Promise<CertificationBlueprint | null> {
+    const [row] = await getDb()
+      .select({ id: testBlueprints.id, academyId: testBlueprints.academyId, cefrLevel: testBlueprints.cefrLevel, rules: testBlueprints.rules })
+      .from(testBlueprints)
+      .where(and(eq(testBlueprints.cefrLevel, cefrLevel), eq(testBlueprints.kind, "certification_exam")))
+      .limit(1);
+
+    if (!row || !row.cefrLevel) return null;
+    const rules = row.rules as CertificationBlueprintRules;
+    return {
+      id: row.id,
+      academyId: row.academyId,
+      cefrLevel: row.cefrLevel,
+      itemCount: rules.itemCount,
+      passThresholdPercent: rules.passThresholdPercent,
+      gradedSkills: rules.gradedSkills,
+      timeLimitMinutes: rules.timeLimitMinutes,
+      cooldownDays: rules.cooldownDays,
+      maxFailuresBeforeEscalation: rules.maxFailuresBeforeEscalation,
+    };
+  }
+
+  async assembleCertificationItems(cefrLevel: CefrLevel, itemCount: number): Promise<AssessmentItem[]> {
+    // Master Blueprint §6: the same unit-agnostic (unitId IS NULL) item
+    // pool placement already uses for this level, reused rather than
+    // duplicated -- "authored once, reused everywhere."
+    const rows = await getDb()
+      .select({ id: itemBank.id, skill: itemBank.skill, cefrLevel: itemBank.cefrLevel, itemType: itemBank.itemType, prompt: itemBank.prompt })
+      .from(itemBank)
+      .where(and(eq(itemBank.cefrLevel, cefrLevel), isNull(itemBank.unitId)))
+      .limit(itemCount);
+
+    return rows.map(toAssessmentItem);
   }
 }

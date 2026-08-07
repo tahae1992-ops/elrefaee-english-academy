@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { CheckCircle2, Lock } from "lucide-react";
+import { Award, CheckCircle2, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,15 @@ import type { CourseProgressSnapshot } from "@/lib/resolve-course-progress";
 
 const LEVEL_LABEL: Record<string, string> = { pre_a1: "Pre-A1", a1: "A1", a2: "A2", b1: "B1", b2: "B2", c1: "C1" };
 
-export function CourseDetailsContent({ snapshot }: { snapshot: CourseProgressSnapshot }) {
+export function CourseDetailsContent({
+  snapshot,
+  certificationState,
+  certificateId,
+}: {
+  snapshot: CourseProgressSnapshot;
+  certificationState: "locked" | "available" | "certified";
+  certificateId: string | null;
+}) {
   const t = useTranslations("CourseDetails");
   const { courseDetail, lessonsByUnit, statusByLesson, unitAccess, resumeTarget, lessonsForCourse } = snapshot;
 
@@ -78,6 +86,44 @@ export function CourseDetailsContent({ snapshot }: { snapshot: CourseProgressSna
           );
         })}
       </div>
+
+      {/* Wireframe §2 site map: CourseDetails -->|level end| Exam. EDD §14: the level-end summative assessment is the same bar as completing the level -- available only once every unit above is completed. */}
+      {certificationState === "certified" && certificateId ? (
+        <Link href={`/certificates/${certificateId}`}>
+          <Card className="gap-2 border-accent/40 bg-accent/10">
+            <CardContent className="flex items-center gap-3 py-4">
+              <Award className="size-5 shrink-0 text-accent" aria-hidden="true" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">{t("certification.title")}</p>
+                <p className="text-xs text-muted-foreground">{t("certification.certified")}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      ) : certificationState === "available" ? (
+        <Card className="gap-2 border-primary/40 bg-accent">
+          <CardContent className="flex items-center gap-3 py-4">
+            <Award className="size-5 shrink-0 text-primary" aria-hidden="true" />
+            <div className="flex-1">
+              <p className="text-sm font-medium">{t("certification.title")}</p>
+              <p className="text-xs text-muted-foreground">{t("certification.available")}</p>
+            </div>
+            <Button asChild size="sm">
+              <Link href={`/exams/${courseDetail.course.id}/certification`}>{t("certification.start")}</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="gap-2 opacity-60">
+          <CardContent className="flex items-center gap-3 py-4">
+            <Lock className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-medium">{t("certification.title")}</p>
+              <p className="text-xs text-muted-foreground">{t("certification.locked")}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -24,9 +24,16 @@ describe("SidebarNav", () => {
   it("renders not-yet-built items as disabled, not as dead links", () => {
     renderWithIntl(<SidebarNav />);
 
-    expect(screen.queryByRole("link", { name: /certificates/i })).not.toBeInTheDocument();
-    const certificates = screen.getByText("Certificates").closest("span");
-    expect(certificates).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByRole("link", { name: /profile/i })).not.toBeInTheDocument();
+    const profile = screen.getByText("Profile").closest("span");
+    expect(profile).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("renders Certificates (Phase 14 slice) as a real link", () => {
+    renderWithIntl(<SidebarNav />);
+
+    const certificates = screen.getByRole("link", { name: /certificates/i });
+    expect(certificates).toHaveAttribute("href", "/certificates");
   });
 
   it("renders Review (Review Engine slice) as a real link", () => {

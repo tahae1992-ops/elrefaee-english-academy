@@ -18,6 +18,8 @@ function fakeItemBank(overrides: Partial<ItemBankPort> = {}): ItemBankPort {
     assembleCheckpointItems: vi.fn(),
     getItemsByIds: vi.fn(),
     getBlueprintMeta: vi.fn(),
+    getCertificationBlueprint: vi.fn(),
+    assembleCertificationItems: vi.fn(),
     ...overrides,
   };
 }
@@ -37,12 +39,12 @@ function fakeAttempts(overrides: Partial<AttemptRepositoryPort> = {}): AttemptRe
 
 describe("GetAttemptKindUseCase", () => {
   it("returns the attempt's blueprint metadata", async () => {
-    const itemBank = fakeItemBank({ getBlueprintMeta: vi.fn().mockResolvedValue({ kind: "unit_checkpoint", unitId: "unit-1", passThresholdPercent: 0.7 }) });
+    const itemBank = fakeItemBank({ getBlueprintMeta: vi.fn().mockResolvedValue({ kind: "unit_checkpoint", unitId: "unit-1", cefrLevel: null, academyId: "academy-1", passThresholdPercent: 0.7 }) });
     const attempts = fakeAttempts();
 
     const result = await new GetAttemptKindUseCase(attempts, itemBank).execute("attempt-1", "user-1");
 
-    expect(result).toEqual({ kind: "unit_checkpoint", unitId: "unit-1", passThresholdPercent: 0.7 });
+    expect(result).toEqual({ kind: "unit_checkpoint", unitId: "unit-1", cefrLevel: null, academyId: "academy-1", passThresholdPercent: 0.7 });
   });
 
   it("throws AttemptNotFoundError when the attempt doesn't exist", async () => {

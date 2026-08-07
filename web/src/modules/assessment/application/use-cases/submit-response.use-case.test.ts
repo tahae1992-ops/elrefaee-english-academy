@@ -25,6 +25,8 @@ function buildPorts(overrides: { itemBank?: Partial<ItemBankPort>; attempts?: Pa
     assembleCheckpointItems: vi.fn(),
     getItemsByIds: vi.fn(),
     getBlueprintMeta: vi.fn(),
+    getCertificationBlueprint: vi.fn(),
+    assembleCertificationItems: vi.fn(),
     ...overrides.itemBank,
   };
   const attempts: AttemptRepositoryPort = {

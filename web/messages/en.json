@@ -178,6 +178,13 @@
       "title": "We couldn't load this course",
       "description": "This is a temporary issue on our side — your account is fine.",
       "retry": "Try again"
+    },
+    "certification": {
+      "title": "Certification exam",
+      "locked": "Complete every unit above to unlock the certification exam.",
+      "available": "All units complete — take the certification exam to earn your certificate.",
+      "start": "Start exam",
+      "certified": "Certified — view your certificate"
     }
   },
   "Unit": {
@@ -212,6 +219,58 @@
       "tryAgain": "Try again",
       "backToUnit": "Back to unit"
     }
+  },
+  "Exam": {
+    "itemProgress": "Item {current} of {total}",
+    "submitAndNext": "Submit and continue",
+    "submitAndFinish": "Submit and finish",
+    "error": {
+      "submitFailed": "We couldn't submit that answer — check your connection and try again.",
+      "startFailed": "We couldn't load the certification exam — your account and progress are fine.",
+      "finalizeFailed": "We couldn't score the certification exam — your answers are saved, try again.",
+      "cooldownActive": "You recently attempted this certification exam. You can try again after {date}.",
+      "retry": "Try again"
+    },
+    "results": {
+      "passedTitle": "Certification exam passed!",
+      "failedTitle": "Not quite there yet",
+      "scorePercent": "{percent}%",
+      "skillBreakdown": "Skill breakdown",
+      "pendingReview": "{count, plural, one {# response is} other {# responses are}} pending human review and not counted in this score.",
+      "alreadyCertified": "You're already certified for this level — this result doesn't change your existing certificate.",
+      "cooldownHint": "You can attempt this certification exam again after the cooldown period.",
+      "backToCourse": "Back to course",
+      "issuedDialog": {
+        "title": "Certificate earned!",
+        "description": "You've been awarded a new Elrefaee English Academy certificate.",
+        "viewCertificate": "View certificate"
+      }
+    }
+  },
+  "Certificate": {
+    "pageTitle": "Your certificates",
+    "empty": {
+      "title": "No certificates yet",
+      "description": "Complete a course and pass its certification exam to earn your first certificate."
+    },
+    "issuedOn": "Issued {date}",
+    "revoked": "Revoked",
+    "share": "Share",
+    "download": "Download",
+    "copyLink": "Copy verification link",
+    "linkCopied": "Link copied",
+    "shareTitle": "My Elrefaee English Academy certificate"
+  },
+  "Verify": {
+    "validTitle": "Certificate verified",
+    "holder": "Awarded to {name}",
+    "issuedBy": "Issued by {issuer} on {date}",
+    "revokedTitle": "This certificate has been revoked",
+    "revokedDescription": "This certificate is no longer valid.",
+    "notFoundTitle": "Certificate not found",
+    "notFoundDescription": "We couldn't find a certificate matching this verification code.",
+    "rateLimitedTitle": "Too many attempts",
+    "rateLimitedDescription": "Too many verification attempts from your network. Try again shortly."
   },
   "Lesson": {
     "progress": "Block {current} of {total}",

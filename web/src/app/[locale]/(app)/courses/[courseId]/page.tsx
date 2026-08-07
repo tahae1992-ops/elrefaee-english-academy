@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Lock } from "lucide-react";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
-import { createEnterCourseUseCase } from "@/composition-root";
+import { createEnterCourseUseCase, createListCertificatesUseCase } from "@/composition-root";
 import { resolveCourseProgress } from "@/lib/resolve-course-progress";
 import { computeCourseAccess, CourseNotFoundError } from "@/modules/curriculum/interface/types";
 import { WidgetsErrorState } from "@/components/dashboard/widgets-error-state";
@@ -40,7 +40,13 @@ export default async function CourseDetailsPage({ params }: { params: Promise<{ 
     courseId,
   });
 
-  return <CourseDetailsContent snapshot={snapshot} />;
+  const allUnitsCompleted = snapshot.courseDetail.units.every((unit) => snapshot.unitAccess.get(unit.id) === "completed");
+  const certificates = await createListCertificatesUseCase().execute(current.userId);
+  const existingCertificate = certificates.find((certificate) => certificate.cefrLevel === snapshot.courseDetail.course.cefrLevel);
+
+  const certificationState: "locked" | "available" | "certified" = existingCertificate ? "certified" : allUnitsCompleted ? "available" : "locked";
+
+  return <CourseDetailsContent snapshot={snapshot} certificationState={certificationState} certificateId={existingCertificate?.id ?? null} />;
 }
 
 function LockedCourseState() {
