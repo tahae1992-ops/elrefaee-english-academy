@@ -36,7 +36,12 @@ export function CourseCatalog({
             <Sparkles className="size-6 shrink-0" aria-hidden="true" />
             <div>
               <p className="font-display text-lg font-bold">{t("placementBanner.title")}</p>
-              <p className="text-sm text-accent-foreground/80">{t("placementBanner.description")}</p>
+              {/* Full opacity, not /80: accent-foreground on bg-accent
+                  is tuned to pass 4.5:1 at full strength (the title
+                  above proves it); the multiplied-down variant dropped
+                  to 4.14:1. Font-weight already distinguishes the
+                  title from this description line. */}
+              <p className="text-sm text-accent-foreground">{t("placementBanner.description")}</p>
             </div>
           </div>
           <Button asChild className="w-fit shrink-0">

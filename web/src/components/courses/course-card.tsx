@@ -21,9 +21,15 @@ export function CourseCard({ course }: { course: CourseListItem }) {
   const isLocked = course.access.state === "locked" || course.access.state === "requires_placement";
 
   const card = (
-    <Card className={cn("gap-3", isLocked && "opacity-60", !isLocked && "transition-opacity hover:opacity-90")}>
+    <Card className={cn("gap-3", !isLocked && "transition-opacity hover:opacity-90")}>
       <CardHeader className="flex-row items-start justify-between gap-2">
         <div className="flex flex-col gap-1">
+          {/* No opacity dimming on this badge -- its label ("A1", "B2",
+              etc.) is real text content, and WCAG 1.4.3's 4.5:1 applies
+              regardless of how minor the text seems. The locked state
+              is conveyed by the Lock icon (decorative, aria-hidden,
+              only needs the lower 3:1 non-text threshold) and the
+              explicit "why locked" text below, not by dimming. */}
           <Badge variant="outline" className="w-fit">
             {LEVEL_LABEL[course.cefrLevel]}
           </Badge>

@@ -18,11 +18,16 @@ function createDbClient() {
   }
 
   const queryClient = postgres(connectionString, {
-    // Connection pooling is Supabase-managed (SAD §9); a small local pool
-    // is sufficient for the app server's own connections on top of that.
+    // Connection pooling is Supabase-managed (SAD §9) via the
+    // transaction pooler -- required for a serverless deployment
+    // (see .env.example's DATABASE_URL comment for why session mode
+    // isn't safe here). `prepare: false`: transaction-mode pooling
+    // doesn't support server-side prepared statements persisting
+    // across pooled connections.
     max: 10,
     idle_timeout: 20,
     connect_timeout: 10,
+    prepare: false,
   });
 
   return drizzle(queryClient);

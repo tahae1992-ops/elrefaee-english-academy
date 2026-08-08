@@ -225,5 +225,19 @@
   }
   html {
     @apply font-sans;
+    /* WCAG 2.2 SC 2.4.11 Focus Not Obscured (Minimum): the sticky
+       top-nav (h-14) and, on mobile, the fixed bottom tab bar can
+       otherwise cover a keyboard-focused element that the browser
+       scrolls to the viewport edge -- scroll-padding reserves that
+       space so focus lands clear of both. */
+    scroll-padding-top: 3.5rem;
+  }
+
+  @media (max-width: 767px) {
+    html {
+      /* Bottom tab bar's rendered height (icon + label + padding) plus
+         a safe-area allowance for notched devices. */
+      scroll-padding-bottom: 4.5rem;
+    }
   }
 }

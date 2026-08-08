@@ -70,7 +70,13 @@ function DashboardContent({
     <div className="flex flex-col gap-6 p-4 md:p-8">
       <StreakXpStrip streakDays={gamification.streak.current} xp={gamification.xp.total} level={gamification.xp.level} />
       <h1 className="sr-only">{t("pageTitle")}</h1>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
+      {/* md:grid-cols-4 alone jumped straight from 1 to 4 columns at
+          exactly 768px, squeezing each card to ~170px and clipping/
+          overlapping their text (found in the responsive pass) -- an
+          intermediate 2-column tablet step fixes it; ContinueLearningCard's
+          own `md:col-span-2` still resolves correctly at both steps
+          (full-width at 2 cols, half-width at 4). */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <ContinueLearningCard currentLevel={currentLevel} />
         <CefrLevelCard currentLevel={currentLevel} />
         <PendingReviewsCard userId={userId} />

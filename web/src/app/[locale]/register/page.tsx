@@ -16,7 +16,10 @@ export default function RegisterPage() {
         <RegisterForm />
         <p className="text-center text-sm text-muted-foreground">
           {t("haveAccount")}{" "}
-          <Link href="/login" className="text-primary underline-offset-4 hover:underline">
+          {/* Persistent underline, not hover-only: a link inline with
+              body text needs a non-color cue at rest too (WCAG
+              1.4.1 / axe's link-in-text-block), not only on hover. */}
+          <Link href="/login" className="text-primary underline underline-offset-4">
             {t("signInLink")}
           </Link>
         </p>
