@@ -23,6 +23,17 @@ export default function RegisterPage() {
             {t("signInLink")}
           </Link>
         </p>
+        <p className="text-center text-xs text-muted-foreground">
+          {t("legalNoticePrefix")}{" "}
+          <Link href="/terms" className="text-primary underline underline-offset-4">
+            {t("termsLink")}
+          </Link>{" "}
+          {t("legalNoticeAnd")}{" "}
+          <Link href="/privacy" className="text-primary underline underline-offset-4">
+            {t("privacyLink")}
+          </Link>
+          .
+        </p>
       </div>
     </main>
   );

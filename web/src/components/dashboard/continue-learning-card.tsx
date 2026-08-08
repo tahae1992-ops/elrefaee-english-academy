@@ -1,8 +1,6 @@
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Link } from "@/i18n/navigation";
 import type { CefrLevel } from "@/modules/identity/interface/current-user";
 
@@ -10,11 +8,11 @@ import type { CefrLevel } from "@/modules/identity/interface/current-user";
  * Doc 09 §5.3's dominant widget — "the continue widget's whole card
  * is one tap target" and doc 08 §3.4's stated empty-state rule: a
  * brand-new learner sees the placement-test CTA, never an empty
- * lesson list (SRS FR-03). Once assessed, this now links to the real
- * Course Catalog (its genuine next step) rather than a disabled
- * tooltip — the "coming soon" part is lesson content itself
- * (`learning.enrollments`/lesson viewer, still unbuilt), which the
- * tooltip on the badge still discloses honestly.
+ * lesson list (SRS FR-03). Once assessed, this links to the Course
+ * Catalog -- lesson content itself has since shipped (Phase 6), so
+ * this no longer carries the "coming soon" badge/tooltip it used to
+ * (found stale during Phase 19's bug-bash: it still claimed lesson
+ * content was unbuilt well after it existed and worked).
  */
 export function ContinueLearningCard({ currentLevel }: { currentLevel: CefrLevel | null }) {
   const t = useTranslations("Dashboard.continueLearning");
@@ -56,14 +54,6 @@ export function ContinueLearningCard({ currentLevel }: { currentLevel: CefrLevel
           <h2 className="font-display text-2xl font-bold tracking-[-0.01em]">{t("assessedTitle")}</h2>
         </div>
         <p className="text-sm text-accent-foreground">{t("assessedDescription")}</p>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Badge variant="outline" className="w-fit">
-              {t("comingSoon")}
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent>{t("comingSoonHint")}</TooltipContent>
-        </Tooltip>
       </Card>
     </Link>
   );

@@ -2,6 +2,7 @@ import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { UserMenu } from "@/components/app-shell/user-menu";
+import { FeedbackButton } from "@/components/app-shell/feedback-button";
 
 export function TopNav({ displayName, email }: { displayName: string; email: string }) {
   return (
@@ -9,6 +10,7 @@ export function TopNav({ displayName, email }: { displayName: string; email: str
       <Logo variant="mark" className="h-6 w-6 md:hidden" />
       <Logo className="hidden md:flex" />
       <div className="flex items-center gap-2">
+        <FeedbackButton />
         <LocaleSwitcher />
         <ThemeToggle />
         <UserMenu displayName={displayName} email={email} />

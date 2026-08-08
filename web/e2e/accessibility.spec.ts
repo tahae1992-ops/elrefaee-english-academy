@@ -61,6 +61,16 @@ test.describe("WCAG 2.2 AA automated audit (axe-core)", () => {
     reportViolations("verify (not found state)", await scan(page));
   });
 
+  test("terms page", async ({ page }) => {
+    await page.goto("/terms");
+    reportViolations("terms", await scan(page));
+  });
+
+  test("privacy page", async ({ page }) => {
+    await page.goto("/privacy");
+    reportViolations("privacy", await scan(page));
+  });
+
   test.describe("authenticated pages", () => {
     // One registration for the whole describe block, not one per test
     // (per test was the original shape): register.action.ts's own

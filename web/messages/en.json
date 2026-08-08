@@ -23,6 +23,10 @@
     "successReady": "Account created. You're signed in as {email}.",
     "haveAccount": "Already have an account?",
     "signInLink": "Sign in",
+    "legalNoticePrefix": "By creating an account, you agree to our",
+    "termsLink": "Terms of Service",
+    "legalNoticeAnd": "and",
+    "privacyLink": "Privacy Policy",
     "validation": {
       "nameRequired": "Name is required",
       "emailInvalid": "Enter a valid email address",
@@ -63,6 +67,27 @@
       "signingOut": "Signing out…"
     }
   },
+  "Feedback": {
+    "trigger": "Send feedback",
+    "dialogTitle": "Send feedback",
+    "dialogDescription": "Found a bug or have a suggestion? Tell us — this goes straight to the team building the app.",
+    "categoryLabel": "Type",
+    "category": {
+      "bug": "Something's broken",
+      "suggestion": "Suggestion",
+      "other": "Other"
+    },
+    "messageLabel": "Message",
+    "messagePlaceholder": "What happened, or what would help?",
+    "submit": "Send",
+    "submitting": "Sending…",
+    "success": "Thanks — your feedback was sent.",
+    "rateLimited": "You've sent a few of these already — try again in a bit.",
+    "genericError": "Couldn't send that — check your connection and try again.",
+    "validation": {
+      "messageRequired": "Please add a message before sending."
+    }
+  },
   "Dashboard": {
     "pageTitle": "Dashboard",
     "streakXp": {
@@ -77,9 +102,7 @@
       "description": "Take a short placement test so your lessons match your level from day one.",
       "cta": "Take the placement test",
       "assessedTitle": "Browse your courses",
-      "assessedDescription": "You're placed — head to the Course Catalog to find your course. Lessons themselves will appear once they launch.",
-      "comingSoon": "Coming soon",
-      "comingSoonHint": "Lesson content is being built next — the Course Catalog is your entry point in the meantime."
+      "assessedDescription": "You're placed — head to the Course Catalog to start your course."
     },
     "cefrLevel": {
       "title": "Current level",
@@ -408,6 +431,52 @@
     },
     "error": {
       "submitFailed": "Couldn't save your response. Please try again."
+    }
+  },
+  "LegalPages": {
+    "draftBanner": "Draft — this page is a placeholder pending legal review. It does not yet constitute a binding agreement.",
+    "backToApp": "Back to ERA",
+    "terms": {
+      "title": "Terms of Service",
+      "effectiveNotice": "Not yet in effect. Elrefaee English Academy is currently in a private beta; these terms will be finalized before public launch.",
+      "s1Heading": "Acceptance",
+      "s1Body": "By creating an account or using Elrefaee English Academy (\"ERA\", \"we\", \"us\"), you agree to these Terms of Service, once finalized. If you do not agree, do not use the service.",
+      "s2Heading": "Eligibility and accounts",
+      "s2Body": "ERA is intended for adult learners. You must provide accurate registration information and are responsible for activity on your account.",
+      "s3Heading": "Acceptable use",
+      "s3Body": "You agree not to misuse the service — including attempting to bypass rate limits or access controls, sharing account credentials, or submitting harmful or unlawful content through lessons, exercises, or feedback.",
+      "s4Heading": "Certificates",
+      "s4Body": "Certificates issued through ERA reflect performance on ERA's own assessments at a point in time. They are not an externally accredited qualification unless explicitly stated, and can be independently verified using their unique verification code.",
+      "s5Heading": "Service availability",
+      "s5Body": "ERA is under active development and offered on an as-is, as-available basis during this beta period. Features, including AI-assisted tutoring, may be limited, changed, or temporarily unavailable.",
+      "s6Heading": "Termination",
+      "s6Body": "We may suspend or terminate accounts that violate these terms. You may stop using the service and request account deletion at any time — see our Privacy Policy.",
+      "s7Heading": "Liability",
+      "s7Body": "To the extent permitted by law, ERA is provided without warranties of any kind, and our liability for any claim relating to the service is limited. This section will be finalized with legal counsel before launch.",
+      "s8Heading": "Changes to these terms",
+      "s8Body": "We may update these terms. Material changes will be announced before taking effect.",
+      "s9Heading": "Contact",
+      "s9Body": "Questions about these terms can be sent to [support email to be added]."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "effectiveNotice": "Not yet in effect. Elrefaee English Academy is currently in a private beta; this policy will be finalized before public launch.",
+      "s1Heading": "What we collect",
+      "s1Body": "Account information you provide (name, email); your learning activity (lessons completed, exercise answers, assessment and certification results, vocabulary review history); engagement data (XP, streaks, badges); and any feedback you submit through the app.",
+      "s2Heading": "How we use it",
+      "s2Body": "To operate the service — track your progress, schedule spaced-repetition review, personalize your course placement, issue certificates, and respond to feedback. We do not sell your data or use it for advertising.",
+      "s3Heading": "Third-party processors",
+      "s3Body": "We use Supabase for authentication and data storage, Vercel for hosting, and Sentry for error monitoring — each processes data on our behalf under their own security and data-processing terms. When AI-assisted tutoring is enabled, conversation content is sent to our AI provider (Anthropic) to generate responses; this feature is not yet active for all users.",
+      "s4Heading": "Cookies and sessions",
+      "s4Body": "We use cookies only to keep you signed in (authentication session cookies). We do not use advertising or cross-site tracking cookies.",
+      "s5Heading": "Data retention and your rights",
+      "s5Body": "You can request a copy of your data or account deletion by contacting us at [support email to be added]. Deletion requests are currently handled manually while self-serve tools are being built; deleted accounts are anonymized rather than immediately erased, to preserve the integrity of records like issued certificates.",
+      "s6Heading": "Children's privacy",
+      "s6Body": "ERA is intended for adult learners and is not directed at children under 16.",
+      "s7Heading": "Changes to this policy",
+      "s7Body": "We may update this policy. Material changes will be announced before taking effect.",
+      "s8Heading": "Contact",
+      "s8Body": "Questions about this policy can be sent to [support email to be added]."
     }
   }
 }

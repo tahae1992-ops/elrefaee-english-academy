@@ -31,6 +31,8 @@ import { DrizzleCertificationResultAdapter } from "@/modules/assessment/infrastr
 import { DrizzleCertificateAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-certificate.adapter";
 import { DrizzleCertificateTemplateAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-certificate-template.adapter";
 import { DrizzleRateLimiterAdapter } from "@/shared/infrastructure/adapters/drizzle-rate-limiter.adapter";
+import { SubmitFeedbackUseCase } from "@/modules/feedback/application/use-cases/submit-feedback.use-case";
+import { DrizzleFeedbackAdapter } from "@/modules/feedback/infrastructure/adapters/drizzle-feedback.adapter";
 import { ListCoursesUseCase } from "@/modules/curriculum/application/use-cases/list-courses.use-case";
 import { DrizzleCourseAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-course.adapter";
 import { GetCourseDetailUseCase } from "@/modules/curriculum/application/use-cases/get-course-detail.use-case";
@@ -345,4 +347,8 @@ export function createGetConversationHistoryUseCase(): GetConversationHistoryUse
 
 export function createFlagTutorMessageUseCase(): FlagTutorMessageUseCase {
   return new FlagTutorMessageUseCase(new DrizzleTutorConversationAdapter());
+}
+
+export function createSubmitFeedbackUseCase(): SubmitFeedbackUseCase {
+  return new SubmitFeedbackUseCase(new DrizzleFeedbackAdapter());
 }
