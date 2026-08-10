@@ -69,6 +69,11 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   silent: !process.env.SENTRY_AUTH_TOKEN,
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
+  // Explicit rather than relying on the plugin's implicit env-var
+  // pickup — same value either way, but this makes the source-map
+  // upload's dependency on this specific var self-evident from the
+  // config alone.
+  authToken: process.env.SENTRY_AUTH_TOKEN,
   // Source maps are uploaded to Sentry but not shipped to the client —
   // readable stack traces in Sentry without exposing source publicly.
   widenClientFileUpload: true,

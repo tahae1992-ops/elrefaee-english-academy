@@ -88,6 +88,12 @@
     "description": "The page you're looking for doesn't exist or may have moved.",
     "homeLink": "Back to ERA"
   },
+  "ErrorPage": {
+    "title": "Something went wrong",
+    "description": "We've been notified and are looking into it.",
+    "tryAgain": "Try again",
+    "homeLink": "Back to ERA"
+  },
   "AppShell": {
     "nav": {
       "label": "Main navigation",
