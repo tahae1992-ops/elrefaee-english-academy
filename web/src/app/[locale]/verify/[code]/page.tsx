@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { useTranslations } from "next-intl";
 import { CheckCircle2, ShieldAlert, XCircle } from "lucide-react";
@@ -8,6 +9,14 @@ import { Logo } from "@/components/logo";
 import { Card, CardContent } from "@/components/ui/card";
 
 const LEVEL_LABEL: Record<string, string> = { pre_a1: "Pre-A1", a1: "A1", a2: "A2", b1: "B1", b2: "B2", c1: "C1" };
+
+// Each verification link is meant to work when shared directly (SRS
+// FR-11), but bulk search-engine indexing of every certificate code
+// would surface holders' names in search results -- noindex keeps the
+// direct-link use case intact while opting out of that.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 // Same bucket-key scheme as /api/v1/certificates/verify/[code] -- a
 // visitor hitting this page (the actual public entry point a shared

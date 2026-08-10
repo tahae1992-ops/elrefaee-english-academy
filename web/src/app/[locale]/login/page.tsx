@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
 import { LoginForm } from "./login-form";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "LoginPage" });
+  return { title: t("title"), description: t("metaDescription") };
+}
 
 export default function LoginPage() {
   const t = useTranslations("LoginPage");
@@ -14,6 +26,11 @@ export default function LoginPage() {
           {t("title")}
         </h1>
         <LoginForm />
+        <p className="text-center text-sm">
+          <Link href="/forgot-password" className="text-primary underline underline-offset-4">
+            {t("forgotPasswordLink")}
+          </Link>
+        </p>
         <p className="text-center text-sm text-muted-foreground">
           {t("noAccount")}{" "}
           {/* Persistent underline, not hover-only: a link inline with

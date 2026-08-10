@@ -27,6 +27,7 @@
     "termsLink": "Terms of Service",
     "legalNoticeAnd": "and",
     "privacyLink": "Privacy Policy",
+    "metaDescription": "Create your ERA (Elrefaee English Academy) account and start learning American English with placement testing, structured courses, and certification.",
     "validation": {
       "nameRequired": "Name is required",
       "emailInvalid": "Enter a valid email address",
@@ -45,10 +46,47 @@
     "rateLimited": "Too many attempts. Try again shortly.",
     "noAccount": "New here?",
     "registerLink": "Create an account",
+    "forgotPasswordLink": "Forgot password?",
+    "metaDescription": "Sign in to ERA (Elrefaee English Academy) to continue your American English lessons, review, and certification progress.",
     "validation": {
       "emailInvalid": "Enter a valid email address",
       "passwordRequired": "Password is required"
     }
+  },
+  "ForgotPasswordPage": {
+    "title": "Reset your password",
+    "description": "Enter your email and we'll send you a link to reset your password.",
+    "emailLabel": "Email",
+    "submit": "Send reset link",
+    "submitting": "Sending…",
+    "genericError": "Something went wrong. Please try again.",
+    "rateLimited": "Too many attempts. Try again shortly.",
+    "linkExpired": "That reset link is invalid or has expired. Request a new one below.",
+    "successMessage": "If an account exists for {email}, a reset link is on its way.",
+    "backToLoginLink": "Back to sign in",
+    "validation": {
+      "emailInvalid": "Enter a valid email address"
+    }
+  },
+  "ResetPasswordPage": {
+    "title": "Choose a new password",
+    "description": "Enter a new password for your account.",
+    "passwordLabel": "New password",
+    "passwordHint": "At least 8 characters",
+    "submit": "Update password",
+    "submitting": "Updating…",
+    "genericError": "Something went wrong. Please try again.",
+    "linkExpired": "That reset link is invalid or has expired.",
+    "requestNewLink": "Request a new one",
+    "successMessage": "Password updated. Taking you to your dashboard…",
+    "validation": {
+      "passwordTooShort": "At least 8 characters"
+    }
+  },
+  "NotFoundPage": {
+    "title": "Page not found",
+    "description": "The page you're looking for doesn't exist or may have moved.",
+    "homeLink": "Back to ERA"
   },
   "AppShell": {
     "nav": {

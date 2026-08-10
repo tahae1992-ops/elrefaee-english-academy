@@ -39,4 +39,10 @@ export interface AuthProviderPort {
   signUp(email: string, password: string): Promise<SignUpResult>;
   signIn(email: string, password: string): Promise<SignInResult>;
   signOut(): Promise<void>;
+  /** Always resolves, regardless of whether `email` belongs to an account — API Spec §7.1's no-enumeration rule applies here too. */
+  requestPasswordReset(email: string, redirectTo: string): Promise<void>;
+  /** Exchanges the emailed link's one-time `code` for a real (recovery) session, setting session cookies via the caller's Supabase client. Throws if the code is invalid, already used, or expired. Returns the resulting session's user id, for audit logging. */
+  exchangeRecoveryCode(code: string): Promise<{ userId: string }>;
+  /** Updates the password on the *current* session (the recovery session established by `exchangeRecoveryCode`) — never takes a token as a parameter, matching Supabase's own `updateUser` contract. */
+  updatePassword(newPassword: string): Promise<void>;
 }

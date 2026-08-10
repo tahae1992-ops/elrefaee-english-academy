@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Info } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
@@ -7,8 +9,18 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 /**
  * Phase 19 (Beta Release) — "finalized ToS/Privacy Policy pages." See
  * terms/page.tsx's own comment: real page, honest draft legal text,
- * not fabricated final copy.
+ * not fabricated final copy. Same `noindex` reasoning as that page.
  */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "LegalPages.privacy" });
+  return { title: t("title"), robots: { index: false, follow: false } };
+}
+
 export default function PrivacyPage() {
   const t = useTranslations("LegalPages");
   const tPrivacy = useTranslations("LegalPages.privacy");

@@ -51,6 +51,15 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: SECURITY_HEADERS }];
   },
+  // The root layout is `[locale]/layout.tsx` (a top-level dynamic
+  // segment, not a catch-all) -- Next's own docs call this out as
+  // exactly the case nested `not-found.tsx` files can't cover: a URL
+  // with no matching route at all short-circuits straight to Next's
+  // built-in generic 404 before ever entering `[locale]`'s tree.
+  // `global-not-found.tsx` is the documented fix.
+  experimental: {
+    globalNotFound: true,
+  },
 };
 
 export default withSentryConfig(withNextIntl(nextConfig), {

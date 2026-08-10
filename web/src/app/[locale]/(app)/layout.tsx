@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { TopNav } from "@/components/app-shell/top-nav";
 import { SidebarNav } from "@/components/app-shell/sidebar-nav";
 import { BottomTabBar } from "@/components/app-shell/bottom-tab-bar";
+
+// Every route nested here (dashboard, courses, certificates) requires
+// a signed-in session — none of it should appear in search results.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 /**
  * The authenticated app shell (Dashboard Shell slice) — every route

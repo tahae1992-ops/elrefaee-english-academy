@@ -64,4 +64,38 @@ export class SupabaseAuthAdapter implements AuthProviderPort {
       throw new AuthProviderError(error.message, error.code, error.status, error.toJSON());
     }
   }
+
+  async requestPasswordReset(email: string, redirectTo: string): Promise<void> {
+    const supabase = await createSupabaseServerClient();
+    // Supabase's own resetPasswordForEmail already never reveals
+    // whether the address has an account — no error is returned for
+    // "unknown email," only for real failures (rate limit, malformed
+    // input). The caller still doesn't branch on this either way.
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) {
+      throw new AuthProviderError(error.message, error.code, error.status, error.toJSON());
+    }
+  }
+
+  async exchangeRecoveryCode(code: string): Promise<{ userId: string }> {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+    if (error || !data.user) {
+      throw new AuthProviderError(
+        error?.message ?? "Recovery code exchange failed: no user returned",
+        error?.code,
+        error?.status,
+        error?.toJSON() ?? null,
+      );
+    }
+    return { userId: data.user.id };
+  }
+
+  async updatePassword(newPassword: string): Promise<void> {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) {
+      throw new AuthProviderError(error.message, error.code, error.status, error.toJSON());
+    }
+  }
 }

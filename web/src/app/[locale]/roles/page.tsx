@@ -1,9 +1,15 @@
-import { createListRolesUseCase } from "@/composition-root";
+import type { Metadata } from "next";
+import { createListRolesUseCase, createRoleResolver } from "@/composition-root";
 import { handleListRoles } from "@/modules/identity/interface/roles.controller";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { redirect } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Roles & Permissions",
+  robots: { index: false, follow: false },
+};
 
 /**
  * Sprint 2 Task 2's visible proof: the seeded RBAC data (DDD §3.1,
@@ -16,12 +22,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
  * unauthenticated. Guarded directly here rather than relocated, since
  * this is scaffolding for a future admin-only screen (Phase 15), not
  * a page every logged-in learner should see either.
+ *
+ * Pre-launch audit follow-up: the Phase 17 fix only required *some*
+ * session, not an admin one — any signed-in student could read the
+ * full role/permission matrix. Gated to `roles.manage` (SRS §4's
+ * matrix grants this to super_admin only) rather than any specific
+ * role key, so it stays correct if the matrix changes.
  */
 export default async function RolesPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const current = await getCurrentUserWithDashboardData();
   if (!current) {
     redirect({ href: "/login", locale });
+    return;
+  }
+
+  const permissions = await createRoleResolver().resolveForUser(current.userId);
+  if (!permissions.has("roles.manage")) {
+    redirect({ href: "/dashboard", locale });
     return;
   }
 

@@ -118,6 +118,60 @@ export class AuthService {
       entityId: userId,
     });
   }
+
+  /**
+   * Password reset, request half. Same no-enumeration contract as
+   * login (§7.1) — the caller gets the same "check your email"
+   * outcome whether or not the address has an account; only a real
+   * provider failure (rate limit, malformed input) throws.
+   */
+  async requestPasswordReset(email: string, redirectTo: string): Promise<void> {
+    await this.authProvider.requestPasswordReset(email, redirectTo);
+    await this.auditLog.record({
+      actorId: null,
+      action: "auth.password_reset.requested",
+      entityType: "user",
+      entityId: "00000000-0000-0000-0000-000000000000",
+      after: { emailHash: await hashEmail(email) },
+    });
+  }
+
+  /**
+   * Password reset, step 2 of 3: the Route Handler the emailed link
+   * points at calls this with the link's one-time `code`, exchanging
+   * it for a real recovery session (session cookies get set on the
+   * response the Route Handler sends back — a plain Server Action or
+   * Server Component render can't do that, only a Route Handler or
+   * another Server Action can). The returned userId is only for
+   * logging; nothing downstream trusts a caller-supplied one.
+   */
+  async exchangePasswordResetCode(code: string): Promise<{ userId: string }> {
+    const { userId } = await this.authProvider.exchangeRecoveryCode(code);
+    await this.auditLog.record({
+      actorId: userId,
+      action: "auth.password_reset.link_opened",
+      entityType: "user",
+      entityId: userId,
+    });
+    return { userId };
+  }
+
+  /**
+   * Password reset, step 3 of 3: the reset-password form's own Server
+   * Action calls this once the recovery session from step 2 is
+   * already active (read via cookies, same as every other
+   * authenticated action in this app) — it does not re-exchange a
+   * code or accept one.
+   */
+  async updatePasswordForCurrentSession(userId: string, newPassword: string): Promise<void> {
+    await this.authProvider.updatePassword(newPassword);
+    await this.auditLog.record({
+      actorId: userId,
+      action: "auth.password_reset.completed",
+      entityType: "user",
+      entityId: userId,
+    });
+  }
 }
 
 /**

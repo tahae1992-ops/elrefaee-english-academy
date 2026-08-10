@@ -17,6 +17,9 @@ function buildService(overrides: {
     signUp: vi.fn(),
     signIn: vi.fn(),
     signOut: vi.fn().mockResolvedValue(undefined),
+    requestPasswordReset: vi.fn().mockResolvedValue(undefined),
+    exchangeRecoveryCode: vi.fn(),
+    updatePassword: vi.fn().mockResolvedValue(undefined),
     ...overrides.authProvider,
   };
   const userProfiles: UserProfileRepositoryPort = {

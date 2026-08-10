@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
 import { RegisterForm } from "./register-form";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "RegisterPage" });
+  return { title: t("title"), description: t("metaDescription") };
+}
 
 export default function RegisterPage() {
   const t = useTranslations("RegisterPage");

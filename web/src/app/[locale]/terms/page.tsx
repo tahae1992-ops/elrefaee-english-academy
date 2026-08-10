@@ -1,4 +1,6 @@
+import type { Metadata } from "next";
 import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Info } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/navigation";
@@ -11,8 +13,20 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
  * documented data practices, not fabricated final legal copy --
  * drafting binding terms is a legal decision outside engineering
  * scope, so this is clearly labeled and deferred to real review
- * rather than presented as launch-ready.
+ * rather than presented as launch-ready. `noindex` follows from that
+ * same draft status -- a non-binding placeholder shouldn't surface in
+ * search results as if it were the real policy.
  */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "LegalPages.terms" });
+  return { title: t("title"), robots: { index: false, follow: false } };
+}
+
 export default function TermsPage() {
   const t = useTranslations("LegalPages");
   const tTerms = useTranslations("LegalPages.terms");
