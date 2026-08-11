@@ -75,11 +75,19 @@ export function BlockRenderer({
         <p className="text-base leading-[1.7]">{block.explanation}</p>
         <ArabicText text={block.explanationAr} />
         <ul className="flex flex-col gap-1.5 rounded-md bg-muted p-3">
-          {block.examples.map((example, index) => (
-            <li key={index} className="text-sm italic text-muted-foreground">
-              {example}
-            </li>
-          ))}
+          {block.examples.map((example, index) => {
+            const audio = block.exampleAudio?.[index];
+            return (
+              <li key={index} className="flex items-center gap-2 text-sm italic text-muted-foreground">
+                <span>{example}</span>
+                {audio && (
+                  <audio controls src={audio.material.sourceUrl} className="h-7 max-w-[160px]">
+                    {t("audioUnsupported")}
+                  </audio>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
     );

@@ -41,6 +41,16 @@ export interface PresentationBlock {
   explanation: string;
   examples: string[];
   explanationAr?: string;
+  /** Pre-A1 media audit — optional per-example audio (e.g. phoneme/letter-sound demonstrations), keyed by index into `examples`. Sparse: most presentation blocks have none; a block with mixed audio/no-audio examples only lists the ones that have a real recording. */
+  exampleAudioIds?: Record<number, string>;
+}
+
+export interface ClientPresentationBlock {
+  type: "presentation";
+  explanation: string;
+  examples: string[];
+  explanationAr?: string;
+  exampleAudio?: Record<number, ResolvedMaterialRef>;
 }
 
 export interface ControlledPracticeBlock {
@@ -198,7 +208,7 @@ export type LessonBlock =
 
 export type ClientLessonBlock =
   | WarmUpBlock
-  | PresentationBlock
+  | ClientPresentationBlock
   | ClientVocabularyBlock
   | ClientVideoBlock
   | ClientReadingBlock
@@ -249,11 +259,12 @@ export function collectVocabularyEntryIds(content: LessonContent): string[] {
   return ids;
 }
 
-/** Every materialId referenced across a lesson's blocks (video, listening), e.g. to batch-fetch material content in one query. */
+/** Every materialId referenced across a lesson's blocks (video, listening, presentation example audio), e.g. to batch-fetch material content in one query. */
 export function collectMaterialIds(content: LessonContent): string[] {
   const ids: string[] = [];
   for (const block of content.blocks) {
     if (block.type === "video" || block.type === "listening") ids.push(block.materialId);
+    if (block.type === "presentation" && block.exampleAudioIds) ids.push(...Object.values(block.exampleAudioIds));
   }
   return ids;
 }
@@ -302,6 +313,14 @@ export function toClientLessonContent(
     objective: content.objective,
     blocks: content.blocks.map((block): ClientLessonBlock => {
       switch (block.type) {
+        case "presentation": {
+          if (!block.exampleAudioIds) return block;
+          const exampleAudio: Record<number, ResolvedMaterialRef> = {};
+          for (const [index, materialId] of Object.entries(block.exampleAudioIds)) {
+            exampleAudio[Number(index)] = resolveMaterialRef(materialId, resolvedMaterials);
+          }
+          return { type: "presentation", explanation: block.explanation, examples: block.examples, explanationAr: block.explanationAr, exampleAudio };
+        }
         case "controlled_practice":
           return {
             type: "controlled_practice",
