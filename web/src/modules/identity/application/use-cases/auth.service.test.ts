@@ -20,6 +20,10 @@ function buildService(overrides: {
     requestPasswordReset: vi.fn().mockResolvedValue(undefined),
     exchangeRecoveryCode: vi.fn(),
     updatePassword: vi.fn().mockResolvedValue(undefined),
+    listMfaFactors: vi.fn().mockResolvedValue([]),
+    enrollMfaFactor: vi.fn(),
+    createMfaChallenge: vi.fn(),
+    verifyMfaChallenge: vi.fn(),
     ...overrides.authProvider,
   };
   const userProfiles: UserProfileRepositoryPort = {
@@ -127,7 +131,7 @@ describe("AuthService.login", () => {
     );
   });
 
-  it("returns mfa_required for a user holding an elevated role, without issuing a token pair", async () => {
+  it("returns mfa_enrollment_required for an elevated-role user with no verified TOTP factor, without issuing a token pair", async () => {
     const { service, refreshTokens } = buildService({
       authProvider: {
         signIn: vi.fn().mockResolvedValue({
@@ -136,6 +140,7 @@ describe("AuthService.login", () => {
           refreshToken: "rt_2",
           expiresIn: 3600,
         }),
+        listMfaFactors: vi.fn().mockResolvedValue([]),
       },
       roleRepository: {
         getRoleAssignmentsForUser: vi
@@ -146,7 +151,31 @@ describe("AuthService.login", () => {
 
     const result = await service.login({ email: "admin@example.com", password: "hunter2long" });
 
-    expect(result).toEqual({ status: "mfa_required" });
+    expect(result).toEqual({ status: "mfa_enrollment_required" });
+    expect(refreshTokens.record).not.toHaveBeenCalled();
+  });
+
+  it("returns mfa_challenge_required with the verified factor's id for an elevated-role user who already enrolled", async () => {
+    const { service, refreshTokens } = buildService({
+      authProvider: {
+        signIn: vi.fn().mockResolvedValue({
+          userId: "user-2",
+          accessToken: "at_2",
+          refreshToken: "rt_2",
+          expiresIn: 3600,
+        }),
+        listMfaFactors: vi.fn().mockResolvedValue([{ id: "factor_1", status: "verified" }]),
+      },
+      roleRepository: {
+        getRoleAssignmentsForUser: vi
+          .fn()
+          .mockResolvedValue([{ roleKey: "academy_admin", academyId: null }]),
+      },
+    });
+
+    const result = await service.login({ email: "admin@example.com", password: "hunter2long" });
+
+    expect(result).toEqual({ status: "mfa_challenge_required", factorId: "factor_1" });
     expect(refreshTokens.record).not.toHaveBeenCalled();
   });
 
@@ -165,6 +194,55 @@ describe("AuthService.login", () => {
     const [entry] = vi.mocked(auditLog.record).mock.calls[0];
     expect(entry.after?.emailHash).toEqual(expect.any(String));
     expect(entry.after?.emailHash).not.toContain("yuki");
+  });
+});
+
+describe("AuthService.verifyMfa", () => {
+  it("verifies the challenge, records the refresh token + an audit entry, and returns a success token pair with resolved roles", async () => {
+    const { service, auditLog, refreshTokens } = buildService({
+      authProvider: {
+        verifyMfaChallenge: vi.fn().mockResolvedValue({
+          userId: "user-2",
+          accessToken: "at_elevated",
+          refreshToken: "rt_elevated",
+          expiresIn: 3600,
+        }),
+      },
+      roleRepository: {
+        getRoleAssignmentsForUser: vi
+          .fn()
+          .mockResolvedValue([{ roleKey: "academy_admin", academyId: null }]),
+      },
+    });
+
+    const result = await service.verifyMfa("factor_1", "challenge_1", "123456");
+
+    expect(result).toEqual({
+      status: "success",
+      accessToken: "at_elevated",
+      refreshToken: "rt_elevated",
+      expiresIn: 3600,
+      roles: ["academy_admin"],
+    });
+    expect(refreshTokens.record).toHaveBeenCalledWith({
+      userId: "user-2",
+      refreshToken: "rt_elevated",
+      expiresInSeconds: 3600,
+    });
+    expect(auditLog.record).toHaveBeenCalledWith(
+      expect.objectContaining({ actorId: "user-2", action: "auth.mfa.verified" }),
+    );
+  });
+
+  it("propagates a wrong/expired code failure without recording a refresh token", async () => {
+    const { service, refreshTokens } = buildService({
+      authProvider: {
+        verifyMfaChallenge: vi.fn().mockRejectedValue(new Error("Invalid TOTP code entered")),
+      },
+    });
+
+    await expect(service.verifyMfa("factor_1", "challenge_1", "000000")).rejects.toThrow("Invalid TOTP code entered");
+    expect(refreshTokens.record).not.toHaveBeenCalled();
   });
 });
 

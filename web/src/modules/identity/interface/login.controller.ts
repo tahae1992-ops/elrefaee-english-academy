@@ -18,9 +18,10 @@ export interface LoginErrorDebugInfo {
 
 export type LoginResponseBody =
   | { accessToken: string; refreshToken: string; expiresIn: number; roles: string[] }
+  | { mfaRequired: true; enrolled: false }
+  | { mfaRequired: true; enrolled: true; factorId: string }
   | { error: "VALIDATION_FAILED"; message: string }
   | { error: "UNAUTHENTICATED"; message: string; debug?: LoginErrorDebugInfo }
-  | { error: "MFA_NOT_IMPLEMENTED"; message: string }
   | { error: "RATE_LIMITED"; message: string };
 
 /**
@@ -44,15 +45,11 @@ export async function handleLogin(
   try {
     const result = await authService.login(parsed.data);
 
-    if (result.status === "mfa_required") {
-      // Detected correctly (role resolution + Blueprint §15's policy
-      // both ran for real) but the MFA challenge flow itself isn't
-      // built yet — an honest 501, not a fabricated mfaChallengeId
-      // the client could never actually complete.
-      return {
-        status: 501,
-        body: { error: "MFA_NOT_IMPLEMENTED", message: "MFA is required for this account but not yet supported." },
-      };
+    if (result.status === "mfa_enrollment_required") {
+      return { status: 200, body: { mfaRequired: true, enrolled: false } };
+    }
+    if (result.status === "mfa_challenge_required") {
+      return { status: 200, body: { mfaRequired: true, enrolled: true, factorId: result.factorId } };
     }
 
     return {

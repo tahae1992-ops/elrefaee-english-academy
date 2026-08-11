@@ -43,9 +43,9 @@ describe("handleLogin", () => {
     });
   });
 
-  it("returns 501 MFA_NOT_IMPLEMENTED rather than a fabricated challenge id", async () => {
+  it("returns 200 mfaRequired (unenrolled) when the account has no verified TOTP factor yet", async () => {
     const authService = fakeAuthService({
-      login: vi.fn().mockResolvedValue({ status: "mfa_required" }),
+      login: vi.fn().mockResolvedValue({ status: "mfa_enrollment_required" }),
     });
 
     const { status, body } = await handleLogin(authService, {
@@ -53,11 +53,22 @@ describe("handleLogin", () => {
       password: "hunter2long",
     });
 
-    expect(status).toBe(501);
-    expect(body).toEqual({
-      error: "MFA_NOT_IMPLEMENTED",
-      message: "MFA is required for this account but not yet supported.",
+    expect(status).toBe(200);
+    expect(body).toEqual({ mfaRequired: true, enrolled: false });
+  });
+
+  it("returns 200 mfaRequired (enrolled) with the factorId to challenge when a verified factor already exists", async () => {
+    const authService = fakeAuthService({
+      login: vi.fn().mockResolvedValue({ status: "mfa_challenge_required", factorId: "factor_1" }),
     });
+
+    const { status, body } = await handleLogin(authService, {
+      email: "admin@example.com",
+      password: "hunter2long",
+    });
+
+    expect(status).toBe(200);
+    expect(body).toEqual({ mfaRequired: true, enrolled: true, factorId: "factor_1" });
   });
 
   it("returns a generic 401 UNAUTHENTICATED on credential failure, never revealing enumeration detail in the primary message field outside dev", async () => {

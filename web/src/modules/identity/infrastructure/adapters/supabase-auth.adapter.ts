@@ -2,6 +2,9 @@ import { createSupabaseServerClient } from "@/shared/infrastructure/supabase/ser
 import {
   AuthProviderError,
   type AuthProviderPort,
+  type MfaChallengeResult,
+  type MfaEnrollResult,
+  type MfaFactor,
   type SignInResult,
   type SignUpResult,
 } from "@/modules/identity/application/ports/auth-provider-port";
@@ -97,5 +100,67 @@ export class SupabaseAuthAdapter implements AuthProviderPort {
     if (error) {
       throw new AuthProviderError(error.message, error.code, error.status, error.toJSON());
     }
+  }
+
+  async listMfaFactors(): Promise<MfaFactor[]> {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.mfa.listFactors();
+    if (error) {
+      throw new AuthProviderError(error.message, error.code, error.status, error.toJSON());
+    }
+    // Supabase's per-type `.totp` breakdown only ever contains
+    // verified factors (its own type confirms this) — exactly what
+    // login()'s "does this user already have a factor to challenge"
+    // check needs; an unverified leftover is enrollMfaFactor's concern.
+    return data.totp.map((factor) => ({ id: factor.id, status: factor.status }));
+  }
+
+  async enrollMfaFactor(): Promise<MfaEnrollResult> {
+    const supabase = await createSupabaseServerClient();
+
+    // Clear any stale unverified factor from an abandoned previous
+    // attempt first — Supabase caps the number of factors per user,
+    // and an orphaned unverified one would otherwise pile up on every
+    // retry without ever becoming the one actually used. Unverified
+    // factors only show up in `.all` — the per-type `.totp` breakdown
+    // is typed (and populated) as verified-only.
+    const { data: existing, error: listError } = await supabase.auth.mfa.listFactors();
+    if (listError) {
+      throw new AuthProviderError(listError.message, listError.code, listError.status, listError.toJSON());
+    }
+    for (const factor of existing.all) {
+      if (factor.factor_type === "totp" && factor.status === "unverified") {
+        await supabase.auth.mfa.unenroll({ factorId: factor.id });
+      }
+    }
+
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp" });
+    if (error || !data) {
+      throw new AuthProviderError(error?.message ?? "MFA enrollment failed: no factor returned", error?.code, error?.status, error?.toJSON() ?? null);
+    }
+    return { factorId: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret };
+  }
+
+  async createMfaChallenge(factorId: string): Promise<MfaChallengeResult> {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.mfa.challenge({ factorId });
+    if (error || !data) {
+      throw new AuthProviderError(error?.message ?? "MFA challenge failed: no challenge returned", error?.code, error?.status, error?.toJSON() ?? null);
+    }
+    return { challengeId: data.id };
+  }
+
+  async verifyMfaChallenge(factorId: string, challengeId: string, code: string): Promise<SignInResult> {
+    const supabase = await createSupabaseServerClient();
+    const { data, error } = await supabase.auth.mfa.verify({ factorId, challengeId, code });
+    if (error || !data.access_token) {
+      throw new AuthProviderError(error?.message ?? "MFA verification failed: no session returned", error?.code, error?.status, error?.toJSON() ?? null);
+    }
+    return {
+      userId: data.user.id,
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+      expiresIn: data.expires_in,
+    };
   }
 }

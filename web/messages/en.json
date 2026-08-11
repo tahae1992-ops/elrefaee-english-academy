@@ -42,7 +42,6 @@
     "submitting": "Signing in…",
     "genericError": "Sign-in failed. Please try again.",
     "invalidCredentials": "Invalid email or password.",
-    "mfaNotImplemented": "MFA is required for this account but not yet supported.",
     "rateLimited": "Too many attempts. Try again shortly.",
     "noAccount": "New here?",
     "registerLink": "Create an account",
@@ -51,6 +50,19 @@
     "validation": {
       "emailInvalid": "Enter a valid email address",
       "passwordRequired": "Password is required"
+    },
+    "mfa": {
+      "enrollTitle": "Set up two-factor authentication",
+      "enrollInstructions": "Your role requires an extra layer of security. Scan this QR code with an authenticator app (like Google Authenticator or Authy), then enter the 6-digit code it shows.",
+      "secretFallbackLabel": "Can't scan the code? Enter this key manually:",
+      "challengeTitle": "Enter your authentication code",
+      "challengeInstructions": "Open your authenticator app and enter the current 6-digit code.",
+      "codeLabel": "6-digit code",
+      "verify": "Verify",
+      "verifying": "Verifying…",
+      "invalidCode": "That code is incorrect or has expired. A new code was requested — try again.",
+      "genericError": "Something went wrong. Please try again.",
+      "codeRequired": "Enter the 6-digit code"
     }
   },
   "ForgotPasswordPage": {

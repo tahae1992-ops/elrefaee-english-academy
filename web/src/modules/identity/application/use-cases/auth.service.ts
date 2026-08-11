@@ -1,5 +1,5 @@
 import { requiresMfa } from "@/modules/identity/domain/services/mfa-policy";
-import type { AuthProviderPort } from "@/modules/identity/application/ports/auth-provider-port";
+import type { AuthProviderPort, MfaEnrollResult } from "@/modules/identity/application/ports/auth-provider-port";
 import type { UserProfileRepositoryPort } from "@/modules/identity/application/ports/user-profile-repository-port";
 import type { RoleRepositoryPort } from "@/modules/identity/application/ports/role-repository-port";
 import type { AuditLogPort } from "@/shared/application/ports/audit-log-port";
@@ -23,7 +23,10 @@ export interface LoginInput {
 
 export type LoginResult =
   | { status: "success"; accessToken: string; refreshToken: string; expiresIn: number; roles: string[] }
-  | { status: "mfa_required" };
+  /** No verified TOTP factor yet — the client must walk the enrollment flow (enrollMfa → verifyMfa) before it can get a session. */
+  | { status: "mfa_enrollment_required" }
+  /** A verified TOTP factor already exists — the client only needs a fresh challenge + code (challengeMfa → verifyMfa). */
+  | { status: "mfa_challenge_required"; factorId: string };
 
 /**
  * SAD §8's AuthService — grows one method per Sprint 2 auth slice
@@ -58,11 +61,10 @@ export class AuthService {
   }
 
   /**
-   * API Spec §7.1. The MFA-required branch is detected correctly
-   * (role resolution + Blueprint §15's policy both run for real) but
-   * doesn't complete the challenge flow yet — that's the dedicated MFA
-   * slice (TOTP setup + challenge screen), not silently faked here
-   * with a non-functional `mfaChallengeId`.
+   * API Spec §7.1. `signIn` already sets an aal1 session cookie as a
+   * side effect (SupabaseAuthAdapter's own doc comment) — that's what
+   * lets the MFA branches below call back into `listMfaFactors`/
+   * `enrollMfa`/etc. on later requests without re-sending credentials.
    */
   async login(input: LoginInput): Promise<LoginResult> {
     let signInResult;
@@ -90,7 +92,11 @@ export class AuthService {
     });
 
     if (requiresMfa(roleKeys)) {
-      return { status: "mfa_required" };
+      const factors = await this.authProvider.listMfaFactors();
+      const verifiedFactor = factors.find((factor) => factor.status === "verified");
+      return verifiedFactor
+        ? { status: "mfa_challenge_required", factorId: verifiedFactor.id }
+        : { status: "mfa_enrollment_required" };
     }
 
     await this.refreshTokens.record({
@@ -104,6 +110,49 @@ export class AuthService {
       accessToken: signInResult.accessToken,
       refreshToken: signInResult.refreshToken,
       expiresIn: signInResult.expiresIn,
+      roles: roleKeys,
+    };
+  }
+
+  /** Blueprint §15 MFA slice, enrollment step 1: generates a fresh TOTP secret + QR code for the current (aal1) session's user. */
+  async enrollMfa(): Promise<MfaEnrollResult> {
+    return this.authProvider.enrollMfaFactor();
+  }
+
+  /** Step 2 of both the enrollment and the returning-user flows: opens a challenge the client must then answer with a 6-digit code. */
+  async challengeMfa(factorId: string): Promise<{ challengeId: string }> {
+    return this.authProvider.createMfaChallenge(factorId);
+  }
+
+  /**
+   * Final step for both flows: verifies the code, elevates the session
+   * to aal2, and returns the same success shape `login()` does so the
+   * Route Handler doesn't need two different response builders.
+   */
+  async verifyMfa(factorId: string, challengeId: string, code: string): Promise<LoginResult> {
+    const result = await this.authProvider.verifyMfaChallenge(factorId, challengeId, code);
+
+    const assignments = await this.roleRepository.getRoleAssignmentsForUser(result.userId);
+    const roleKeys = assignments.map((assignment) => assignment.roleKey);
+
+    await this.auditLog.record({
+      actorId: result.userId,
+      action: "auth.mfa.verified",
+      entityType: "user",
+      entityId: result.userId,
+    });
+
+    await this.refreshTokens.record({
+      userId: result.userId,
+      refreshToken: result.refreshToken,
+      expiresInSeconds: result.expiresIn,
+    });
+
+    return {
+      status: "success",
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
+      expiresIn: result.expiresIn,
       roles: roleKeys,
     };
   }
