@@ -35,7 +35,11 @@ export default async function AppLayout({
 
   return (
     <div className="flex min-h-svh flex-col">
-      <TopNav displayName={current.dashboardData.displayName} email={current.email} />
+      <TopNav
+        displayName={current.dashboardData.displayName}
+        email={current.email}
+        showTeacherLink={current.dashboardData.permissionKeys.includes("cohort.view_roster_analytics")}
+      />
       <div className="flex flex-1">
         <SidebarNav />
         <main className="flex-1 pb-16 md:pb-0">{children}</main>

@@ -25,6 +25,7 @@ const DISALLOWED_PATHS = [
   "/roles",
   "/reset-password",
   "/design-system",
+  "/teacher",
 ];
 
 export default function robots(): MetadataRoute.Robots {

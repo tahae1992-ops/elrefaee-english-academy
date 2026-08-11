@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { boolean, index, integer, jsonb, numeric, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 import { learningSchema } from "@/shared/infrastructure/db/schemas";
 import { academies } from "@/shared/infrastructure/db/tables/academy";
+import { activityEventType } from "@/shared/infrastructure/db/tables/enums";
 import { userProfiles } from "@/modules/identity/infrastructure/db/tables/identity";
 import { contentItems, courses, units, lessons, vocabularyEntries } from "@/modules/curriculum/infrastructure/db/tables/curriculum";
 
@@ -145,5 +146,35 @@ export const vocabularyReviewState = learningSchema.table(
   (table) => [
     uniqueIndex("vocabulary_review_state_user_entry_unique").on(table.userId, table.vocabularyEntryId),
     index("vocabulary_review_state_user_due_idx").on(table.userId, table.dueAt),
+  ],
+);
+
+/**
+ * Phase 21 — Goal 2's real, persistent (never localStorage) activity
+ * timeline. Deliberately the exact 11-event set specified, not
+ * open-ended analytics — every write site in the app corresponds to
+ * one of these, chosen for what a teacher's activity view actually
+ * needs, not generic telemetry. `metadata` stays small and
+ * event-specific (e.g. `{ blockIndex, blockType }`), never a dumping
+ * ground.
+ */
+export const activityEvents = learningSchema.table(
+  "activity_events",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => userProfiles.id),
+    eventType: activityEventType("event_type").notNull(),
+    lessonId: uuid("lesson_id").references(() => lessons.id),
+    materialId: uuid("material_id").references(() => contentItems.id),
+    exerciseId: uuid("exercise_id").references(() => contentItems.id),
+    metadata: jsonb("metadata").notNull().default({}),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("activity_events_user_created_idx").on(table.userId, table.createdAt),
+    index("activity_events_lesson_idx").on(table.lessonId),
+    index("activity_events_user_type_idx").on(table.userId, table.eventType),
   ],
 );

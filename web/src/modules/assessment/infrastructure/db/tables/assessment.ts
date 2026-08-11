@@ -13,9 +13,9 @@ import {
 } from "drizzle-orm/pg-core";
 import { assessmentSchema } from "@/shared/infrastructure/db/schemas";
 import { academies } from "@/shared/infrastructure/db/tables/academy";
-import { cefrLevel, skillType } from "@/shared/infrastructure/db/tables/enums";
+import { cefrLevel, skillType, gradeType } from "@/shared/infrastructure/db/tables/enums";
 import { userProfiles } from "@/modules/identity/infrastructure/db/tables/identity";
-import { units } from "@/modules/curriculum/infrastructure/db/tables/curriculum";
+import { units, lessons } from "@/modules/curriculum/infrastructure/db/tables/curriculum";
 
 /**
  * Placement Test slice — the MVP-scoped assessment schema (DDD §3.9),
@@ -220,4 +220,65 @@ export const certificates = assessmentSchema.table(
     index("certificates_user_issued_idx").on(table.userId, table.issuedAt),
     index("certificates_user_cefr_level_idx").on(table.userId, table.cefrLevel),
   ],
+);
+
+/**
+ * Phase 21 — the real gradebook Goal 2 asked for: distinct from (and
+ * fed by) exercise_attempts/checkpoint_results/responses, which record
+ * *what happened*; this is the durable, teacher-facing *scored
+ * outcome* row. `referenceId` is the exercise/quiz-block/lesson
+ * content_item id being graded — deliberately untyped as a specific FK
+ * since it points at different tables depending on `gradeType`, same
+ * pattern as `assessment.results.skill_levels` being a free-form
+ * structure rather than one FK per possible target.
+ */
+export const grades = assessmentSchema.table(
+  "grades",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => userProfiles.id),
+    gradeType: gradeType("grade_type").notNull(),
+    referenceId: uuid("reference_id").notNull(),
+    lessonId: uuid("lesson_id").references(() => lessons.id),
+    score: numeric("score", { precision: 6, scale: 2, mode: "number" }).notNull(),
+    maxScore: numeric("max_score", { precision: 6, scale: 2, mode: "number" }).notNull(),
+    percentage: numeric("percentage", { precision: 5, scale: 2, mode: "number" }).notNull(),
+    attemptNumber: integer("attempt_number").notNull().default(1),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("grades_user_created_idx").on(table.userId, table.createdAt),
+    index("grades_reference_idx").on(table.referenceId),
+    index("grades_lesson_idx").on(table.lessonId),
+  ],
+);
+
+/**
+ * Phase 21 — audit trail for any manual grade edit (Goal 2: "record
+ * who changed it, previous value, new value, timestamp"). No update
+ * path exists yet for `grades` itself in this slice — students can
+ * never write here at all, and no teacher-edit UI is wired up yet
+ * either — but the audit table exists now so that when one is built,
+ * grades are never silently overwritten without a trail.
+ */
+export const gradeOverrides = assessmentSchema.table(
+  "grade_overrides",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    gradeId: uuid("grade_id")
+      .notNull()
+      .references(() => grades.id),
+    changedBy: uuid("changed_by")
+      .notNull()
+      .references(() => userProfiles.id),
+    previousScore: numeric("previous_score", { precision: 6, scale: 2, mode: "number" }).notNull(),
+    newScore: numeric("new_score", { precision: 6, scale: 2, mode: "number" }).notNull(),
+    previousMaxScore: numeric("previous_max_score", { precision: 6, scale: 2, mode: "number" }).notNull(),
+    newMaxScore: numeric("new_max_score", { precision: 6, scale: 2, mode: "number" }).notNull(),
+    reason: text("reason"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [index("grade_overrides_grade_idx").on(table.gradeId)],
 );

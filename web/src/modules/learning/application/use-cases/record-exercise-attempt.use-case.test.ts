@@ -19,6 +19,7 @@ describe("RecordExerciseAttemptUseCase", () => {
       record: vi.fn().mockResolvedValue(recorded),
       countDistinctCorrectForUser: vi.fn(),
       listDistinctIncorrectExerciseIdsForLesson: vi.fn(),
+      getLatestCorrectnessForExercises: vi.fn(),
     };
     const input = {
       userId: "u1",

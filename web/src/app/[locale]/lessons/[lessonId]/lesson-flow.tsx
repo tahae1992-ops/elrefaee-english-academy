@@ -32,6 +32,20 @@ interface ScoreResponse {
 
 const AUTO_ADVANCE_SECONDS = 5;
 
+const BLOCK_LABEL_KEY: Record<ClientLesson["content"]["blocks"][number]["type"], string> = {
+  warm_up: "warmUp",
+  presentation: "presentation",
+  vocabulary: "vocabulary",
+  video: "video",
+  reading: "reading",
+  listening: "listening",
+  controlled_practice: "controlledPractice",
+  speaking_practice: "speakingPractice",
+  communicative_task: "communicativeTask",
+  quiz: "quiz",
+  wrap_up: "wrapUp",
+};
+
 export function LessonFlow({
   lesson,
   courseId,
@@ -75,7 +89,7 @@ export function LessonFlow({
 
   function isBlockFullyDone(index: number, exerciseAttempts: Record<string, { done: boolean }>): boolean {
     const block = blocks[index];
-    if (block.type !== "controlled_practice") return true;
+    if (block.type !== "controlled_practice" && block.type !== "quiz") return true;
     return block.exercises.every(({ id }) => exerciseAttempts[id]?.done === true);
   }
 
@@ -229,7 +243,7 @@ export function LessonFlow({
               )}
             >
               {index < blockIndex ? "✓ " : index === blockIndex ? "▸ " : ""}
-              {t(`blocks.${block.type === "warm_up" ? "warmUp" : block.type === "controlled_practice" ? "controlledPractice" : block.type === "communicative_task" ? "communicativeTask" : block.type === "wrap_up" ? "wrapUp" : "presentation"}`)}
+              {t(`blocks.${BLOCK_LABEL_KEY[block.type]}`)}
             </button>
           ))}
         </nav>

@@ -1,9 +1,11 @@
 import type { LessonRepositoryPort } from "@/modules/curriculum/application/ports/lesson-repository-port";
 import type { ExerciseRepositoryPort } from "@/modules/curriculum/application/ports/exercise-repository-port";
 import type { VocabularyEntryRepositoryPort } from "@/modules/curriculum/application/ports/vocabulary-entry-repository-port";
+import type { MaterialRepositoryPort } from "@/modules/curriculum/application/ports/material-repository-port";
 import {
   collectExerciseIds,
   collectVocabularyEntryIds,
+  collectMaterialIds,
   toClientLessonContent,
   type ClientLessonContent,
 } from "@/modules/curriculum/domain/services/lesson-blocks";
@@ -11,6 +13,8 @@ import { toClientExercise } from "@/modules/curriculum/domain/services/exercise"
 import type { ClientExercise } from "@/modules/curriculum/domain/services/exercise";
 import { toClientVocabularyEntry } from "@/modules/curriculum/domain/services/vocabulary-entry";
 import type { ClientVocabularyEntry } from "@/modules/curriculum/domain/services/vocabulary-entry";
+import { toClientMaterial } from "@/modules/curriculum/domain/services/material";
+import type { ClientMaterial } from "@/modules/curriculum/domain/services/material";
 
 export class LessonNotFoundError extends Error {
   constructor() {
@@ -45,6 +49,7 @@ export class GetLessonUseCase {
     private readonly lessons: LessonRepositoryPort,
     private readonly exercises: ExerciseRepositoryPort,
     private readonly vocabularyEntries: VocabularyEntryRepositoryPort,
+    private readonly materials: MaterialRepositoryPort,
   ) {}
 
   async execute(lessonId: string): Promise<ClientLesson> {
@@ -63,12 +68,18 @@ export class GetLessonUseCase {
       [...fullVocabularyEntries.entries()].map(([id, entry]) => [id, toClientVocabularyEntry(entry)]),
     );
 
+    const materialIds = collectMaterialIds(lesson.content);
+    const fullMaterials = await this.materials.listByIds(materialIds);
+    const clientMaterials = new Map<string, ClientMaterial>(
+      [...fullMaterials.entries()].map(([id, material]) => [id, toClientMaterial(material)]),
+    );
+
     return {
       id: lesson.id,
       unitId: lesson.unitId,
       courseId: lesson.courseId,
       orderIndex: lesson.orderIndex,
-      content: toClientLessonContent(lesson.content, clientExercises, clientVocabularyEntries),
+      content: toClientLessonContent(lesson.content, clientExercises, clientVocabularyEntries, clientMaterials),
     };
   }
 }

@@ -132,6 +132,9 @@ export const vocabularyEntries = curriculumSchema.table(
     synonyms: text("synonyms").array().notNull().default([]),
     // { text: string }[] — at least one authored example sentence.
     exampleSentences: jsonb("example_sentences").notNull(),
+    // Phase 21 — both optional FKs into content_items (type='material').
+    imageMaterialId: uuid("image_material_id").references(() => contentItems.id),
+    audioMaterialId: uuid("audio_material_id").references(() => contentItems.id),
   },
   (table) => [uniqueIndex("vocabulary_entries_academy_headword_sense_unique").on(table.academyId, table.headword, table.senseNumber)],
 );

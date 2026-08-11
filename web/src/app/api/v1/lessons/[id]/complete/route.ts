@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
-import { createAdvanceEnrollmentUseCase, createCompleteLessonUseCase, createQueueVocabularyForReviewUseCase, createAwardXpUseCase } from "@/composition-root";
+import {
+  createAdvanceEnrollmentUseCase,
+  createCompleteLessonUseCase,
+  createQueueVocabularyForReviewUseCase,
+  createAwardXpUseCase,
+  createRecordActivityEventUseCase,
+  createRecordGradeUseCase,
+  createDrizzleExerciseAttemptAdapter,
+} from "@/composition-root";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { gateLessonAccess } from "@/lib/gate-lesson-access";
 import { handleCompleteLesson } from "@/modules/learning/interface/complete-lesson.controller";
 import { recordGamificationActivity } from "@/lib/record-gamification-activity";
 import { deterministicEventId } from "@/lib/deterministic-event-id";
 import { XP_REWARDS } from "@/modules/engagement/interface/types";
+import type { ClientLessonBlock } from "@/modules/curriculum/interface/types";
 
 /**
  * API Spec §6.3: POST /lessons/{id}/complete (FR-05). The unit-advance
@@ -50,6 +59,43 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   const { lesson, snapshot } = gate;
   const now = new Date();
+
+  // Phase 21, Goal 2: real, persistent lesson-completion signal for
+  // the teacher activity timeline and student progress view.
+  const recordActivityEvent = createRecordActivityEventUseCase();
+  await recordActivityEvent.execute({ userId: current.userId, eventType: "lesson_completed", lessonId: id });
+
+  // Phase 21 grading: quiz + lesson-level grades, computed from
+  // server-authoritative attempt correctness (never the client's own
+  // blockInteractions submission) via getLatestCorrectnessForExercises.
+  const gradableBlocks = lesson.content.blocks.filter(
+    (block): block is Extract<ClientLessonBlock, { type: "controlled_practice" | "quiz" }> =>
+      block.type === "controlled_practice" || block.type === "quiz",
+  );
+  if (gradableBlocks.length > 0) {
+    const allExerciseIds = gradableBlocks.flatMap((block) => block.exercises.map((ref) => ref.id));
+    const correctness = await createDrizzleExerciseAttemptAdapter().getLatestCorrectnessForExercises(current.userId, allExerciseIds);
+    const recordGrade = createRecordGradeUseCase();
+
+    for (const block of gradableBlocks) {
+      if (block.type !== "quiz") continue;
+      const total = block.exercises.length;
+      const correct = block.exercises.filter((ref) => correctness.get(ref.id) === true).length;
+      await recordGrade.execute({ userId: current.userId, gradeType: "quiz", referenceId: id, lessonId: id, score: correct, maxScore: total });
+      await recordActivityEvent.execute({ userId: current.userId, eventType: "quiz_completed", lessonId: id });
+    }
+
+    const lessonTotal = allExerciseIds.length;
+    const lessonCorrect = allExerciseIds.filter((exerciseId) => correctness.get(exerciseId) === true).length;
+    await recordGrade.execute({
+      userId: current.userId,
+      gradeType: "lesson",
+      referenceId: id,
+      lessonId: id,
+      score: lessonCorrect,
+      maxScore: lessonTotal,
+    });
+  }
 
   const wrapUpBlock = lesson.content.blocks.find((block) => block.type === "wrap_up");
   if (wrapUpBlock && wrapUpBlock.type === "wrap_up" && wrapUpBlock.targetVocabulary.length > 0) {

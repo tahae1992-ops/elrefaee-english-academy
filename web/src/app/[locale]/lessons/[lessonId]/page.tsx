@@ -1,6 +1,6 @@
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
-import { createGetLessonProgressUseCase } from "@/composition-root";
+import { createGetLessonProgressUseCase, createRecordActivityEventUseCase } from "@/composition-root";
 import { gateLessonAccess } from "@/lib/gate-lesson-access";
 import { buildTutorLessonContext } from "@/lib/build-tutor-lesson-context";
 import { deriveTutorStarters } from "@/modules/ai/interface/types";
@@ -26,6 +26,17 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
     redirect({ href: "/courses", locale });
     return;
   }
+
+  // Phase 21, Goal 2: real "opened this lesson" signal for the
+  // teacher activity timeline — this is the actual code path a
+  // browser hits opening/reopening a lesson (the API route of the
+  // same name exists for external consumers per API Spec §6.3, but
+  // the UI itself renders via this Server Component directly).
+  await createRecordActivityEventUseCase().execute({
+    userId: current.userId,
+    eventType: "lesson_started",
+    lessonId,
+  });
 
   const progress = await createGetLessonProgressUseCase().execute(current.userId, [lessonId]);
   const savedPosition = progress.get(lessonId)?.lastPosition ?? { blockIndex: 0, blockInteractions: {} };

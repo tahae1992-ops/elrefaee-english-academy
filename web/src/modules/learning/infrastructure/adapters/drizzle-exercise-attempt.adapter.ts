@@ -1,4 +1,4 @@
-import { and, count, countDistinct, desc, eq } from "drizzle-orm";
+import { and, count, countDistinct, desc, eq, inArray } from "drizzle-orm";
 import { getDb } from "@/shared/infrastructure/db/client";
 import { exerciseAttempts } from "@/modules/learning/infrastructure/db/tables/learning";
 import type {
@@ -64,5 +64,21 @@ export class DrizzleExerciseAttemptAdapter implements ExerciseAttemptRepositoryP
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit)
       .map((row) => row.exerciseId);
+  }
+
+  async getLatestCorrectnessForExercises(userId: string, exerciseIds: string[]): Promise<Map<string, boolean>> {
+    if (exerciseIds.length === 0) return new Map();
+
+    const rows = await getDb()
+      .selectDistinctOn([exerciseAttempts.exerciseId], {
+        exerciseId: exerciseAttempts.exerciseId,
+        isCorrect: exerciseAttempts.isCorrect,
+        createdAt: exerciseAttempts.createdAt,
+      })
+      .from(exerciseAttempts)
+      .where(and(eq(exerciseAttempts.userId, userId), inArray(exerciseAttempts.exerciseId, exerciseIds)))
+      .orderBy(exerciseAttempts.exerciseId, desc(exerciseAttempts.createdAt));
+
+    return new Map(rows.map((row) => [row.exerciseId, row.isCorrect]));
   }
 }

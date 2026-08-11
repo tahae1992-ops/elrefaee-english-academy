@@ -27,7 +27,13 @@ export const skillType = sharedSchema.enum("skill_type", [
   "vocabulary",
 ]);
 
-/** DDD §3.3's shared `content_type` enum — every authorable content kind across the platform. */
+/**
+ * DDD §3.3's shared `content_type` enum — every authorable content kind
+ * across the platform. `material` (Phase 21) is the one addition beyond
+ * the original DDD list — externally-sourced video/image/audio,
+ * authored the same way as everything else here (a `content_items` row)
+ * rather than a parallel media table.
+ */
 export const contentType = sharedSchema.enum("content_type", [
   "lesson",
   "exercise",
@@ -40,7 +46,26 @@ export const contentType = sharedSchema.enum("content_type", [
   "teacher_note",
   "dialogue",
   "assessment_item",
+  "material",
 ]);
+
+/** Phase 21 — Goal 2's real persistent activity tracking (learning.activity_events), the exact event set specified, not open-ended analytics. */
+export const activityEventType = sharedSchema.enum("activity_event_type", [
+  "lesson_started",
+  "lesson_completed",
+  "section_viewed",
+  "video_started",
+  "video_completed",
+  "vocabulary_viewed",
+  "exercise_started",
+  "exercise_completed",
+  "quiz_started",
+  "quiz_completed",
+  "answer_submitted",
+]);
+
+/** Phase 21 — assessment.grades's grade_type: the 4 scored-outcome kinds the gradebook tracks. */
+export const gradeType = sharedSchema.enum("grade_type", ["exercise", "quiz", "lesson", "assessment"]);
 
 /** DDD §3.3's shared `content_status` enum — the Content Governance lifecycle (Blueprint §4.1). */
 export const contentStatus = sharedSchema.enum("content_status", [

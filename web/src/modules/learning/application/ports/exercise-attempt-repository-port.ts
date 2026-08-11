@@ -26,4 +26,12 @@ export interface ExerciseAttemptRepositoryPort {
   countDistinctCorrectForUser(userId: string): Promise<number>;
   /** AI Tutor slice — "tutor suggestions based on learner mistakes": exercises in this lesson the learner has answered incorrectly at least once, most-recent-mistake first. Exercise ids only — the caller resolves these to client-safe (answer-key-free) prompt text itself (see src/lib/build-tutor-lesson-context.ts), never from this port. */
   listDistinctIncorrectExerciseIdsForLesson(userId: string, lessonId: string, limit: number): Promise<string[]>;
+  /**
+   * Phase 21 grading — the *server-authoritative* correctness per
+   * exercise (each exercise's most recent attempt), for computing a
+   * quiz/lesson-level grade at completion time. Deliberately never
+   * sourced from client-submitted `blockInteractions` — that payload
+   * is attacker-controllable, this query is not.
+   */
+  getLatestCorrectnessForExercises(userId: string, exerciseIds: string[]): Promise<Map<string, boolean>>;
 }

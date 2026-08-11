@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { LogOut, User as UserIcon } from "lucide-react";
-import { useRouter } from "@/i18n/navigation";
+import { GraduationCap, LogOut, User as UserIcon } from "lucide-react";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -20,7 +20,16 @@ function initialsFor(displayName: string): string {
   return initials.join("") || "?";
 }
 
-export function UserMenu({ displayName, email }: { displayName: string; email: string }) {
+export function UserMenu({
+  displayName,
+  email,
+  showTeacherLink = false,
+}: {
+  displayName: string;
+  email: string;
+  /** Phase 21, Goal 2 — only rendered for users holding `cohort.view_roster_analytics` (resolved once by the caller, not re-checked here; the real gate is server-side on the /teacher route itself). */
+  showTeacherLink?: boolean;
+}) {
   const t = useTranslations("AppShell.userMenu");
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -53,6 +62,14 @@ export function UserMenu({ displayName, email }: { displayName: string; email: s
           <UserIcon />
           {t("profile")}
         </DropdownMenuItem>
+        {showTeacherLink && (
+          <DropdownMenuItem asChild>
+            <Link href="/teacher">
+              <GraduationCap />
+              {t("teacherDashboard")}
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={signOut} disabled={isSigningOut} variant="destructive">
           <LogOut />

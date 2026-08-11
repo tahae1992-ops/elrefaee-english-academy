@@ -1,3 +1,8 @@
+import { GetTeacherRosterUseCase } from "@/modules/instruction/application/use-cases/get-teacher-roster.use-case";
+import { GetStudentDetailUseCase } from "@/modules/instruction/application/use-cases/get-student-detail.use-case";
+import { AssignStudentToTeacherUseCase } from "@/modules/instruction/application/use-cases/assign-student-to-teacher.use-case";
+import { DrizzleTeacherAssignmentAdapter } from "@/modules/instruction/infrastructure/adapters/drizzle-teacher-assignment.adapter";
+import { DrizzleRosterAdapter } from "@/modules/instruction/infrastructure/adapters/drizzle-roster.adapter";
 import { CheckIdentityModuleHealthUseCase } from "@/modules/identity/application/use-cases/check-identity-module-health.use-case";
 import { DrizzleDatabaseHealthAdapter } from "@/modules/identity/infrastructure/adapters/drizzle-database-health.adapter";
 import { ListRolesWithPermissionsUseCase } from "@/modules/identity/application/use-cases/list-roles-with-permissions.use-case";
@@ -27,6 +32,8 @@ import { DrizzleItemBankAdapter } from "@/modules/assessment/infrastructure/adap
 import { DrizzleAttemptAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-attempt.adapter";
 import { DrizzleResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-result.adapter";
 import { DrizzleCheckpointResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-checkpoint-result.adapter";
+import { DrizzleGradeAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-grade.adapter";
+import { RecordGradeUseCase } from "@/modules/assessment/application/use-cases/record-grade.use-case";
 import { DrizzleCertificationResultAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-certification-result.adapter";
 import { DrizzleCertificateAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-certificate.adapter";
 import { DrizzleCertificateTemplateAdapter } from "@/modules/assessment/infrastructure/adapters/drizzle-certificate-template.adapter";
@@ -44,18 +51,21 @@ import { DrizzleUnitAdapter } from "@/modules/curriculum/infrastructure/adapters
 import { DrizzleLessonAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-lesson.adapter";
 import { DrizzleExerciseAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-exercise.adapter";
 import { DrizzleVocabularyEntryAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-vocabulary-entry.adapter";
+import { DrizzleMaterialAdapter } from "@/modules/curriculum/infrastructure/adapters/drizzle-material.adapter";
 import { EnterCourseUseCase } from "@/modules/learning/application/use-cases/enter-course.use-case";
 import { GetLessonProgressUseCase } from "@/modules/learning/application/use-cases/get-lesson-progress.use-case";
 import { SaveLessonPositionUseCase } from "@/modules/learning/application/use-cases/save-lesson-position.use-case";
 import { CompleteLessonUseCase } from "@/modules/learning/application/use-cases/complete-lesson.use-case";
 import { AdvanceEnrollmentUseCase } from "@/modules/learning/application/use-cases/advance-enrollment.use-case";
 import { RecordExerciseAttemptUseCase } from "@/modules/learning/application/use-cases/record-exercise-attempt.use-case";
+import { RecordActivityEventUseCase } from "@/modules/learning/application/use-cases/record-activity-event.use-case";
 import { QueueVocabularyForReviewUseCase } from "@/modules/learning/application/use-cases/queue-vocabulary-for-review.use-case";
 import { GetDueReviewQueueUseCase } from "@/modules/learning/application/use-cases/get-due-review-queue.use-case";
 import { SubmitReviewResponseUseCase } from "@/modules/learning/application/use-cases/submit-review-response.use-case";
 import { DrizzleEnrollmentAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-enrollment.adapter";
 import { DrizzleProgressAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-progress.adapter";
 import { DrizzleExerciseAttemptAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-exercise-attempt.adapter";
+import { DrizzleActivityEventAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-activity-event.adapter";
 import { DrizzleVocabularyReviewStateAdapter } from "@/modules/learning/infrastructure/adapters/drizzle-vocabulary-review-state.adapter";
 import { AwardXpUseCase } from "@/modules/engagement/application/use-cases/award-xp.use-case";
 import { GetXpBalanceUseCase } from "@/modules/engagement/application/use-cases/get-xp-balance.use-case";
@@ -87,6 +97,18 @@ import { DrizzleAiInteractionAdapter } from "@/modules/ai/infrastructure/adapter
  * As new modules land, each gets its own factory here, following this
  * same shape.
  */
+export function createGetTeacherRosterUseCase(): GetTeacherRosterUseCase {
+  return new GetTeacherRosterUseCase(new DrizzleTeacherAssignmentAdapter(), new DrizzleRosterAdapter());
+}
+
+export function createGetStudentDetailUseCase(): GetStudentDetailUseCase {
+  return new GetStudentDetailUseCase(new DrizzleTeacherAssignmentAdapter(), new DrizzleRosterAdapter());
+}
+
+export function createAssignStudentToTeacherUseCase(): AssignStudentToTeacherUseCase {
+  return new AssignStudentToTeacherUseCase(new DrizzleTeacherAssignmentAdapter());
+}
+
 export function createIdentityHealthUseCase(): CheckIdentityModuleHealthUseCase {
   const databaseHealthAdapter = new DrizzleDatabaseHealthAdapter();
   return new CheckIdentityModuleHealthUseCase(databaseHealthAdapter);
@@ -167,6 +189,14 @@ export function createGetAttemptKindUseCase(): GetAttemptKindUseCase {
   return new GetAttemptKindUseCase(new DrizzleAttemptAdapter(), new DrizzleItemBankAdapter());
 }
 
+export function createRecordGradeUseCase(): RecordGradeUseCase {
+  return new RecordGradeUseCase(new DrizzleGradeAdapter());
+}
+
+export function createDrizzleGradeAdapter(): DrizzleGradeAdapter {
+  return new DrizzleGradeAdapter();
+}
+
 export function createDrizzleCheckpointResultAdapter(): DrizzleCheckpointResultAdapter {
   return new DrizzleCheckpointResultAdapter();
 }
@@ -222,7 +252,12 @@ export function createGetUnitDetailUseCase(): GetUnitDetailUseCase {
 }
 
 export function createGetLessonUseCase(): GetLessonUseCase {
-  return new GetLessonUseCase(new DrizzleLessonAdapter(), new DrizzleExerciseAdapter(), new DrizzleVocabularyEntryAdapter());
+  return new GetLessonUseCase(
+    new DrizzleLessonAdapter(),
+    new DrizzleExerciseAdapter(),
+    new DrizzleVocabularyEntryAdapter(),
+    new DrizzleMaterialAdapter(),
+  );
 }
 
 export function createListExercisesForLessonUseCase(): ListExercisesForLessonUseCase {
@@ -231,6 +266,14 @@ export function createListExercisesForLessonUseCase(): ListExercisesForLessonUse
 
 export function createScoreExerciseUseCase(): ScoreExerciseUseCase {
   return new ScoreExerciseUseCase(new DrizzleExerciseAdapter());
+}
+
+export function createRecordActivityEventUseCase(): RecordActivityEventUseCase {
+  return new RecordActivityEventUseCase(new DrizzleActivityEventAdapter());
+}
+
+export function createDrizzleActivityEventAdapter(): DrizzleActivityEventAdapter {
+  return new DrizzleActivityEventAdapter();
 }
 
 export function createRecordExerciseAttemptUseCase(): RecordExerciseAttemptUseCase {

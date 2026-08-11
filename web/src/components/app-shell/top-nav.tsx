@@ -4,7 +4,15 @@ import { LocaleSwitcher } from "@/components/locale-switcher";
 import { UserMenu } from "@/components/app-shell/user-menu";
 import { FeedbackButton } from "@/components/app-shell/feedback-button";
 
-export function TopNav({ displayName, email }: { displayName: string; email: string }) {
+export function TopNav({
+  displayName,
+  email,
+  showTeacherLink = false,
+}: {
+  displayName: string;
+  email: string;
+  showTeacherLink?: boolean;
+}) {
   return (
     <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between border-b border-border bg-card px-4 md:px-6">
       <Logo variant="mark" className="h-6 w-6 md:hidden" />
@@ -13,7 +21,7 @@ export function TopNav({ displayName, email }: { displayName: string; email: str
         <FeedbackButton />
         <LocaleSwitcher />
         <ThemeToggle />
-        <UserMenu displayName={displayName} email={email} />
+        <UserMenu displayName={displayName} email={email} showTeacherLink={showTeacherLink} />
       </div>
     </header>
   );

@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createRecordExerciseAttemptUseCase, createScoreExerciseUseCase, createSubmitReviewResponseUseCase, createAwardXpUseCase } from "@/composition-root";
+import {
+  createRecordExerciseAttemptUseCase,
+  createScoreExerciseUseCase,
+  createSubmitReviewResponseUseCase,
+  createAwardXpUseCase,
+  createRecordActivityEventUseCase,
+  createRecordGradeUseCase,
+} from "@/composition-root";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { gateLessonAccess } from "@/lib/gate-lesson-access";
 import { handleScoreExercise } from "@/modules/curriculum/interface/score-exercise.controller";
@@ -46,6 +53,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return NextResponse.json(scoreResult.body, { status: scoreResult.status });
   }
 
+  // Phase 21, Goal 2: this app's exercise UI has no separate "opened
+  // this question" moment distinct from answering it (the prompt
+  // renders immediately, with no explicit start action) — so
+  // exercise_started and answer_submitted are both genuinely true of
+  // this exact request, not a fabricated split.
+  const recordActivityEvent = createRecordActivityEventUseCase();
+  await recordActivityEvent.execute({ userId: current.userId, eventType: "exercise_started", lessonId, exerciseId: id });
+
   const attempt = await createRecordExerciseAttemptUseCase().execute({
     userId: current.userId,
     exerciseId: id,
@@ -53,6 +68,29 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     responsePayload: scoreResult.parsedResponse,
     isCorrect: scoreResult.score.isCorrect,
     latencyMs,
+  });
+
+  await recordActivityEvent.execute({
+    userId: current.userId,
+    eventType: "answer_submitted",
+    lessonId,
+    exerciseId: id,
+    metadata: { isCorrect: scoreResult.score.isCorrect, attemptNumber: attempt.attemptNumber },
+  });
+  if (scoreResult.score.isCorrect) {
+    await recordActivityEvent.execute({ userId: current.userId, eventType: "exercise_completed", lessonId, exerciseId: id });
+  }
+
+  // Phase 21 grading: the exercise-level grade, server-authoritative
+  // (scoreResult.score.isCorrect is computed server-side by
+  // handleScoreExercise, never trusted from the client).
+  await createRecordGradeUseCase().execute({
+    userId: current.userId,
+    gradeType: "exercise",
+    referenceId: id,
+    lessonId,
+    score: scoreResult.score.isCorrect ? 1 : 0,
+    maxScore: 1,
   });
 
   // Review Engine integration: an incorrect answer demotes this lesson's

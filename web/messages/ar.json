@@ -94,6 +94,57 @@
     "tryAgain": "حاول مرة أخرى",
     "homeLink": "العودة إلى ERA"
   },
+  "Teacher": {
+    "roster": {
+      "title": "طلابي",
+      "subtitle": "الطلاب المسندون إليك",
+      "noStudents": "لا يوجد طلاب مسندون بعد.",
+      "noLevel": "بلا مستوى",
+      "noData": "لا توجد بيانات بعد",
+      "statusActive": "نشط",
+      "statusInactive": "غير نشط",
+      "lessonsCompleted": "{count} درس مكتمل",
+      "averageScore": "متوسط {percent}٪",
+      "progress": "تقدم {percent}٪"
+    },
+    "detail": {
+      "noLevel": "بلا مستوى",
+      "noActivity": "لا يوجد نشاط بعد",
+      "lastActive": "آخر نشاط {date}",
+      "overallProgress": "التقدم العام",
+      "lessonsCompletedLabel": "الدروس المكتملة",
+      "inProgressLabel": "قيد التقدم",
+      "averageScoreLabel": "متوسط الدرجات",
+      "noData": "لا توجد بيانات بعد",
+      "lessonBreakdown": "تفصيل الدروس",
+      "lessonsCompletedCount": "{count} مكتمل",
+      "lessonsInProgressCount": "{count} قيد التقدم",
+      "lessonsNotStartedCount": "{count} لم يبدأ",
+      "weakAreas": "بحاجة إلى مراجعة",
+      "strongAreas": "نقاط القوة",
+      "recentGrades": "الدرجات الأخيرة",
+      "recentActivity": "النشاط الأخير",
+      "gradeType": {
+        "exercise": "تمرين",
+        "quiz": "اختبار قصير",
+        "lesson": "درس",
+        "assessment": "تقييم"
+      },
+      "eventType": {
+        "lesson_started": "فتح درسًا",
+        "lesson_completed": "أكمل درسًا",
+        "section_viewed": "شاهد قسمًا",
+        "video_started": "بدأ فيديو",
+        "video_completed": "أنهى فيديو",
+        "vocabulary_viewed": "راجع المفردات",
+        "exercise_started": "بدأ تمرينًا",
+        "exercise_completed": "أكمل تمرينًا",
+        "quiz_started": "بدأ اختبارًا قصيرًا",
+        "quiz_completed": "أكمل اختبارًا قصيرًا",
+        "answer_submitted": "أرسل إجابة"
+      }
+    }
+  },
   "AppShell": {
     "nav": {
       "label": "التنقل الرئيسي",
@@ -107,6 +158,7 @@
     "userMenu": {
       "openMenu": "فتح قائمة الحساب",
       "profile": "الملف الشخصي",
+      "teacherDashboard": "لوحة المعلم",
       "signOut": "تسجيل الخروج",
       "signingOut": "جارٍ تسجيل الخروج…"
     }
@@ -352,12 +404,20 @@
     "blocks": {
       "warmUp": "تمهيد",
       "presentation": "عرض",
+      "vocabulary": "المفردات",
+      "video": "فيديو",
+      "reading": "قراءة",
+      "listening": "استماع",
       "controlledPractice": "تدريب",
+      "speakingPractice": "محادثة",
       "communicativeTask": "مهمة",
+      "quiz": "اختبار قصير",
       "wrapUp": "ختام",
       "taskPlaceholder": "اكتب إجابتك هنا.",
       "submitTask": "إرسال",
-      "taskSubmitted": "تم الإرسال"
+      "taskSubmitted": "تم الإرسال",
+      "showTranscript": "إظهار النص",
+      "audioUnsupported": "متصفحك لا يدعم تشغيل الصوت."
     },
     "exercises": {
       "submit": "إرسال",

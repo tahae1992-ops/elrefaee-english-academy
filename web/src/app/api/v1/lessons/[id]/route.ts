@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createRecordActivityEventUseCase } from "@/composition-root";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { gateLessonAccess } from "@/lib/gate-lesson-access";
 
@@ -16,6 +17,16 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   if (!result.ok) {
     return NextResponse.json(result.body, { status: result.status });
   }
+
+  // Phase 21, Goal 2: a real "opened this lesson" signal for the
+  // teacher activity timeline — this is the actual route the Lesson
+  // page's Server Component fetches through, so it fires exactly when
+  // a learner opens (or reopens) the lesson.
+  await createRecordActivityEventUseCase().execute({
+    userId: current.userId,
+    eventType: "lesson_started",
+    lessonId: id,
+  });
 
   return NextResponse.json(result.lesson, { status: 200 });
 }

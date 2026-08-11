@@ -94,6 +94,57 @@
     "tryAgain": "Try again",
     "homeLink": "Back to ERA"
   },
+  "Teacher": {
+    "roster": {
+      "title": "My Students",
+      "subtitle": "Students assigned to you",
+      "noStudents": "No students assigned yet.",
+      "noLevel": "No level",
+      "noData": "No data yet",
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "lessonsCompleted": "{count} lessons completed",
+      "averageScore": "{percent}% average",
+      "progress": "{percent}% progress"
+    },
+    "detail": {
+      "noLevel": "No level",
+      "noActivity": "No activity yet",
+      "lastActive": "Last active {date}",
+      "overallProgress": "Overall progress",
+      "lessonsCompletedLabel": "Lessons completed",
+      "inProgressLabel": "In progress",
+      "averageScoreLabel": "Average score",
+      "noData": "No data yet",
+      "lessonBreakdown": "Lesson breakdown",
+      "lessonsCompletedCount": "{count} completed",
+      "lessonsInProgressCount": "{count} in progress",
+      "lessonsNotStartedCount": "{count} not started",
+      "weakAreas": "Needs review",
+      "strongAreas": "Strong areas",
+      "recentGrades": "Recent grades",
+      "recentActivity": "Recent activity",
+      "gradeType": {
+        "exercise": "Exercise",
+        "quiz": "Quiz",
+        "lesson": "Lesson",
+        "assessment": "Assessment"
+      },
+      "eventType": {
+        "lesson_started": "Opened a lesson",
+        "lesson_completed": "Completed a lesson",
+        "section_viewed": "Viewed a section",
+        "video_started": "Started a video",
+        "video_completed": "Finished a video",
+        "vocabulary_viewed": "Reviewed vocabulary",
+        "exercise_started": "Started an exercise",
+        "exercise_completed": "Completed an exercise",
+        "quiz_started": "Started a quiz",
+        "quiz_completed": "Completed a quiz",
+        "answer_submitted": "Submitted an answer"
+      }
+    }
+  },
   "AppShell": {
     "nav": {
       "label": "Main navigation",
@@ -107,6 +158,7 @@
     "userMenu": {
       "openMenu": "Open account menu",
       "profile": "Profile",
+      "teacherDashboard": "Teacher Dashboard",
       "signOut": "Sign out",
       "signingOut": "Signing out…"
     }
@@ -352,12 +404,20 @@
     "blocks": {
       "warmUp": "Warm-up",
       "presentation": "Presentation",
+      "vocabulary": "Vocabulary",
+      "video": "Video",
+      "reading": "Reading",
+      "listening": "Listening",
       "controlledPractice": "Practice",
+      "speakingPractice": "Speaking",
       "communicativeTask": "Task",
+      "quiz": "Quiz",
       "wrapUp": "Wrap-up",
       "taskPlaceholder": "Type your answer here.",
       "submitTask": "Submit",
-      "taskSubmitted": "Submitted"
+      "taskSubmitted": "Submitted",
+      "showTranscript": "Show transcript",
+      "audioUnsupported": "Your browser doesn't support audio playback."
     },
     "exercises": {
       "submit": "Submit",

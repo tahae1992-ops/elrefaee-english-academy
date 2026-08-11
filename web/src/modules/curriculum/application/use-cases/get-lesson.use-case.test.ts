@@ -3,8 +3,10 @@ import { GetLessonUseCase, LessonNotFoundError } from "./get-lesson.use-case";
 import type { LessonRepositoryPort, PublishedLesson } from "@/modules/curriculum/application/ports/lesson-repository-port";
 import type { ExerciseRepositoryPort } from "@/modules/curriculum/application/ports/exercise-repository-port";
 import type { VocabularyEntryRepositoryPort } from "@/modules/curriculum/application/ports/vocabulary-entry-repository-port";
+import type { MaterialRepositoryPort } from "@/modules/curriculum/application/ports/material-repository-port";
 import type { Exercise } from "@/modules/curriculum/domain/services/exercise";
 import type { VocabularyEntry } from "@/modules/curriculum/domain/services/vocabulary-entry";
+import type { Material } from "@/modules/curriculum/domain/services/material";
 
 function fakeLesson(): PublishedLesson {
   return {
@@ -29,6 +31,10 @@ function fakeVocabularyRepo(entries: Map<string, VocabularyEntry> = new Map()): 
   return { getById: vi.fn(), listByIds: vi.fn().mockResolvedValue(entries) };
 }
 
+function fakeMaterialRepo(materials: Map<string, Material> = new Map()): MaterialRepositoryPort {
+  return { listByIds: vi.fn().mockResolvedValue(materials) };
+}
+
 describe("GetLessonUseCase", () => {
   it("resolves exerciseIds into client-safe exercises with the answer key stripped, and vocabularyIds into vocabulary entries", async () => {
     const lessons: LessonRepositoryPort = { listForUnit: vi.fn(), listForCourse: vi.fn(), getById: vi.fn().mockResolvedValue(fakeLesson()) };
@@ -50,7 +56,7 @@ describe("GetLessonUseCase", () => {
     };
     const vocabularyEntries = fakeVocabularyRepo(new Map([["voc-1", vocabularyEntry]]));
 
-    const result = await new GetLessonUseCase(lessons, exercises, vocabularyEntries).execute("lesson-1");
+    const result = await new GetLessonUseCase(lessons, exercises, vocabularyEntries, fakeMaterialRepo()).execute("lesson-1");
 
     expect(result.id).toBe("lesson-1");
     const practiceBlock = result.content.blocks[0];
@@ -71,6 +77,8 @@ describe("GetLessonUseCase", () => {
     const exercises: ExerciseRepositoryPort = { getById: vi.fn(), listByIds: vi.fn() };
     const vocabularyEntries = fakeVocabularyRepo();
 
-    await expect(new GetLessonUseCase(lessons, exercises, vocabularyEntries).execute("missing")).rejects.toThrow(LessonNotFoundError);
+    await expect(new GetLessonUseCase(lessons, exercises, vocabularyEntries, fakeMaterialRepo()).execute("missing")).rejects.toThrow(
+      LessonNotFoundError,
+    );
   });
 });

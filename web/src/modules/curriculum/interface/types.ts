@@ -38,3 +38,5 @@ export { ExerciseResponseTypeMismatchError } from "@/modules/curriculum/domain/s
 export type { ExerciseResponse, ScoreResult } from "@/modules/curriculum/domain/services/score-exercise";
 export { toClientVocabularyEntry } from "@/modules/curriculum/domain/services/vocabulary-entry";
 export type { VocabularyEntry, ClientVocabularyEntry, VocabularyTier, ExampleSentence } from "@/modules/curriculum/domain/services/vocabulary-entry";
+export { toClientMaterial } from "@/modules/curriculum/domain/services/material";
+export type { Material, ClientMaterial, MaterialType } from "@/modules/curriculum/domain/services/material";
