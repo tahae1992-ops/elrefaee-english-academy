@@ -31,17 +31,22 @@ export interface WarmUpBlock {
   type: "warm_up";
   prompt: string;
   content: string;
+  /** Pre-A1 blueprint (Rev. 3) §2 — "never assume reading ability": an Arabic mirror of `prompt`/`content`, not just of vocabulary meaning. */
+  promptAr?: string;
+  contentAr?: string;
 }
 
 export interface PresentationBlock {
   type: "presentation";
   explanation: string;
   examples: string[];
+  explanationAr?: string;
 }
 
 export interface ControlledPracticeBlock {
   type: "controlled_practice";
   instructions: string;
+  instructionsAr?: string;
   exerciseIds: string[];
 }
 
@@ -53,6 +58,7 @@ export interface ResolvedExerciseRef {
 export interface ClientControlledPracticeBlock {
   type: "controlled_practice";
   instructions: string;
+  instructionsAr?: string;
   exercises: ResolvedExerciseRef[];
 }
 
@@ -60,6 +66,8 @@ export interface CommunicativeTaskBlock {
   type: "communicative_task";
   instructions: string;
   prompt: string;
+  instructionsAr?: string;
+  promptAr?: string;
 }
 
 export interface WrapUpBlock {
@@ -84,12 +92,14 @@ export interface ClientWrapUpBlock {
 export interface VocabularyBlock {
   type: "vocabulary";
   instructions: string;
+  instructionsAr?: string;
   vocabularyIds: string[];
 }
 
 export interface ClientVocabularyBlock {
   type: "vocabulary";
   instructions: string;
+  instructionsAr?: string;
   vocabulary: ResolvedVocabularyRef[];
 }
 
@@ -103,6 +113,7 @@ export interface VideoBlock {
   type: "video";
   title: string;
   instructions: string;
+  instructionsAr?: string;
   materialId: string;
 }
 
@@ -110,6 +121,7 @@ export interface ClientVideoBlock {
   type: "video";
   title: string;
   instructions: string;
+  instructionsAr?: string;
   material: ResolvedMaterialRef;
 }
 
@@ -148,6 +160,8 @@ export interface SpeakingPracticeBlock {
   type: "speaking_practice";
   instructions: string;
   prompt: string;
+  instructionsAr?: string;
+  promptAr?: string;
 }
 
 /** Phase 21 — a scored checkpoint distinct from controlled_practice: contributes a `assessment.grades` row on completion, not just spaced-repetition/attempt tracking. */
@@ -155,6 +169,7 @@ export interface QuizBlock {
   type: "quiz";
   title: string;
   instructions: string;
+  instructionsAr?: string;
   exerciseIds: string[];
   passingScorePercent: number;
 }
@@ -163,6 +178,7 @@ export interface ClientQuizBlock {
   type: "quiz";
   title: string;
   instructions: string;
+  instructionsAr?: string;
   exercises: ResolvedExerciseRef[];
   passingScorePercent: number;
 }
@@ -290,6 +306,7 @@ export function toClientLessonContent(
           return {
             type: "controlled_practice",
             instructions: block.instructions,
+            instructionsAr: block.instructionsAr,
             exercises: resolveExerciseRefs(block.exerciseIds, resolvedExercises),
           };
         case "quiz":
@@ -297,6 +314,7 @@ export function toClientLessonContent(
             type: "quiz",
             title: block.title,
             instructions: block.instructions,
+            instructionsAr: block.instructionsAr,
             exercises: resolveExerciseRefs(block.exerciseIds, resolvedExercises),
             passingScorePercent: block.passingScorePercent,
           };
@@ -310,6 +328,7 @@ export function toClientLessonContent(
           return {
             type: "vocabulary",
             instructions: block.instructions,
+            instructionsAr: block.instructionsAr,
             vocabulary: resolveVocabularyRefs(block.vocabularyIds, resolvedVocabulary),
           };
         case "reading":
@@ -324,6 +343,7 @@ export function toClientLessonContent(
             type: "video",
             title: block.title,
             instructions: block.instructions,
+            instructionsAr: block.instructionsAr,
             material: resolveMaterialRef(block.materialId, resolvedMaterials),
           };
         case "listening":

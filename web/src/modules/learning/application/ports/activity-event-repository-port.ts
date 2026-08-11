@@ -31,4 +31,6 @@ export interface ActivityEventRepositoryPort {
   listRecentForUser(userId: string, limit: number): Promise<ActivityEvent[]>;
   /** Teacher dashboard's "last activity" column across a whole roster in one query. */
   getLastActivityForUsers(userIds: string[]): Promise<Map<string, Date>>;
+  /** Pre-A1 blueprint (Rev. 3) — meaningful lesson completion: the distinct block indexes this user has a real `section_viewed` event for, in this lesson. Read by `computeLessonCompletionGaps` before a lesson is allowed to be marked complete. */
+  listViewedBlockIndexes(userId: string, lessonId: string): Promise<number[]>;
 }

@@ -38,6 +38,8 @@ export type ExerciseType =
 interface ExerciseBase {
   prompt: string;
   explanation: string;
+  /** Pre-A1 blueprint (Rev. 3) §2 — an optional pre-attempt nudge in Arabic, distinct from `explanation` (English, post-attempt feedback). Client-safe: shown while attempting, never reveals the answer key. */
+  arabicHint?: string;
 }
 
 export interface MultipleChoiceExercise extends ExerciseBase {
@@ -92,18 +94,18 @@ export type Exercise =
 
 // --- Client-safe variants: never carry the answer key. ---
 
-export type ClientMultipleChoiceExercise = Pick<MultipleChoiceExercise, "exerciseType" | "prompt" | "options">;
-export type ClientFillInBlankExercise = Pick<FillInBlankExercise, "exerciseType" | "prompt">;
-export interface ClientMatchingExercise extends Pick<MatchingExercise, "exerciseType" | "prompt"> {
+export type ClientMultipleChoiceExercise = Pick<MultipleChoiceExercise, "exerciseType" | "prompt" | "options" | "arabicHint">;
+export type ClientFillInBlankExercise = Pick<FillInBlankExercise, "exerciseType" | "prompt" | "arabicHint">;
+export interface ClientMatchingExercise extends Pick<MatchingExercise, "exerciseType" | "prompt" | "arabicHint"> {
   leftItems: string[];
   rightItems: string[];
 }
-export interface ClientOrderingExercise extends Pick<OrderingExercise, "exerciseType" | "prompt"> {
+export interface ClientOrderingExercise extends Pick<OrderingExercise, "exerciseType" | "prompt" | "arabicHint"> {
   shuffledItems: string[];
 }
-export type ClientTrueFalseExercise = Pick<TrueFalseExercise, "exerciseType" | "prompt">;
-export type ClientShortAnswerExercise = Pick<ShortAnswerExercise, "exerciseType" | "prompt">;
-export interface ClientSentenceBuildingExercise extends Pick<SentenceBuildingExercise, "exerciseType" | "prompt"> {
+export type ClientTrueFalseExercise = Pick<TrueFalseExercise, "exerciseType" | "prompt" | "arabicHint">;
+export type ClientShortAnswerExercise = Pick<ShortAnswerExercise, "exerciseType" | "prompt" | "arabicHint">;
+export interface ClientSentenceBuildingExercise extends Pick<SentenceBuildingExercise, "exerciseType" | "prompt" | "arabicHint"> {
   shuffledChunks: string[];
 }
 
@@ -129,21 +131,26 @@ function shuffle<T>(items: T[]): T[] {
 export function toClientExercise(exercise: Exercise): ClientExercise {
   switch (exercise.exerciseType) {
     case "multiple_choice":
-      return { exerciseType: "multiple_choice", prompt: exercise.prompt, options: exercise.options };
+      return { exerciseType: "multiple_choice", prompt: exercise.prompt, options: exercise.options, arabicHint: exercise.arabicHint };
     case "fill_in_blank":
-      return { exerciseType: "fill_in_blank", prompt: exercise.prompt };
+      return { exerciseType: "fill_in_blank", prompt: exercise.prompt, arabicHint: exercise.arabicHint };
     case "matching": {
       const leftItems = shuffle(exercise.pairs.map(([left]) => left));
       const rightItems = shuffle(exercise.pairs.map(([, right]) => right));
-      return { exerciseType: "matching", prompt: exercise.prompt, leftItems, rightItems };
+      return { exerciseType: "matching", prompt: exercise.prompt, leftItems, rightItems, arabicHint: exercise.arabicHint };
     }
     case "ordering":
-      return { exerciseType: "ordering", prompt: exercise.prompt, shuffledItems: shuffle(exercise.items) };
+      return { exerciseType: "ordering", prompt: exercise.prompt, shuffledItems: shuffle(exercise.items), arabicHint: exercise.arabicHint };
     case "true_false":
-      return { exerciseType: "true_false", prompt: exercise.prompt };
+      return { exerciseType: "true_false", prompt: exercise.prompt, arabicHint: exercise.arabicHint };
     case "short_answer":
-      return { exerciseType: "short_answer", prompt: exercise.prompt };
+      return { exerciseType: "short_answer", prompt: exercise.prompt, arabicHint: exercise.arabicHint };
     case "sentence_building":
-      return { exerciseType: "sentence_building", prompt: exercise.prompt, shuffledChunks: shuffle(exercise.chunks) };
+      return {
+        exerciseType: "sentence_building",
+        prompt: exercise.prompt,
+        shuffledChunks: shuffle(exercise.chunks),
+        arabicHint: exercise.arabicHint,
+      };
   }
 }

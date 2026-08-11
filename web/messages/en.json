@@ -417,7 +417,8 @@
       "submitTask": "Submit",
       "taskSubmitted": "Submitted",
       "showTranscript": "Show transcript",
-      "audioUnsupported": "Your browser doesn't support audio playback."
+      "audioUnsupported": "Your browser doesn't support audio playback.",
+      "pronunciationPending": "Pronunciation audio pending verification."
     },
     "exercises": {
       "submit": "Submit",

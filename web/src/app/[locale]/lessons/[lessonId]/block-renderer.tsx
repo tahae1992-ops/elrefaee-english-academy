@@ -27,6 +27,16 @@ export function blockAccentClass(type: ClientLessonBlock["type"]): string {
   return BLOCK_ACCENT[type];
 }
 
+/** Pre-A1 blueprint (Rev. 3) — the one shared treatment for every Arabic twin field (promptAr/contentAr/explanationAr/instructionsAr/arabicTranslation/arabicHint). RTL + lang="ar" so it renders correctly regardless of the active locale/direction of the surrounding page. */
+function ArabicText({ text, className = "" }: { text: string | undefined; className?: string }) {
+  if (!text) return null;
+  return (
+    <p dir="rtl" lang="ar" className={`text-base leading-[1.8] text-primary ${className}`}>
+      {text}
+    </p>
+  );
+}
+
 export function BlockRenderer({
   block,
   interaction,
@@ -51,7 +61,9 @@ export function BlockRenderer({
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold tracking-[0.06em] text-muted-foreground uppercase">{t("warmUp")}</p>
         <p className="text-base font-medium">{block.prompt}</p>
+        <ArabicText text={block.promptAr} className="font-medium" />
         <p className="text-base leading-[1.7] text-muted-foreground">{block.content}</p>
+        <ArabicText text={block.contentAr} />
       </div>
     );
   }
@@ -61,6 +73,7 @@ export function BlockRenderer({
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold tracking-[0.06em] text-primary uppercase">{t("presentation")}</p>
         <p className="text-base leading-[1.7]">{block.explanation}</p>
+        <ArabicText text={block.explanationAr} />
         <ul className="flex flex-col gap-1.5 rounded-md bg-muted p-3">
           {block.examples.map((example, index) => (
             <li key={index} className="text-sm italic text-muted-foreground">
@@ -77,16 +90,37 @@ export function BlockRenderer({
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold tracking-[0.06em] text-primary uppercase">{t("vocabulary")}</p>
         <p className="text-sm text-muted-foreground">{block.instructions}</p>
+        <ArabicText text={block.instructionsAr} className="text-sm" />
         <div className="flex flex-col gap-3">
           {block.vocabulary.map(({ id, entry }) => (
-            <div key={id} className="rounded-md border border-border p-3">
-              <div className="flex items-baseline gap-2">
-                <span className="text-base font-semibold">{entry.headword}</span>
+            <div key={id} className="flex flex-col gap-2 rounded-md border border-border p-3">
+              {entry.image && (
+                // eslint-disable-next-line @next/next/no-img-element -- external, licensed source URLs; see MaterialEmbed above
+                <img
+                  src={entry.image.thumbnailUrl ?? entry.image.sourceUrl}
+                  alt={entry.headword}
+                  className="h-32 w-full rounded-md object-cover"
+                />
+              )}
+              <div className="flex flex-wrap items-baseline gap-2">
+                <span className="text-lg font-semibold">{entry.headword}</span>
                 <span className="text-sm text-muted-foreground">/{entry.ipaTranscription}/</span>
                 <span className="text-xs text-muted-foreground italic">{entry.partOfSpeech}</span>
               </div>
+              {entry.arabicTranslation && (
+                <p dir="rtl" lang="ar" className="text-lg font-medium text-primary">
+                  {entry.arabicTranslation}
+                </p>
+              )}
+              {entry.audio ? (
+                <audio controls src={entry.audio.sourceUrl} className="h-9 w-full">
+                  {t("audioUnsupported")}
+                </audio>
+              ) : (
+                <p className="text-xs text-warning-text italic">{t("pronunciationPending")}</p>
+              )}
               {entry.exampleSentences[0] && (
-                <p className="mt-1 text-sm text-muted-foreground italic">{entry.exampleSentences[0].text}</p>
+                <p className="text-sm text-muted-foreground italic">{entry.exampleSentences[0].text}</p>
               )}
             </div>
           ))}
@@ -101,6 +135,7 @@ export function BlockRenderer({
         <p className="text-xs font-semibold tracking-[0.06em] text-info uppercase">{t("video")}</p>
         <p className="text-base font-medium">{block.title}</p>
         <p className="text-sm text-muted-foreground">{block.instructions}</p>
+        <ArabicText text={block.instructionsAr} className="text-sm" />
         <MaterialEmbed material={block.material.material} />
       </div>
     );
@@ -148,6 +183,7 @@ export function BlockRenderer({
         </p>
         {isQuiz && <p className="text-base font-medium">{block.title}</p>}
         <p className="text-sm text-muted-foreground">{block.instructions}</p>
+        <ArabicText text={block.instructionsAr} className="text-sm" />
         {block.exercises.map(({ id, exercise }) => (
           <ExercisePractice
             key={id}
@@ -168,7 +204,9 @@ export function BlockRenderer({
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold tracking-[0.06em] text-accent-foreground uppercase">{t("speakingPractice")}</p>
         <p className="text-sm text-muted-foreground">{block.instructions}</p>
+        <ArabicText text={block.instructionsAr} className="text-sm" />
         <p className="text-base font-medium">{block.prompt}</p>
+        <ArabicText text={block.promptAr} className="font-medium" />
         <TaskSubmissionView submission={interaction?.taskSubmission} onSubmit={onSubmitTask} />
       </div>
     );
@@ -179,7 +217,9 @@ export function BlockRenderer({
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold tracking-[0.06em] text-accent-foreground uppercase">{t("communicativeTask")}</p>
         <p className="text-sm text-muted-foreground">{block.instructions}</p>
+        <ArabicText text={block.instructionsAr} className="text-sm" />
         <p className="text-base font-medium">{block.prompt}</p>
+        <ArabicText text={block.promptAr} className="font-medium" />
         <TaskSubmissionView submission={interaction?.taskSubmission} onSubmit={onSubmitTask} />
       </div>
     );
@@ -224,7 +264,7 @@ function MaterialEmbed({ material }: { material: ClientMaterial }) {
   if (material.mediaType === "audio") {
     return (
       <div className="flex flex-col gap-1.5">
-        <audio controls src={material.url} className="w-full">
+        <audio controls src={material.sourceUrl} className="w-full">
           {t("audioUnsupported")}
         </audio>
         <MaterialAttribution material={material} />
@@ -236,7 +276,7 @@ function MaterialEmbed({ material }: { material: ClientMaterial }) {
   return (
     <div className="flex flex-col gap-1.5">
       {/* eslint-disable-next-line @next/next/no-img-element -- external, licensed source URLs; next/image's domain allowlist isn't worth configuring for a small, curated set of one-off educational sources */}
-      <img src={material.thumbnailUrl ?? material.url} alt={material.title} className="w-full rounded-md object-cover" />
+      <img src={material.thumbnailUrl ?? material.sourceUrl} alt={material.title} className="w-full rounded-md object-cover" />
       <MaterialAttribution material={material} />
     </div>
   );
@@ -249,6 +289,7 @@ function MaterialAttribution({ material }: { material: ClientMaterial }) {
       {material.source}
       {material.attribution ? ` — ${material.attribution}` : ""}
       {material.license ? ` (${material.license})` : ""}
+      {material.mediaType === "audio" && material.isHumanVoice ? " · human voice, verified" : ""}
     </p>
   );
 }

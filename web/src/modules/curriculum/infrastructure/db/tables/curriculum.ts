@@ -135,6 +135,8 @@ export const vocabularyEntries = curriculumSchema.table(
     // Phase 21 — both optional FKs into content_items (type='material').
     imageMaterialId: uuid("image_material_id").references(() => contentItems.id),
     audioMaterialId: uuid("audio_material_id").references(() => contentItems.id),
+    // Pre-A1 blueprint (Rev. 3) §2 — Template 0 step 4's Arabic meaning.
+    arabicTranslation: varchar("arabic_translation", { length: 200 }),
   },
   (table) => [uniqueIndex("vocabulary_entries_academy_headword_sense_unique").on(table.academyId, table.headword, table.senseNumber)],
 );

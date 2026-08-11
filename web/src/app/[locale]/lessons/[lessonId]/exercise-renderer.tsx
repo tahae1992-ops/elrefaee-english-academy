@@ -92,6 +92,11 @@ export function ExercisePractice({
   return (
     <div className="flex flex-col gap-3 rounded-md border border-border p-4">
       <p className="text-sm font-medium">{exercise.prompt}</p>
+      {exercise.arabicHint && (
+        <p dir="rtl" lang="ar" className="text-sm text-primary">
+          {exercise.arabicHint}
+        </p>
+      )}
       <ExerciseInput exercise={exercise} disabled={isDone || submitting} onSubmit={(r) => onSubmit(r, getLatency())} />
       {attempt && <FeedbackPanel attempt={attempt} />}
       {isWrongUnresolved && <RetryOrReveal onRetry={onRetry} onShowAnswer={onShowAnswer} />}

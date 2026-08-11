@@ -64,14 +64,21 @@ export class GetLessonUseCase {
 
     const vocabularyEntryIds = collectVocabularyEntryIds(lesson.content);
     const fullVocabularyEntries = await this.vocabularyEntries.listByIds(vocabularyEntryIds);
-    const clientVocabularyEntries = new Map<string, ClientVocabularyEntry>(
-      [...fullVocabularyEntries.entries()].map(([id, entry]) => [id, toClientVocabularyEntry(entry)]),
-    );
 
-    const materialIds = collectMaterialIds(lesson.content);
-    const fullMaterials = await this.materials.listByIds(materialIds);
+    // Every vocabulary entry's own image/audio materials (Template 0's
+    // steps 1/3) join the block-level materialIds (video/listening) so
+    // both resolve from one batch fetch.
+    const blockMaterialIds = collectMaterialIds(lesson.content);
+    const vocabularyMaterialIds = [...fullVocabularyEntries.values()].flatMap((entry) =>
+      [entry.imageMaterialId, entry.audioMaterialId].filter((id): id is string => Boolean(id)),
+    );
+    const fullMaterials = await this.materials.listByIds([...new Set([...blockMaterialIds, ...vocabularyMaterialIds])]);
     const clientMaterials = new Map<string, ClientMaterial>(
       [...fullMaterials.entries()].map(([id, material]) => [id, toClientMaterial(material)]),
+    );
+
+    const clientVocabularyEntries = new Map<string, ClientVocabularyEntry>(
+      [...fullVocabularyEntries.entries()].map(([id, entry]) => [id, toClientVocabularyEntry(entry, clientMaterials)]),
     );
 
     return {

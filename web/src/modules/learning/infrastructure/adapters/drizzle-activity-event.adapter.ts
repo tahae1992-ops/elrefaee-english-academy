@@ -1,4 +1,4 @@
-import { desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { getDb } from "@/shared/infrastructure/db/client";
 import { activityEvents } from "@/modules/learning/infrastructure/db/tables/learning";
 import type {
@@ -58,5 +58,14 @@ export class DrizzleActivityEventAdapter implements ActivityEventRepositoryPort 
       .groupBy(activityEvents.userId);
 
     return new Map(rows.map((row) => [row.userId, new Date(row.lastActivity)]));
+  }
+
+  async listViewedBlockIndexes(userId: string, lessonId: string): Promise<number[]> {
+    const rows = await getDb()
+      .selectDistinct({ blockIndex: sql<number>`(${activityEvents.metadata} ->> 'blockIndex')::int` })
+      .from(activityEvents)
+      .where(and(eq(activityEvents.userId, userId), eq(activityEvents.lessonId, lessonId), eq(activityEvents.eventType, "section_viewed")));
+
+    return rows.map((row) => row.blockIndex).filter((index) => Number.isInteger(index));
   }
 }

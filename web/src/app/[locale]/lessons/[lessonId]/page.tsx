@@ -40,6 +40,24 @@ export default async function LessonPage({ params }: { params: Promise<{ lessonI
 
   const progress = await createGetLessonProgressUseCase().execute(current.userId, [lessonId]);
   const savedPosition = progress.get(lessonId)?.lastPosition ?? { blockIndex: 0, blockInteractions: {} };
+
+  // Pre-A1 blueprint (Rev. 3) Rule 6: the /progress route already
+  // records section_viewed for every block a learner advances *into*
+  // — block 0 is the one block that's never advanced into (it's just
+  // rendered on load), so it needs its own event here or
+  // computeLessonCompletionGaps would wrongly treat it as unseen on a
+  // single-block lesson, or any lesson completed by navigating
+  // straight back to block 0. Only fires the first time block 0 is
+  // actually reached (savedPosition.blockIndex === 0 means either a
+  // fresh start or a learner who genuinely returned to the first block).
+  if (savedPosition.blockIndex === 0) {
+    await createRecordActivityEventUseCase().execute({
+      userId: current.userId,
+      eventType: "section_viewed",
+      lessonId,
+      metadata: { blockIndex: 0, blockType: gate.lesson.content.blocks[0]?.type },
+    });
+  }
   const alreadyCompleted = progress.get(lessonId)?.status === "completed";
 
   const unit = gate.snapshot.courseDetail.units.find((u) => u.id === gate.lesson.unitId);

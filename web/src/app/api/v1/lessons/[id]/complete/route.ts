@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import {
   createAdvanceEnrollmentUseCase,
   createCompleteLessonUseCase,
@@ -7,14 +8,21 @@ import {
   createRecordActivityEventUseCase,
   createRecordGradeUseCase,
   createDrizzleExerciseAttemptAdapter,
+  createDrizzleActivityEventAdapter,
 } from "@/composition-root";
 import { getCurrentUserWithDashboardData } from "@/modules/identity/interface/current-user";
 import { gateLessonAccess } from "@/lib/gate-lesson-access";
 import { handleCompleteLesson } from "@/modules/learning/interface/complete-lesson.controller";
 import { recordGamificationActivity } from "@/lib/record-gamification-activity";
 import { deterministicEventId } from "@/lib/deterministic-event-id";
+import { computeLessonCompletionGaps } from "@/lib/compute-lesson-completion-gaps";
 import { XP_REWARDS } from "@/modules/engagement/interface/types";
 import type { ClientLessonBlock } from "@/modules/curriculum/interface/types";
+
+const completionRequestSchema = z.object({
+  blockIndex: z.number().int().min(0),
+  blockInteractions: z.record(z.string(), z.unknown()).default({}),
+});
 
 /**
  * API Spec §6.3: POST /lessons/{id}/complete (FR-05). The unit-advance
@@ -52,6 +60,37 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   }
 
   const body = await request.json().catch(() => null);
+
+  // Pre-A1 blueprint (Rev. 3) Rule 6: a lesson is only allowed to
+  // complete once every block up to this point has a real
+  // section_viewed event, every gradable exercise has a real attempt,
+  // and every open-ended task has a submission — never on the client
+  // simply calling this endpoint.
+  const parsedForGate = completionRequestSchema.safeParse(body);
+  if (!parsedForGate.success) {
+    return NextResponse.json({ error: "VALIDATION_FAILED", message: "Invalid request." }, { status: 400 });
+  }
+  const viewedBlockIndexes = new Set(await createDrizzleActivityEventAdapter().listViewedBlockIndexes(current.userId, id));
+  const gradableExerciseIds = gate.lesson.content.blocks.flatMap((block) =>
+    block.type === "controlled_practice" || block.type === "quiz" ? block.exercises.map((ref) => ref.id) : [],
+  );
+  const attemptedExerciseIds = new Set(
+    (await createDrizzleExerciseAttemptAdapter().getLatestCorrectnessForExercises(current.userId, gradableExerciseIds)).keys(),
+  );
+  const gaps = computeLessonCompletionGaps(
+    gate.lesson.content.blocks,
+    parsedForGate.data.blockIndex,
+    viewedBlockIndexes,
+    attemptedExerciseIds,
+    parsedForGate.data.blockInteractions as Record<number, unknown>,
+  );
+  if (gaps.length > 0) {
+    return NextResponse.json(
+      { error: "LESSON_NOT_READY", message: "Finish the remaining sections before completing this lesson.", gaps },
+      { status: 400 },
+    );
+  }
+
   const { status, body: responseBody } = await handleCompleteLesson(createCompleteLessonUseCase(), current.userId, id, body);
   if (status !== 200) {
     return NextResponse.json(responseBody, { status });

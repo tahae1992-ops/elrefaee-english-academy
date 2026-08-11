@@ -417,7 +417,8 @@
       "submitTask": "إرسال",
       "taskSubmitted": "تم الإرسال",
       "showTranscript": "إظهار النص",
-      "audioUnsupported": "متصفحك لا يدعم تشغيل الصوت."
+      "audioUnsupported": "متصفحك لا يدعم تشغيل الصوت.",
+      "pronunciationPending": "تسجيل النطق قيد التحقق."
     },
     "exercises": {
       "submit": "إرسال",

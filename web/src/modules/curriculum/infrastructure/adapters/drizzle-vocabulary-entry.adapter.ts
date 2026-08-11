@@ -14,6 +14,9 @@ function toDomain(row: {
   collocations: string[];
   synonyms: string[];
   exampleSentences: unknown;
+  arabicTranslation: string | null;
+  imageMaterialId: string | null;
+  audioMaterialId: string | null;
 }): VocabularyEntry {
   return {
     headword: row.headword,
@@ -25,6 +28,9 @@ function toDomain(row: {
     collocations: row.collocations,
     synonyms: row.synonyms,
     exampleSentences: row.exampleSentences as ExampleSentence[],
+    arabicTranslation: row.arabicTranslation ?? undefined,
+    imageMaterialId: row.imageMaterialId ?? undefined,
+    audioMaterialId: row.audioMaterialId ?? undefined,
   };
 }
 
@@ -39,6 +45,9 @@ const SELECTED_COLUMNS = {
   collocations: vocabularyEntries.collocations,
   synonyms: vocabularyEntries.synonyms,
   exampleSentences: vocabularyEntries.exampleSentences,
+  arabicTranslation: vocabularyEntries.arabicTranslation,
+  imageMaterialId: vocabularyEntries.imageMaterialId,
+  audioMaterialId: vocabularyEntries.audioMaterialId,
 };
 
 export class DrizzleVocabularyEntryAdapter implements VocabularyEntryRepositoryPort {

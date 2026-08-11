@@ -44,9 +44,11 @@ const fakeVocabularyEntry: ClientVocabularyEntry = {
 const fakeMaterial: ClientMaterial = {
   mediaType: "video",
   title: "A video",
-  source: "YouTube",
-  url: "https://www.youtube.com/watch?v=abc",
+  source: "YouTube Learning English",
+  provider: "YouTube",
+  sourceUrl: "https://www.youtube.com/watch?v=abc",
   embedUrl: "https://www.youtube.com/embed/abc",
+  verificationStatus: "VERIFIED",
 };
 
 function fakeMaps() {
